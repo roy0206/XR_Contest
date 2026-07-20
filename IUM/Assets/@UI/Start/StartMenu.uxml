@@ -1,0 +1,29 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="StartMenu.uss" />
+    <ui:VisualElement name="screen" class="screen">
+        <ui:VisualElement class="ambient ambient--top" />
+        <ui:VisualElement class="ambient ambient--bottom" />
+        <ui:VisualElement class="menu-card">
+            <ui:Label text="IUM" class="eyebrow" />
+            <ui:Label text="IMMERSIVE UNIVERSE" class="title" />
+            <ui:Label text="새로운 공간으로 들어갈 준비가 되셨나요?" class="subtitle" />
+            <ui:VisualElement class="divider" />
+            <ui:Button name="start-button" text="시작" class="menu-button menu-button--primary" />
+            <ui:Button name="options-button" text="옵션" class="menu-button" />
+            <ui:Button name="exit-button" text="나가기" class="menu-button menu-button--quiet" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="options-panel" class="modal-layer">
+            <ui:VisualElement class="options-card">
+                <ui:Label name="options-title" text="옵션" class="options-title" />
+                <ui:Label name="master-volume-label" text="전체 사운드" class="field-label" />
+                <ui:Slider name="volume-slider" low-value="0" high-value="1" value="1" show-input-field="false" class="volume-slider" />
+                <ui:VisualElement class="volume-scale">
+                    <ui:Label text="음소거" />
+                    <ui:Label text="최대" />
+                </ui:VisualElement>
+                <ui:Button name="close-options-button" text="완료" class="menu-button menu-button--primary close-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

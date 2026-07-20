@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "files": [
+    {
+      "key": "app",
+      "address": "ium/data/static/app",
+      "required": true
+    }
+  ]
+}

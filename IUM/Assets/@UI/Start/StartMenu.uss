@@ -1,0 +1,152 @@
+.screen {
+    flex-grow: 1;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(7, 12, 24);
+    color: rgb(237, 245, 255);
+}
+
+.ambient {
+    position: absolute;
+    width: 720px;
+    height: 720px;
+    border-radius: 360px;
+    background-color: rgba(35, 168, 255, 0.12);
+}
+
+.ambient--top {
+    top: -390px;
+    right: -170px;
+}
+
+.ambient--bottom {
+    bottom: -430px;
+    left: -210px;
+    background-color: rgba(101, 75, 255, 0.13);
+}
+
+.menu-card, .options-card {
+    width: 520px;
+    padding: 54px 58px;
+    border-width: 1px;
+    border-color: rgba(148, 190, 230, 0.28);
+    border-radius: 28px;
+    background-color: rgba(14, 24, 43, 0.94);
+}
+
+.eyebrow {
+    font-size: 18px;
+    letter-spacing: 8px;
+    color: rgb(79, 203, 255);
+    -unity-text-align: middle-center;
+}
+
+.title {
+    margin-top: 12px;
+    font-size: 38px;
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+    -unity-text-align: middle-center;
+}
+
+.subtitle {
+    margin-top: 14px;
+    font-size: 17px;
+    color: rgb(163, 183, 207);
+    -unity-text-align: middle-center;
+}
+
+.divider {
+    height: 1px;
+    margin-top: 34px;
+    margin-bottom: 28px;
+    background-color: rgba(145, 185, 224, 0.2);
+}
+
+.menu-button {
+    height: 58px;
+    margin-top: 12px;
+    border-width: 1px;
+    border-color: rgba(127, 169, 211, 0.34);
+    border-radius: 14px;
+    background-color: rgba(31, 48, 73, 0.8);
+    color: rgb(231, 241, 252);
+    font-size: 20px;
+    -unity-font-style: bold;
+}
+
+.menu-button:hover {
+    background-color: rgb(42, 67, 98);
+    border-color: rgb(83, 196, 255);
+}
+
+.menu-button--primary {
+    background-color: rgb(28, 145, 209);
+    border-color: rgb(77, 206, 255);
+    color: white;
+}
+
+.menu-button--primary:hover {
+    background-color: rgb(38, 169, 232);
+}
+
+.menu-button--quiet {
+    background-color: rgba(22, 33, 51, 0.62);
+    color: rgb(174, 193, 215);
+}
+
+.modal-layer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(3, 7, 15, 0.78);
+}
+
+.options-card {
+    width: 560px;
+}
+
+.options-title {
+    margin-bottom: 34px;
+    font-size: 32px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.field-label {
+    margin-bottom: 14px;
+    font-size: 18px;
+    color: rgb(202, 220, 239);
+}
+
+.volume-slider {
+    height: 38px;
+}
+
+.volume-slider .unity-base-slider__tracker {
+    height: 8px;
+    border-radius: 4px;
+    background-color: rgb(35, 54, 78);
+}
+
+.volume-slider .unity-base-slider__dragger {
+    width: 24px;
+    height: 24px;
+    border-radius: 12px;
+    background-color: rgb(75, 207, 255);
+}
+
+.volume-scale {
+    flex-direction: row;
+    justify-content: space-between;
+    color: rgb(128, 151, 178);
+    font-size: 13px;
+}
+
+.close-button {
+    margin-top: 36px;
+}
