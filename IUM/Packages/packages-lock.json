@@ -1,5 +1,14 @@
 {
   "dependencies": {
+    "com.antigravity.editor": {
+      "version": "https://github.com/hohollala/Antigravity.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.test-framework": "1.1.9"
+      },
+      "hash": "019821c5b1a44386c59a0677c25e2618606f6251"
+    },
     "com.unity.addressables": {
       "version": "2.8.1",
       "depth": 0,
@@ -117,16 +126,16 @@
         "com.unity.modules.uielements": "1.0.0"
       }
     },
-    "com.unity.nuget.newtonsoft-json": {
-      "version": "3.2.2",
-      "depth": 0,
+    "com.unity.nuget.mono-cecil": {
+      "version": "1.11.6",
+      "depth": 3,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
-    "com.unity.nuget.mono-cecil": {
-      "version": "1.11.6",
-      "depth": 3,
+    "com.unity.nuget.newtonsoft-json": {
+      "version": "3.2.2",
+      "depth": 0,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"

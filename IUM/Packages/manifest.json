@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.antigravity.editor": "https://github.com/hohollala/Antigravity.git",
     "com.unity.addressables": "2.8.1",
     "com.unity.feature.development": "1.0.2",
     "com.unity.ide.rider": "3.0.39",

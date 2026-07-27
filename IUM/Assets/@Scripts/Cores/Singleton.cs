@@ -38,7 +38,7 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
         return value != null;
     }
 
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    //[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     static void ResetStatics()
     {
         instance = null;
