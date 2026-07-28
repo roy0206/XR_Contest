@@ -15,12 +15,12 @@ public class AssemblyPart : MonoBehaviour
         if (!string.IsNullOrEmpty(inheritedID))
         {
             // 내 아래 달려 있는 자식 결합 타겟들을 모두 찾아서
-            SequenceAssemblyTarget[] myTargets = GetComponentsInChildren<SequenceAssemblyTarget>();
+            AssemblyTarget[] myTargets = GetComponentsInChildren<AssemblyTarget>();
 
             foreach (var target in myTargets)
             {
                 // 실시간으로 자식들이 받을 새로운 결합 ID로 바꿔줍니다.
-                target.acceptedPartID = inheritedID;
+                target.SetAcceptedPartID(inheritedID);
             }
         }
     }

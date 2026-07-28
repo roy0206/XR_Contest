@@ -1,0 +1,84 @@
+{
+  "recognitionFirstFailure": "잘 못 들었어. 다시 한 번 말해 줄래?",
+  "recognitionRepeatedFailure": "아직 잘 안 들리네. 아래에서 궁금한 걸 골라 볼래?",
+  "recordingTooShort": "버튼을 누른 채로 천천히 말해 줄래?",
+  "microphoneUnavailable": "마이크를 쓸 수 없어서 지금은 목록에서 골라야 해.",
+  "offline": "지금은 연결이 끊겨서 준비된 설명만 해 줄 수 있어. 아래에서 골라 볼래?",
+  "serviceError": "지금은 대답을 만들지 못했어. 잠시 뒤에 다시 물어봐 줄래?",
+  "blocked": "그건 내가 도와줄 수 있는 내용이 아니야. 지금 하는 작업 이야기를 해 볼까?",
+  "unknown": "그 부분은 내가 가진 자료만으로는 정확히 말하기 어려워.",
+  "inputLocked": "지금은 노장님 말씀에 집중하자.",
+  "offTopicSteer": "그 얘기는 나중에 더 하고, 지금은 하던 작업부터 마무리해 볼까?",
+  "thinking": "잠깐만, 생각해 볼게.",
+  "suggestions": [
+    {
+      "question": "지금 뭘 해야 해?",
+      "fixedAnswer": "노장님이 말씀하신 순서를 하나씩 따라가 보자. 지금 손에 든 도구가 무엇인지부터 확인해 봐."
+    },
+    {
+      "question": "이 도구는 어떻게 써?",
+      "fixedAnswer": "도구는 손잡이를 잡고 몸에서 멀어지는 방향으로 천천히 움직이면 돼. 힘보다 방향이 중요해."
+    },
+    {
+      "question": "왜 이렇게 해야 해?",
+      "fixedAnswer": "전통 목조는 못 없이 나무끼리 물려 힘을 받아. 그래서 치수와 방향이 조금만 어긋나도 짜임이 헐거워져."
+    },
+    {
+      "question": "숭례문은 왜 다시 지었어?",
+      "fixedAnswer": "화재로 문루가 크게 상했거든. 옛 기법 그대로 다시 세우면서 그 기술을 다음 세대에 넘기는 일이기도 했어."
+    },
+    {
+      "process": "makmeok",
+      "question": "먹선이 왜 안 생겨?",
+      "fixedAnswer": "양쪽 끝이 모두 고정됐는지, 줄이 팽팽한지 먼저 봐. 줄이 느슨하면 표면을 제대로 때리지 못해."
+    },
+    {
+      "process": "makmeok",
+      "question": "먹매김은 왜 먼저 해?",
+      "fixedAnswer": "먹선이 톱질과 끌질의 기준이 되니까. 여기가 어긋나면 뒤에 아무리 잘해도 어긋난 채로 남아."
+    },
+    {
+      "process": "sawing",
+      "question": "톱이 자꾸 미끄러져.",
+      "fixedAnswer": "처음엔 얕은 홈부터 만들어야 해. 톱날이 홈에 걸리기 전까지는 힘을 세게 주지 말고 천천히 왕복해 봐."
+    },
+    {
+      "process": "sawing",
+      "question": "절단면이 왜 기울어?",
+      "fixedAnswer": "톱날이 기울면 잘린 면도 같이 기울어. 옆에서 톱날과 부재가 이루는 각을 한 번 살펴볼래?"
+    },
+    {
+      "process": "chiseling",
+      "question": "홈이 자꾸 터져.",
+      "fixedAnswer": "한 번에 깊이 파면 벽이 버티지 못해. 얕게 여러 번 나눠 두드리면 면이 훨씬 깨끗하게 남아."
+    },
+    {
+      "process": "chiseling",
+      "question": "끌은 어느 방향으로 대?",
+      "fixedAnswer": "나뭇결을 먼저 봐. 결을 거스르면 표면이 뜯기니까 결이 흐르는 쪽을 따라가는 게 좋아."
+    },
+    {
+      "process": "purlinInstall",
+      "question": "도리가 왜 안 들어가?",
+      "fixedAnswer": "홈과 촉이 서로 마주 보고 있는지 확인해 봐. 방향이 반대면 아무리 가까이 가도 자리에 앉지 않아."
+    },
+    {
+      "process": "gongpoPuzzle",
+      "question": "다음에 뭘 올려야 해?",
+      "fixedAnswer": "공포는 아래에서 위로 짜 올라가. 지금 구조에서 비어 있는 가장 아래 자리를 먼저 찾아볼래?"
+    },
+    {
+      "process": "gongpoPuzzle",
+      "question": "이 부재가 왜 안 붙어?",
+      "fixedAnswer": "지금 차례가 아닌 부재는 자리에 붙지 않아. 예시 그림과 지금 구조를 나란히 비교해 봐."
+    }
+  ],
+  "fallbackHints": [
+    { "process": "tutorial", "hint": "손을 물체 가까이 가져가서 테두리가 밝아질 때 잡아 보자." },
+    { "process": "makmeok", "hint": "줄의 양 끝이 고정됐는지, 줄이 팽팽한지 먼저 살펴볼래?" },
+    { "process": "sawing", "hint": "톱날이 먹선을 따라가고 있는지 옆에서 한 번 확인해 볼래?" },
+    { "process": "chiseling", "hint": "홈의 깊이를 한 번에 늘리지 말고 얕게 여러 번 나눠 볼래?" },
+    { "process": "purlinInstall", "hint": "설치 자리에 보이는 표시와 부재의 방향이 같은지 살펴볼래?" },
+    { "process": "gongpoPuzzle", "hint": "구조의 아래쪽부터 차례로 살펴보면 다음 자리가 보일 거야." }
+  ]
+}

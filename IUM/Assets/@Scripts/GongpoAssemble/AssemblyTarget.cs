@@ -1,187 +1,75 @@
-using TMPro;
 using UnityEngine;
-using UnityEngine.XR.Interaction.Toolkit;
-using UnityEngine.XR.Interaction.Toolkit.Interactables;
-using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
-public class SequenceAssemblyTarget : MonoBehaviour
+/// <summary>
+/// One seat of the 공포 stack. It accepts a part whose <see cref="MaleSnapPoint"/> ID matches
+/// <see cref="AcceptedPartID"/>, and only while the part this seat sits on is itself assembled,
+/// which is what keeps the stack strictly bottom-up.
+/// Trigger messages stay on the component because they are Unity callbacks; the judgement lives in
+/// <see cref="AssemblySnapModule"/>, the same split as GrabSocket/SocketPlacementModule.
+/// </summary>
+[RequireComponent(typeof(Collider))]
+public class AssemblyTarget : MonoThing
 {
     [Header("받을 부품의 ID")]
     [Tooltip("MaleSnapPoint의 mySnapID와 스펠링이 일치해야 함")]
-    public string acceptedPartID = "Untagged";
+    [SerializeField] string acceptedPartID = "Untagged";
 
     [Header("자식에게 물려줄 자리 ID")]
     [Tooltip("이곳에 부품이 조립되면, 아래로 연결될 부품들에게 이 ID를 물려줌")]
-    public string giveIDToChild = "";
+    [SerializeField] string giveIDToChild = "";
 
     [Header("판정 오차 범위")]
-    public float positionTolerance = 1f;
-    public float rotationTolerance = 20f;
+    [SerializeField, Min(0f)] float positionTolerance = 1f;
+    [SerializeField, Min(0f)] float rotationTolerance = 20f;
 
     [Header("상태별 머티리얼")]
-    public Material correctMaterial;
-    public Material wrongMaterial;
+    [SerializeField] Material correctMaterial;
+    [SerializeField] Material wrongMaterial;
 
-    [Range(0f, 1f)] public float hapticIntensity = 0.5f;
-    public float hapticDuration = 0.1f;
+    [Header("햅틱")]
+    [Tooltip("컨트롤러가 없는 데스크톱 조작에서는 그대로 무시된다.")]
+    [SerializeField, Range(0f, 1f)] float hapticIntensity = 0.5f;
+    [SerializeField, Min(0f)] float hapticDuration = 0.1f;
 
-    private Transform currentMaleSnapPoint;
-    private XRGrabInteractable parentInteractable;
-    private MeshRenderer parentVisual;
-    private Material normalMaterial;
+    public AssemblySnapModule Snap { get; private set; }
 
-    private bool isHovering = false;
-    private bool isOccupied = false;
-    private Material currentAppliedMaterial;
+    /// <summary>The part this seat belongs to. Null on a seat placed directly in the scene root.</summary>
+    public AssemblyPart OwnerPart { get; private set; }
 
-    // 내가 속한 부모 부품 (기단부 또는 기둥 본체)
-    private AssemblyPart ownerPart;
+    public string AcceptedPartID => acceptedPartID;
+    public string GiveIDToChild => giveIDToChild;
+    public float PositionTolerance => positionTolerance;
+    public float RotationTolerance => rotationTolerance;
+    public Material CorrectMaterial => correctMaterial;
+    public Material WrongMaterial => wrongMaterial;
+    public float HapticIntensity => hapticIntensity;
+    public float HapticDuration => hapticDuration;
 
-    private void Start()
+    /// <summary>
+    /// Called by <see cref="AssemblyPart.OnAssembled"/> so a seat can take over the ID handed down
+    /// by the part that was just seated above it.
+    /// </summary>
+    public void SetAcceptedPartID(string id)
     {
-        ownerPart = GetComponentInParent<AssemblyPart>();
-
-        if (ownerPart == null)
-        {
-            Debug.LogWarning($"{gameObject.name}의 부모 객체에 AssemblyPart 스크립트가 없습니다!");
-        }
+        if (!string.IsNullOrEmpty(id)) acceptedPartID = id;
     }
 
-    private void Update()
+    protected override void Awake()
     {
-        // 부모 부품이 아직 조립 안 됐으면 작동 안 함
-        if (ownerPart == null || !ownerPart.isAssembled || isOccupied || !isHovering || currentMaleSnapPoint == null) return;
+        base.Awake();
 
-        if (parentInteractable != null && parentInteractable.isSelected)
-        {
-            float posError = Vector3.Distance(currentMaleSnapPoint.position, transform.position);
-            float rotError = Quaternion.Angle(currentMaleSnapPoint.rotation, transform.rotation);
+        if (collider3D != null) collider3D.isTrigger = true;
 
-            if (posError <= positionTolerance && rotError <= rotationTolerance)
-            {
-                ChangeMaterial(correctMaterial);
-            }
-            else
-            {
-                ChangeMaterial(wrongMaterial);
-            }
-        }
-        else
-        {
-            ChangeMaterial(normalMaterial);
-        }
+        OwnerPart = GetComponentInParent<AssemblyPart>();
+        if (OwnerPart == null)
+            Debug.LogWarning($"{gameObject.name}의 부모 객체에 AssemblyPart 스크립트가 없습니다!", this);
+
+        Snap = new AssemblySnapModule(this);
+        AddModule(Snap);
+        Snap.Init();
     }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        // 부모 부품이 조립 안 됐거나, 이미 자리가 찼으면 안 됨
-        if (ownerPart == null || !ownerPart.isAssembled || isOccupied || isHovering) return;
+    void OnTriggerEnter(Collider other) => Snap?.SetCandidate(other.GetComponent<MaleSnapPoint>());
 
-        // 영역에 들어온 부품의 ID 확인
-        MaleSnapPoint incomingMale = other.GetComponent<MaleSnapPoint>();
-
-        if (incomingMale != null && incomingMale.mySnapID == acceptedPartID)
-        {
-            currentMaleSnapPoint = incomingMale.transform;
-            parentInteractable = currentMaleSnapPoint.GetComponentInParent<XRGrabInteractable>();
-            parentVisual = currentMaleSnapPoint.GetComponentInParent<MeshRenderer>();
-
-            if (parentVisual != null)
-            {
-                normalMaterial = parentVisual.material;
-            }
-
-            if (parentInteractable != null)
-            {
-                parentInteractable.selectExited.AddListener(CheckInstallation);
-            }
-
-            isHovering = true;
-            TriggerHapticFeedback();
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (isHovering && other.transform == currentMaleSnapPoint)
-        {
-            isHovering = false;
-            ChangeMaterial(normalMaterial);
-
-            if (parentInteractable != null)
-            {
-                parentInteractable.selectExited.RemoveListener(CheckInstallation);
-            }
-
-            currentMaleSnapPoint = null;
-            parentInteractable = null;
-            parentVisual = null;
-        }
-    }
-
-    private void ChangeMaterial(Material newMat)
-    {
-        if (parentVisual != null && newMat != null && currentAppliedMaterial != newMat)
-        {
-            parentVisual.material = newMat;
-            currentAppliedMaterial = newMat;
-        }
-    }
-
-    private void TriggerHapticFeedback()
-    {
-        if (parentInteractable != null && parentInteractable.isSelected)
-        {
-            IXRSelectInteractor interactor = parentInteractable.firstInteractorSelecting;
-            if (interactor is XRBaseInputInteractor controllerInteractor)
-            {
-                controllerInteractor.SendHapticImpulse(hapticIntensity, hapticDuration);
-            }
-        }
-    }
-
-    private void CheckInstallation(SelectExitEventArgs arg)
-    {
-        if (ownerPart == null || !ownerPart.isAssembled || isOccupied || !isHovering || currentMaleSnapPoint == null) return;
-
-        float posError = Vector3.Distance(currentMaleSnapPoint.position, transform.position);
-        float rotError = Quaternion.Angle(currentMaleSnapPoint.rotation, transform.rotation);
-
-        if (posError <= positionTolerance && rotError <= rotationTolerance)
-        {
-            InstallSuccess();
-        }
-    }
-
-    private void InstallSuccess()
-    {
-        isOccupied = true;
-        ChangeMaterial(normalMaterial);
-
-        Transform partRoot = parentInteractable.transform;
-
-        Quaternion rotationOffset = Quaternion.Inverse(partRoot.rotation) * currentMaleSnapPoint.rotation;
-        partRoot.rotation = transform.rotation * Quaternion.Inverse(rotationOffset);
-
-        Vector3 positionOffset = currentMaleSnapPoint.position - partRoot.position;
-        partRoot.position = transform.position - positionOffset;
-
-        Rigidbody rb = partRoot.GetComponent<Rigidbody>();
-        if (rb != null)
-        {
-            rb.isKinematic = true;
-            rb.useGravity = false;
-        }
-
-        parentInteractable.enabled = false;
-        partRoot.SetParent(transform.parent != null ? transform.parent : transform);
-        GetComponent<Collider>().enabled = false;
-
-        // 조립 성공 알려주기
-        AssemblyPart partInfo = partRoot.GetComponent<AssemblyPart>();
-        if (partInfo != null)
-        {
-            partInfo.OnAssembled(giveIDToChild);
-        }
-    }
+    void OnTriggerExit(Collider other) => Snap?.ClearCandidate(other.GetComponent<MaleSnapPoint>());
 }

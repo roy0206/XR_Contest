@@ -1,0 +1,63 @@
+{
+  "stt": {
+    "provider": "auto",
+    "localModelId": "sherpa-onnx-zipformer-korean-2024-06-24",
+    "localLanguage": "ko",
+    "localSampleRate": 16000,
+    "localInitTimeoutSeconds": 60,
+    "endpoint": "https://speech.googleapis.com/v1/speech:recognize",
+    "languageCode": "ko-KR",
+    "model": "latest_short",
+    "sampleRateHertz": 16000,
+    "enableAutomaticPunctuation": true,
+    "usePhraseHints": true,
+    "phraseHintBoost": 15,
+    "maxPhraseHints": 40,
+    "timeoutSeconds": 10
+  },
+  "llm": {
+    "endpoint": "https://api.upstage.ai/v1/chat/completions",
+    "model": "solar-pro3",
+    "reasoningEffort": "",
+    "temperature": 0.4,
+    "maxTokens": 400,
+    "timeoutSeconds": 15,
+    "historyTurns": 4,
+    "useStructuredResponse": true,
+    "retryOnSafetyRejection": true
+  },
+  "tts": {
+    "provider": "google",
+    "googleEndpoint": "https://texttospeech.googleapis.com/v1/text:synthesize",
+    "googleLanguageCode": "ko-KR",
+    "googleVoiceName": "ko-KR-Wavenet-A",
+    "googleSpeakingRate": 1.0,
+    "googlePitch": 0.0,
+    "googleVolumeGainDb": 0.0,
+    "googleSampleRateHertz": 24000,
+    "endpoint": "https://naveropenapi.apigw.ntruss.com/tts-premium/v1/tts",
+    "speaker": "ngaram",
+    "speed": 0,
+    "pitch": 0,
+    "volume": 0,
+    "format": "wav",
+    "timeoutSeconds": 12
+  },
+  "conversation": {
+    "minRecordSeconds": 0.4,
+    "maxRecordSeconds": 15,
+    "silenceThreshold": 0.012,
+    "targetResponseChars": 70,
+    "maxResponseChars": 100,
+    "directAnswerMaxChars": 160,
+    "speechCharsPerSecond": 7.0,
+    "maxUserChars": 200,
+    "suggestionsAfterFailures": 2,
+    "offTopicToleranceCount": 2,
+    "offlineFailureThreshold": 3,
+    "offlineCooldownSeconds": 30,
+    "subtitleTailSeconds": 1.2
+  },
+  "forceMockServices": false,
+  "verboseLogging": false
+}

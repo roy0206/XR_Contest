@@ -83,15 +83,14 @@ public sealed class StartMenuController : MonoBehaviour
 
             if (_hasPendingInitialVolume)
             {
-                DataManager.Instance.User.Update(
-                    data => data.Settings.MasterVolume = _pendingInitialVolume);
+                DataManager.Instance.Settings.MasterVolume = _pendingInitialVolume;
                 _volumeSavePending = true;
                 _saveAt = Time.unscaledTime + saveDebounceSeconds;
                 _hasPendingInitialVolume = false;
             }
             else
             {
-                var savedVolume = DataManager.Instance.User.Current.Settings.MasterVolume;
+                var savedVolume = DataManager.Instance.Settings.MasterVolume;
                 _volumeSlider.SetValueWithoutNotify(savedVolume);
                 AudioManager.Instance.MasterVolume = savedVolume;
             }
@@ -134,7 +133,7 @@ public sealed class StartMenuController : MonoBehaviour
             return;
         }
 
-        DataManager.Instance.User.Update(data => data.Settings.MasterVolume = volume);
+        DataManager.Instance.Settings.MasterVolume = volume;
         _volumeSavePending = true;
         _saveAt = Time.unscaledTime + saveDebounceSeconds;
     }

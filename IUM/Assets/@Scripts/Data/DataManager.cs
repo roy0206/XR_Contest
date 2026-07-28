@@ -1,22 +1,33 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
 public sealed class DataManager : Singleton<DataManager>
 {
     public const string ManifestAddress = "ium/data/manifest";
+    const string UserFileName = "user.json";
 
+    readonly SemaphoreSlim _saveLock = new(1, 1);
+    JsonDataSerializer _serializer;
     Task _initializationTask;
+    string _userFilePath;
+    string _userTempPath;
 
     public bool IsReady { get; private set; }
     public Exception InitializationError { get; private set; }
     public DataManifest Manifest { get; private set; }
     public StaticDataService Static { get; private set; }
-    public UserDataService User { get; private set; }
+    public UserDataDocument User { get; private set; }
+    public UserSettingsData Settings => User?.Settings;
+    public UserProgressData Progress => User?.Progress;
 
     public event Action Ready;
     public event Action<Exception> InitializationFailed;
+    public event Action<Exception> SaveFailed;
 
     protected override void Awake()
     {
@@ -31,19 +42,22 @@ public sealed class DataManager : Singleton<DataManager>
     {
         try
         {
-            var serializer = new JsonDataSerializer();
+            _serializer = new JsonDataSerializer();
+            var userDirectory = Path.Combine(Application.persistentDataPath, "UserData");
+            _userFilePath = Path.Combine(userDirectory, UserFileName);
+            _userTempPath = _userFilePath + ".tmp";
+
             IDataTextProvider provider = new AddressableDataProvider();
             await provider.InitializeAsync();
             var manifestJson = await provider.ReadTextAsync(ManifestAddress);
-            Manifest = serializer.Deserialize<DataManifest>(manifestJson);
+            Manifest = _serializer.Deserialize<DataManifest>(manifestJson);
             ValidateManifest(Manifest);
 
-            User = new UserDataService(serializer, new UserDataMigrator());
-            Static = new StaticDataService(serializer, provider);
-
-            await User.InitializeAsync();
+            Static = new StaticDataService(_serializer, provider);
             await Static.LoadAsync(Manifest.Files);
-            AudioManager.Instance.MasterVolume = User.Current.Settings.MasterVolume;
+
+            User = LoadUser();
+            ApplyAudioSettings();
 
             IsReady = true;
             Ready?.Invoke();
@@ -58,10 +72,82 @@ public sealed class DataManager : Singleton<DataManager>
         }
     }
 
+    /// <summary>Applies stored volumes to the mixer. Call again after an options change.</summary>
+    public void ApplyAudioSettings()
+    {
+        if (User == null) return;
+        var audio = AudioManager.Instance;
+        audio.MasterVolume = User.Settings.MasterVolume;
+        audio.BGMVolume = User.Settings.MusicVolume;
+        audio.SFXVolume = User.Settings.EnvironmentVolume;
+        // DialogueVolume has no mixer channel yet; it is stored and applied with the options UI.
+    }
+
+    /// <summary>A missing or unreadable save starts from defaults instead of blocking play.</summary>
+    UserDataDocument LoadUser()
+    {
+        UserDataDocument document = null;
+        try
+        {
+            if (File.Exists(_userFilePath))
+                document = _serializer.Deserialize<UserDataDocument>(
+                    File.ReadAllText(_userFilePath, Encoding.UTF8));
+        }
+        catch (Exception exception)
+        {
+            Debug.LogWarning($"[DataManager] Save file could not be read: {exception.Message}");
+        }
+
+        document ??= new UserDataDocument();
+        document.Settings ??= new UserSettingsData();
+        document.Progress ??= new UserProgressData();
+        document.Settings.Clamp();
+        return document;
+    }
+
+    /// <summary>Saving never throws, so a failed write cannot stop the current process.</summary>
     public async Task SaveUserAsync()
     {
         await InitializeAsync();
-        await User.SaveAsync();
+        var json = _serializer.Serialize(User);
+
+        await _saveLock.WaitAsync();
+        try
+        {
+            await Task.Run(() => WriteAtomic(json));
+        }
+        catch (Exception exception)
+        {
+            SaveFailed?.Invoke(exception);
+            Debug.LogError($"[DataManager] Save failed: {exception.Message}");
+        }
+        finally
+        {
+            _saveLock.Release();
+        }
+    }
+
+    // Write to a temporary file first so an interrupted save leaves the previous file intact.
+    void WriteAtomic(string json)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(_userFilePath));
+        File.WriteAllText(_userTempPath, json, new UTF8Encoding(false));
+
+        if (!File.Exists(_userFilePath))
+        {
+            File.Move(_userTempPath, _userFilePath);
+            return;
+        }
+
+        try
+        {
+            File.Replace(_userTempPath, _userFilePath, null);
+        }
+        catch (PlatformNotSupportedException)
+        {
+            File.Delete(_userFilePath);
+            File.Move(_userTempPath, _userFilePath);
+        }
     }
 
     static void ValidateManifest(DataManifest manifest)
