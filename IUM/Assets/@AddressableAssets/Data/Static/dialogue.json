@@ -1,0 +1,104 @@
+{
+  "settings": {
+    "speechCharsPerSecond": 9,
+    "minLineSeconds": 1.2,
+    "lineGapSeconds": 0.3,
+    "subtitleTailSeconds": 0.4
+  },
+  "sequences": [
+    {
+      "id": "chapter1_intro",
+      "speaker": "nojang",
+      "blocksProcess": true,
+      "priority": 10,
+      "interruptible": false,
+      "lines": [
+        { "id": "chapter1_intro_1", "text": "오늘은 도리를 하나 만들 걸세." },
+        { "id": "chapter1_intro_2", "text": "먹을 놓고, 켜고, 파낸다. 순서는 그뿐이네." }
+      ]
+    },
+    {
+      "id": "makmeok_intro",
+      "speaker": "nojang",
+      "blocksProcess": true,
+      "priority": 10,
+      "interruptible": false,
+      "lines": [
+        { "id": "makmeok_intro_1", "text": "먹줄을 당겨 도리 위에 기준선을 놓게." },
+        { "id": "makmeok_intro_2", "text": "선이 어긋나면 그 뒤는 전부 어긋나네." }
+      ]
+    },
+    {
+      "id": "makmeok_hint_slow",
+      "speaker": "nojang",
+      "blocksProcess": false,
+      "priority": 0,
+      "interruptible": true,
+      "lines": [
+        { "id": "makmeok_hint_slow_1", "text": "서두르지 말게. 줄이 흔들리네." }
+      ]
+    },
+    {
+      "id": "makmeok_result_pass",
+      "speaker": "nojang",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "makmeok_result_pass_1", "text": "됐네. 선이 곧게 섰군." }
+      ]
+    },
+    {
+      "id": "makmeok_result_fail",
+      "speaker": "nojang",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "makmeok_result_fail_1", "text": "선이 기울었네. 새 재료로 다시 하세." }
+      ]
+    },
+    {
+      "id": "prologue_nojang",
+      "speaker": "nojang",
+      "blocksProcess": false,
+      "priority": 10,
+      "interruptible": false,
+      "lines": [
+        { "id": "prologue_nojang_1", "text": "건물은 다시 세울 수 있습니다." },
+        { "id": "prologue_nojang_2", "text": "하지만 기술은 사람이 없으면 이어지지 않습니다." }
+      ]
+    },
+    {
+      "id": "ending_nojang",
+      "speaker": "nojang",
+      "blocksProcess": false,
+      "priority": 10,
+      "interruptible": false,
+      "lines": [
+        { "id": "ending_nojang_1", "text": "자네 손으로 깎은 부재가 저기 올라가 있네." },
+        { "id": "ending_nojang_2", "text": "이제 이 일을 아는 사람이 하나 늘었군." }
+      ]
+    },
+    {
+      "id": "ending_ieumi",
+      "speaker": "ieumi",
+      "blocksProcess": false,
+      "priority": 10,
+      "interruptible": false,
+      "lines": [
+        { "id": "ending_ieumi_1", "text": "고생 많았어. 다음에 또 물어볼 게 생기면 불러줘." }
+      ]
+    },
+    {
+      "id": "tutorial_greeting",
+      "speaker": "ieumi",
+      "blocksProcess": false,
+      "priority": 5,
+      "interruptible": true,
+      "lines": [
+        { "id": "tutorial_greeting_1", "text": "안녕! 나는 이음이야. 모르는 게 있으면 언제든 물어봐." }
+      ]
+    }
+  ]
+}

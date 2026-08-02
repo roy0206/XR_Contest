@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -62,6 +63,87 @@ public class SceneController : Singleton<SceneController>
         }
 
         StartCoroutine(LoadSceneRoutine(config));
+    }
+
+    /// <summary>
+    /// 주 씬을 유지한 채 씬을 겹쳐 올린다. 컷씬 오버레이가 쓰는 경로다.
+    ///
+    /// Raises no <see cref="ISceneEventListener"/> callback on purpose. Those mean "the current
+    /// scene is going away" and listeners stop playback on them, so firing one here would cut the
+    /// very cutscene being loaded. It also does not fade: when to black out belongs to the caller,
+    /// and <see cref="SceneSO"/>'s transition settings describe a scene swap, not an overlay.
+    /// <see cref="IsTransitioning"/> stays untouched for the same reason.
+    /// </summary>
+    /// <param name="makeActive">
+    /// Makes the loaded scene active, which is only needed when its lighting settings should apply.
+    /// </param>
+    /// <returns>The loaded scene, or an invalid scene when the load could not start.</returns>
+    public Task<Scene> LoadAdditiveAsync(string sceneName, bool makeActive = false)
+    {
+        if (string.IsNullOrWhiteSpace(sceneName) || !Application.CanStreamedLevelBeLoaded(sceneName))
+        {
+            Debug.LogError($"[SceneController] Additive scene is not available in Build Settings: '{sceneName}'.");
+            return Task.FromResult(default(Scene));
+        }
+
+        var existing = SceneManager.GetSceneByName(sceneName);
+        if (existing.isLoaded)
+        {
+            Debug.LogWarning($"[SceneController] '{sceneName}' is already loaded additively.");
+            return Task.FromResult(existing);
+        }
+
+        var operation = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+        if (operation == null)
+        {
+            Debug.LogError($"[SceneController] Failed to start the additive load of '{sceneName}'.");
+            return Task.FromResult(default(Scene));
+        }
+
+        var completion = new TaskCompletionSource<Scene>();
+        operation.completed += _ =>
+        {
+            var scene = SceneManager.GetSceneByName(sceneName);
+            if (makeActive && scene.IsValid()) SceneManager.SetActiveScene(scene);
+            completion.SetResult(scene);
+        };
+
+        return completion.Task;
+    }
+
+    /// <summary>Unloads a scene brought in by <see cref="LoadAdditiveAsync"/>. Safe to call twice.</summary>
+    public Task UnloadAdditiveAsync(Scene scene)
+    {
+        if (!scene.IsValid() || !scene.isLoaded) return Task.CompletedTask;
+
+        // Unity leaves no active scene if the active one is unloaded, and objects created after
+        // that have nowhere to go, so hand the role back before it disappears.
+        if (SceneManager.GetActiveScene() == scene) RestoreActiveScene(scene);
+
+        var operation = SceneManager.UnloadSceneAsync(scene);
+        if (operation == null)
+        {
+            Debug.LogWarning($"[SceneController] Failed to start the unload of '{scene.name}'.");
+            return Task.CompletedTask;
+        }
+
+        var completion = new TaskCompletionSource<bool>();
+        operation.completed += _ => completion.SetResult(true);
+        return completion.Task;
+    }
+
+    public bool IsAdditiveLoaded(string sceneName) =>
+        !string.IsNullOrWhiteSpace(sceneName) && SceneManager.GetSceneByName(sceneName).isLoaded;
+
+    static void RestoreActiveScene(Scene leaving)
+    {
+        for (var i = 0; i < SceneManager.sceneCount; i++)
+        {
+            var candidate = SceneManager.GetSceneAt(i);
+            if (candidate == leaving || !candidate.isLoaded) continue;
+            SceneManager.SetActiveScene(candidate);
+            return;
+        }
     }
 
     public void RegisterListener(ISceneEventListener listener)

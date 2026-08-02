@@ -1,0 +1,83 @@
+/* 일시정지 메뉴. 화면 전체를 덮고 뒤쪽을 어둡게 깔아 진행이 멈췄음을 드러낸다. */
+.pause-root {
+    display: none;
+    flex-grow: 1;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(6, 10, 18, 0.72);
+}
+
+.pause-panel {
+    min-width: 380px;
+    max-width: 560px;
+    padding: 32px 36px;
+    border-width: 1px;
+    border-color: rgba(148, 190, 230, 0.24);
+    border-radius: 16px;
+    background-color: rgba(14, 22, 38, 0.96);
+}
+
+.pause-title {
+    margin-bottom: 20px;
+    font-size: 26px;
+    -unity-font-style: bold;
+    color: rgb(237, 245, 255);
+    -unity-text-align: middle-center;
+}
+
+.pause-button {
+    height: 46px;
+    margin-top: 8px;
+    padding: 0 20px;
+    border-width: 1px;
+    border-color: rgba(148, 190, 230, 0.28);
+    border-radius: 10px;
+    background-color: rgba(32, 48, 76, 0.9);
+    font-size: 17px;
+    color: rgb(226, 236, 250);
+}
+
+.pause-button:hover {
+    background-color: rgba(48, 72, 112, 0.95);
+    border-color: rgba(180, 214, 246, 0.5);
+}
+
+.pause-button:active {
+    background-color: rgba(24, 36, 58, 0.95);
+}
+
+/* 확인 창의 좌우 배치용. 세로 목록과 달리 위쪽 여백을 행이 담당한다. */
+.pause-button--inline {
+    flex-grow: 1;
+    margin-top: 0;
+    margin-left: 6px;
+    margin-right: 6px;
+}
+
+.pause-button--danger {
+    background-color: rgba(96, 40, 44, 0.92);
+    border-color: rgba(214, 128, 128, 0.42);
+}
+
+.pause-button--danger:hover {
+    background-color: rgba(124, 52, 56, 0.95);
+}
+
+.pause-slider {
+    margin-top: 14px;
+    font-size: 16px;
+    color: rgb(214, 226, 242);
+}
+
+.pause-message {
+    margin-bottom: 24px;
+    font-size: 18px;
+    color: rgb(230, 238, 250);
+    white-space: normal;
+    -unity-text-align: middle-center;
+}
+
+.pause-confirm-row {
+    flex-direction: row;
+    justify-content: space-between;
+}

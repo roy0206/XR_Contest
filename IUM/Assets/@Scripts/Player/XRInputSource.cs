@@ -29,6 +29,9 @@ public sealed class XRInputSource : IPlayerInputSource
         commands.PushToTalk = input.GetXRButton(XRHandSide.Left, XRInputButton.Primary);
         commands.Pause = input.GetXRButtonDown(XRHandSide.Left, XRInputButton.Menu);
 
+        // Right hand: the left Primary is already PTT, so a cutscene skip there would fight it.
+        commands.Skip = input.GetXRButton(XRHandSide.Right, XRInputButton.Primary);
+
         if (input.TryGetXRDevicePose(XRHandSide.Left, out var leftPose))
             commands.SetHandPose(XRHandSide.Left, leftPose);
         if (input.TryGetXRDevicePose(XRHandSide.Right, out var rightPose))

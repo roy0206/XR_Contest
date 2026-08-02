@@ -30,6 +30,13 @@ public struct PlayerCommands
     public bool PushToTalk;
     public bool Pause;
 
+    /// <summary>
+    /// Held, not pressed: 컷씬 건너뛰기 requires a sustained hold (F-003 3.5). Deliberately absent
+    /// from <see cref="InputLockFlags"/> because it is the one input that must survive a cutscene's
+    /// lock, and <see cref="CutsceneDirector"/> reads it from its own source rather than from here.
+    /// </summary>
+    public bool Skip;
+
     /// <summary>True while the desktop source is active, which also means no HMD is driving the head.</summary>
     public bool IsDesktop;
 

@@ -150,3 +150,35 @@
 .close-button {
     margin-top: 36px;
 }
+
+/* 두 번째 볼륨부터는 위 슬라이더와 간격을 벌린다. */
+.field-label--spaced {
+    margin-top: 22px;
+}
+
+/* 저장 데이터가 없거나 손상된 경우의 안내 (F-001 1.5, 1.8). 평소에는 자리를 차지하지 않는다. */
+.save-notice {
+    display: none;
+    margin-top: 18px;
+    font-size: 15px;
+    color: rgb(232, 168, 120);
+    white-space: normal;
+    -unity-text-align: middle-center;
+}
+
+.save-notice--visible {
+    display: flex;
+}
+
+.confirm-message {
+    margin-bottom: 30px;
+    font-size: 17px;
+    color: rgb(202, 220, 239);
+    white-space: normal;
+    -unity-text-align: middle-center;
+}
+
+/* 비활성 버튼은 눌리지 않는다는 것이 한눈에 보여야 한다 (F-001 1.5). */
+.menu-button:disabled {
+    opacity: 0.45;
+}

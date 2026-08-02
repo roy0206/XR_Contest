@@ -21,6 +21,24 @@ MonoBehaviour:
     m_SerializedLabels:
     - ium-data
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 379b72f8ec3d5b74da7bed8e576a00a6
+    m_Address: ium/data/static/cutscene
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ium-data
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3cf69b3b44e135a4b9193269211af5e0
+    m_Address: ium/data/static/flow
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ium-data
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c0cd4d4369303914091e9f6bb4aae1ac
+    m_Address: ium/data/static/dialogue
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ium-data
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e52624a40b21421e876716cbbfa0ab47
     m_Address: ium/data/static/app
     m_ReadOnly: 0

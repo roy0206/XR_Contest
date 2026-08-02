@@ -1,0 +1,17 @@
+{
+  "_comment": "공정별 목적지. tutorial 항목은 메인 컨텐츠(tutorial ~ gongpoPuzzle) 전체를 대신하는 임시 자유 플레이 씬을 가리킨다. 실제 공정 씬이 생기면 그 줄을 { \"process\": \"tutorial\", \"scene\": \"TutorialScene\" } 형태로 바꾸고 나머지 공정을 한 줄씩 추가한다. completed 항목은 없다. 엔딩 컷씬이 진행을 삭제하므로 completed 상태에는 도달하지 않는다.",
+  "entries": [
+    {
+      "process": "prologue",
+      "cutscene": "prologue"
+    },
+    {
+      "process": "tutorial",
+      "scene": "FreePlayTest"
+    },
+    {
+      "process": "ending",
+      "cutscene": "ending"
+    }
+  ]
+}

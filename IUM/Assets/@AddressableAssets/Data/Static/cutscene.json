@@ -1,0 +1,29 @@
+{
+  "settings": {
+    "skipHoldSeconds": 2,
+    "enterFadeSeconds": 0.5,
+    "exitFadeSeconds": 0.5,
+    "skipFadeSeconds": 0.35,
+    "outroFadeSeconds": 0.6
+  },
+  "cutscenes": [
+    {
+      "id": "prologue",
+      "scene": "Cutscene_Prologue",
+      "skippable": true,
+      "makeSceneActive": false,
+      "revealOnEnter": false,
+      "nextScene": "",
+      "completesProcess": "prologue"
+    },
+    {
+      "id": "ending",
+      "scene": "Cutscene_Ending",
+      "skippable": true,
+      "makeSceneActive": false,
+      "revealOnEnter": true,
+      "clearsProgress": true,
+      "nextScene": "FlowTest"
+    }
+  ]
+}

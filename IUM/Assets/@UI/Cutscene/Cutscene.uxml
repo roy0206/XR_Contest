@@ -1,0 +1,14 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="Cutscene.uss" />
+    <ui:VisualElement name="cutscene-root" class="cutscene-root" picking-mode="Ignore">
+        <ui:VisualElement name="cutscene-caption-box" class="cutscene-caption-box" picking-mode="Ignore">
+            <ui:Label name="cutscene-caption" text="" class="cutscene-caption" />
+        </ui:VisualElement>
+        <ui:VisualElement name="cutscene-skip" class="cutscene-skip" picking-mode="Ignore">
+            <ui:Label name="cutscene-skip-label" text="건너뛰기" class="cutscene-skip-label" />
+            <ui:VisualElement name="cutscene-skip-track" class="cutscene-skip-track" picking-mode="Ignore">
+                <ui:VisualElement name="cutscene-skip-fill" class="cutscene-skip-fill" picking-mode="Ignore" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,25 +1,41 @@
+using System;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-/// <summary>UIDocument-backed start menu configured in StartScene.</summary>
+/// <summary>
+/// 메인 화면 (F-001). 게임 시작 · 이어하기 · 옵션 · 나가기.
+///
+/// Routing is not decided here: <see cref="GameFlow"/> reads the saved progress and picks the
+/// destination. This screen only asks the questions the document requires — overwriting an existing
+/// save, and whether a save exists at all.
+/// </summary>
 [RequireComponent(typeof(UIDocument))]
 public sealed class StartMenuController : MonoBehaviour
 {
-    [SerializeField] string targetSceneName = "SampleScene";
-    [SerializeField, Min(0f)] float saveDebounceSeconds = 0.35f;
-
     UIDocument _document;
+    VisualElement _root;
+    VisualElement _optionsPanel;
+    VisualElement _confirmPanel;
+    Label _saveNotice;
+
     Button _startButton;
+    Button _continueButton;
     Button _optionsButton;
     Button _exitButton;
     Button _closeOptionsButton;
-    VisualElement _optionsPanel;
-    Slider _volumeSlider;
+    Button _confirmNewGameButton;
+    Button _cancelNewGameButton;
+
+    VolumeOptionsPanel _volumes;
     bool _dataReady;
-    bool _hasPendingInitialVolume;
-    bool _volumeSavePending;
-    float _pendingInitialVolume;
-    float _saveAt;
+    bool _busy;
+    bool _hiddenForCutscene;
+    float _menuAlpha = 1f;
+    float _menuFadeSeconds = DefaultFadeSeconds;
+
+    /// <summary>Used until the cutscene table is loaded, and matches its authored default.</summary>
+    const float DefaultFadeSeconds = 0.5f;
 
     void Awake() => _document = GetComponent<UIDocument>();
 
@@ -28,143 +44,278 @@ public sealed class StartMenuController : MonoBehaviour
         if (_document?.visualTreeAsset == null) return;
 
         var root = _document.rootVisualElement;
+        _optionsPanel = root.Q<VisualElement>("options-panel");
+        _confirmPanel = root.Q<VisualElement>("confirm-panel");
+        _saveNotice = root.Q<Label>("save-notice");
+
         _startButton = root.Q<Button>("start-button");
+        _continueButton = root.Q<Button>("continue-button");
         _optionsButton = root.Q<Button>("options-button");
         _exitButton = root.Q<Button>("exit-button");
         _closeOptionsButton = root.Q<Button>("close-options-button");
-        _optionsPanel = root.Q<VisualElement>("options-panel");
-        _volumeSlider = root.Q<Slider>("volume-slider");
+        _confirmNewGameButton = root.Q<Button>("confirm-new-game-button");
+        _cancelNewGameButton = root.Q<Button>("cancel-new-game-button");
 
-        if (_startButton == null || _optionsButton == null || _exitButton == null ||
-            _closeOptionsButton == null || _optionsPanel == null || _volumeSlider == null)
+        if (_optionsPanel == null || _confirmPanel == null || _saveNotice == null ||
+            _startButton == null || _continueButton == null || _optionsButton == null ||
+            _exitButton == null || _closeOptionsButton == null ||
+            _confirmNewGameButton == null || _cancelNewGameButton == null)
         {
             Debug.LogError("[StartMenu] Required UI elements are missing from StartMenu.uxml.");
             return;
         }
 
-        _startButton.clicked += StartGame;
-        _optionsButton.clicked += ToggleOptions;
-        _exitButton.clicked += ExitGame;
-        _closeOptionsButton.clicked += HideOptions;
-        _volumeSlider.RegisterValueChangedCallback(OnVolumeChanged);
+        _root = root;
 
-        // Menu interaction and previewing volume do not depend on saved data.
-        SetButtonsEnabled(true);
-        _volumeSlider.SetEnabled(true);
-        HideOptions();
+        // Resolved before the first frame: this screen comes back mid-transition after the ending,
+        // and starting at full opacity would flash the menu over the blackout.
+        _hiddenForCutscene = ShouldHideMenu();
+        _menuAlpha = _hiddenForCutscene ? 0f : 1f;
+        ApplyMenuAlpha();
+
+        _volumes = new VolumeOptionsPanel(_optionsPanel);
+
+        _startButton.clicked += OnStartClicked;
+        _continueButton.clicked += OnContinueClicked;
+        _optionsButton.clicked += ShowOptions;
+        _exitButton.clicked += OnExitClicked;
+        _closeOptionsButton.clicked += HideModals;
+        _confirmNewGameButton.clicked += OnConfirmNewGame;
+        _cancelNewGameButton.clicked += HideModals;
+
+        HideModals();
+
+        // Continue stays disabled until the save is known to exist; the rest of the menu works
+        // immediately so the player is never left with a dead screen while data loads.
+        _continueButton.SetEnabled(false);
         _ = InitializeDataAsync();
     }
 
     void OnDisable()
     {
-        if (_startButton != null) _startButton.clicked -= StartGame;
-        if (_optionsButton != null) _optionsButton.clicked -= ToggleOptions;
-        if (_exitButton != null) _exitButton.clicked -= ExitGame;
-        if (_closeOptionsButton != null) _closeOptionsButton.clicked -= HideOptions;
-        if (_volumeSlider != null) _volumeSlider.UnregisterValueChangedCallback(OnVolumeChanged);
-        if (_volumeSavePending && DataManager.HasInstance && DataManager.Instance.IsReady)
-            _ = FlushVolumeAsync();
+        if (_startButton != null) _startButton.clicked -= OnStartClicked;
+        if (_continueButton != null) _continueButton.clicked -= OnContinueClicked;
+        if (_optionsButton != null) _optionsButton.clicked -= ShowOptions;
+        if (_exitButton != null) _exitButton.clicked -= OnExitClicked;
+        if (_closeOptionsButton != null) _closeOptionsButton.clicked -= HideModals;
+        if (_confirmNewGameButton != null) _confirmNewGameButton.clicked -= OnConfirmNewGame;
+        if (_cancelNewGameButton != null) _cancelNewGameButton.clicked -= HideModals;
+
+        _volumes?.Dispose();
+        _volumes = null;
+        _root = null;
     }
 
     void Update()
     {
-        if (_volumeSavePending && Time.unscaledTime >= _saveAt)
-            _ = FlushVolumeAsync();
+        _volumes?.Tick();
+        TickMenuVisibility();
     }
 
-    async System.Threading.Tasks.Task InitializeDataAsync()
+    /// <summary>
+    /// 컷씬과 씬 전환 동안 메뉴를 물린다. 컷씬은 이 씬을 끄지 않고 위에 겹쳐 올리는 방식이라 메인
+    /// 화면이 그대로 남는데, UIToolkit 패널은 <see cref="ScreenFader"/>의 캔버스 **위에** 그려져
+    /// 암전으로도 가려지지 않는다. 그래서 스스로 물러나야 한다.
+    ///
+    /// 즉시 끄지 않고 컷씬의 진입 암전과 같은 시간에 걸쳐 알파를 내린다. 한 프레임에 사라지면 화면이
+    /// 어두워지는 것과 무관하게 메뉴만 툭 없어져 끊겨 보인다.
+    ///
+    /// Polled rather than subscribed to <see cref="CutsceneDirector.Started"/>: the director may not
+    /// exist yet when this enables (a Singleton is created on first access), and polling covers the
+    /// abort path and scene transitions with no extra bookkeeping.
+    /// </summary>
+    void TickMenuVisibility()
+    {
+        if (_root == null) return;
+
+        var hidden = ShouldHideMenu();
+        if (hidden != _hiddenForCutscene)
+        {
+            _hiddenForCutscene = hidden;
+            _menuFadeSeconds = ResolveFadeSeconds(hidden);
+        }
+
+        var target = hidden ? 0f : 1f;
+        if (Mathf.Approximately(_menuAlpha, target)) return;
+
+        // 일시정지 중에는 컷씬도 멈춰 있다. Carrying this fade on alone would drift out of step.
+        if (PauseService.IsPaused) return;
+
+        var step = _menuFadeSeconds > 0f ? Time.unscaledDeltaTime / _menuFadeSeconds : 1f;
+        _menuAlpha = Mathf.MoveTowards(_menuAlpha, target, step);
+        ApplyMenuAlpha();
+    }
+
+    /// <summary>
+    /// 씬 전환도 포함한다. 전환은 페이더로 암전한 채 진행하는데, 이 메뉴는 그 암전 위에 그려지므로
+    /// 그대로 두면 로딩 내내 떠 있다.
+    /// </summary>
+    static bool ShouldHideMenu() =>
+        (CutsceneDirector.HasInstance && CutsceneDirector.Instance.IsPlaying) ||
+        SceneController.IsTransitioning;
+
+    static float ResolveFadeSeconds(bool hiding)
+    {
+        if (!CutsceneDirector.HasInstance) return DefaultFadeSeconds;
+
+        var director = CutsceneDirector.Instance;
+        var seconds = hiding ? director.EnterFadeSeconds : director.OutroFadeSeconds;
+        return seconds > 0f ? seconds : DefaultFadeSeconds;
+    }
+
+    void ApplyMenuAlpha()
+    {
+        _root.style.opacity = _menuAlpha;
+
+        // display, not visibility alone: at zero the menu also leaves layout and picking, so a
+        // button cannot be clicked through the cutscene.
+        _root.style.display = _menuAlpha > 0f ? DisplayStyle.Flex : DisplayStyle.None;
+    }
+
+    async Task InitializeDataAsync()
     {
         try
         {
             await DataManager.Instance.InitializeAsync();
+            await GameFlow.Instance.InitializeAsync();
             if (this == null) return;
 
             _dataReady = true;
-
-            if (_hasPendingInitialVolume)
-            {
-                DataManager.Instance.Settings.MasterVolume = _pendingInitialVolume;
-                _volumeSavePending = true;
-                _saveAt = Time.unscaledTime + saveDebounceSeconds;
-                _hasPendingInitialVolume = false;
-            }
-            else
-            {
-                var savedVolume = DataManager.Instance.Settings.MasterVolume;
-                _volumeSlider.SetValueWithoutNotify(savedVolume);
-                AudioManager.Instance.MasterVolume = savedVolume;
-            }
+            _volumes?.Refresh();
+            RefreshContinue();
         }
-        catch (System.Exception exception)
+        catch (Exception exception)
         {
             Debug.LogError($"[StartMenu] Data initialization failed: {exception.Message}");
+            ShowNotice("저장 정보를 불러오지 못했습니다. 새 게임으로 시작해 주세요.");
         }
     }
 
-    void StartGame()
+    /// <summary>저장 데이터 유무에 따라 이어하기를 켜고 끈다 (F-001 1.5, 1.8).</summary>
+    void RefreshContinue()
     {
-        if (!Application.CanStreamedLevelBeLoaded(targetSceneName))
+        var canContinue = GameFlow.Instance.CanContinue;
+        _continueButton.SetEnabled(canContinue);
+
+        if (DataManager.Instance.UserDataCorrupted)
         {
-            Debug.LogError($"[StartMenu] '{targetSceneName}' is not available in Build Settings.");
+            ShowNotice("저장 정보를 불러오지 못했습니다. 새 게임으로 시작해 주세요.");
             return;
         }
 
-        SetButtonsEnabled(false);
-        SceneController.Instance.LoadScene(targetSceneName);
-    }
-
-    void ToggleOptions()
-    {
-        var isVisible = _optionsPanel.resolvedStyle.display != DisplayStyle.None;
-        _optionsPanel.style.display = isVisible ? DisplayStyle.None : DisplayStyle.Flex;
-    }
-
-    void HideOptions() => _optionsPanel.style.display = DisplayStyle.None;
-
-    void OnVolumeChanged(ChangeEvent<float> evt)
-    {
-        var volume = Mathf.Clamp01(evt.newValue);
-        AudioManager.Instance.MasterVolume = volume;
-
-        if (!_dataReady)
+        if (!canContinue)
         {
-            _pendingInitialVolume = volume;
-            _hasPendingInitialVolume = true;
+            ShowNotice("저장된 진행 정보가 없습니다.");
             return;
         }
 
-        DataManager.Instance.Settings.MasterVolume = volume;
-        _volumeSavePending = true;
-        _saveAt = Time.unscaledTime + saveDebounceSeconds;
+        ShowNotice(null);
     }
 
-    async System.Threading.Tasks.Task FlushVolumeAsync()
+    void ShowNotice(string text)
     {
-        if (!_volumeSavePending || !DataManager.HasInstance || !DataManager.Instance.IsReady) return;
-        _volumeSavePending = false;
+        if (string.IsNullOrEmpty(text))
+        {
+            _saveNotice.RemoveFromClassList("save-notice--visible");
+            _saveNotice.text = string.Empty;
+            return;
+        }
+
+        _saveNotice.text = text;
+        _saveNotice.AddToClassList("save-notice--visible");
+    }
+
+    /// <summary>
+    /// 게임 시작 (F-001 1.4). 저장 데이터가 있으면 덮어쓰기 전에 확인부터 받는다.
+    /// </summary>
+    void OnStartClicked()
+    {
+        if (_busy) return;
+
+        if (_dataReady && GameFlow.Instance.CanContinue)
+        {
+            ShowPanel(_confirmPanel);
+            return;
+        }
+
+        _ = StartNewGameAsync();
+    }
+
+    void OnConfirmNewGame()
+    {
+        HideModals();
+        _ = StartNewGameAsync();
+    }
+
+    async Task StartNewGameAsync()
+    {
+        if (_busy) return;
+        SetBusy(true);
+
         try
         {
-            await DataManager.Instance.SaveUserAsync();
+            await GameFlow.Instance.StartNewGameAsync();
         }
-        catch (System.Exception exception)
+        finally
         {
-            _volumeSavePending = true;
-            _saveAt = Time.unscaledTime + 1f;
-            Debug.LogError($"[StartMenu] Failed to save volume: {exception.Message}");
+            // Re-enabled because GameFlow leaves the player here when a destination is missing,
+            // which is the normal state while the main content is unbuilt.
+            SetBusy(false);
+            RefreshContinue();
         }
     }
 
-    void SetButtonsEnabled(bool enabledState)
+    void OnContinueClicked()
     {
-        _startButton?.SetEnabled(enabledState);
-        _optionsButton?.SetEnabled(enabledState);
-        _exitButton?.SetEnabled(enabledState);
+        if (_busy || !_dataReady) return;
+        _ = ContinueAsync();
     }
 
-    async void ExitGame()
+    async Task ContinueAsync()
     {
-        if (_volumeSavePending)
-            await FlushVolumeAsync();
+        SetBusy(true);
+
+        try
+        {
+            await GameFlow.Instance.ContinueAsync();
+        }
+        finally
+        {
+            SetBusy(false);
+        }
+    }
+
+    void SetBusy(bool value)
+    {
+        _busy = value;
+        _startButton.SetEnabled(!value);
+        _optionsButton.SetEnabled(!value);
+        _exitButton.SetEnabled(!value);
+        _continueButton.SetEnabled(!value && _dataReady && GameFlow.Instance.CanContinue);
+    }
+
+    void ShowOptions()
+    {
+        ShowPanel(_optionsPanel);
+        _volumes?.Refresh();
+    }
+
+    void HideModals() => ShowPanel(null);
+
+    void ShowPanel(VisualElement panel)
+    {
+        _optionsPanel.style.display = panel == _optionsPanel ? DisplayStyle.Flex : DisplayStyle.None;
+        _confirmPanel.style.display = panel == _confirmPanel ? DisplayStyle.Flex : DisplayStyle.None;
+    }
+
+    async void OnExitClicked()
+    {
+        // Flushes any pending volume write before the process goes away (F-002 2.5).
+        _volumes?.Dispose();
+        _volumes = null;
+
+        await Task.Yield();
+
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else

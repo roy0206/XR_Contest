@@ -26,6 +26,10 @@ public sealed class PlayerInputModule : Module
         IPlayerInputSource source = _xr.IsAvailable ? _xr : _desktop;
         source.Read(ref _commands);
 
+        // Gated here rather than in each consumer: this is the one place every device's intent
+        // passes through, so 대사·컷씬 lock desktop and XR by the same rule.
+        InputLockService.Apply(ref _commands);
+
         ApplyHandPose(XRHandSide.Left);
         ApplyHandPose(XRHandSide.Right);
     }

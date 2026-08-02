@@ -83,6 +83,12 @@ public sealed class DataManager : Singleton<DataManager>
         // DialogueVolume has no mixer channel yet; it is stored and applied with the options UI.
     }
 
+    /// <summary>
+    /// True when a save file existed but could not be read. Play continues from defaults; this only
+    /// lets 메인 화면 tell the player why 이어하기 is unavailable (F-001 1.8).
+    /// </summary>
+    public bool UserDataCorrupted { get; private set; }
+
     /// <summary>A missing or unreadable save starts from defaults instead of blocking play.</summary>
     UserDataDocument LoadUser()
     {
@@ -95,6 +101,9 @@ public sealed class DataManager : Singleton<DataManager>
         }
         catch (Exception exception)
         {
+            // Distinguished from "no save yet": a file that is there but unreadable is worth
+            // telling the player about, an absent one is not.
+            UserDataCorrupted = true;
             Debug.LogWarning($"[DataManager] Save file could not be read: {exception.Message}");
         }
 

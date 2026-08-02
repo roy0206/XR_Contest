@@ -53,10 +53,53 @@ public sealed class UserSettingsData
     }
 }
 
+/// <summary>
+/// 이어하기로 돌아왔을 때 되돌릴 플레이어 자세. 어느 씬에서 저장했는지 함께 들고 있어, 좌표가
+/// 엉뚱한 씬에 적용되는 일이 없다.
+///
+/// Flat floats rather than Vector3 and Quaternion: Newtonsoft walks Unity's derived properties on
+/// those types (normalized, magnitude, eulerAngles) and writes a bloated, self-referential document.
+///
+/// Yaw only. Pitch and roll belong to the head — the HMD's in VR, the look module's on the desktop —
+/// and restoring them would fight whatever is driving the view on the next run.
+/// </summary>
+[Serializable]
+public sealed class PlayerPoseData
+{
+    public string Scene { get; set; }
+    public float X { get; set; }
+    public float Y { get; set; }
+    public float Z { get; set; }
+    public float Yaw { get; set; }
+
+    [JsonIgnore] public bool IsValid => !string.IsNullOrWhiteSpace(Scene);
+
+    [JsonIgnore]
+    public Vector3 Position
+    {
+        get => new(X, Y, Z);
+        set
+        {
+            X = value.x;
+            Y = value.y;
+            Z = value.z;
+        }
+    }
+
+    public bool Matches(string sceneName) =>
+        IsValid && string.Equals(Scene, sceneName, StringComparison.OrdinalIgnoreCase);
+}
+
 [Serializable]
 public sealed class UserProgressData
 {
     public ProcessId NextProcess { get; set; } = ProcessId.Prologue;
+
+    /// <summary>
+    /// 마지막으로 서 있던 자리. Null until a scene reports one, and cleared with the rest of the
+    /// progress. 공정 자체는 처음부터 다시 시작하되 위치만 되돌린다.
+    /// </summary>
+    public PlayerPoseData PlayerPose { get; set; }
     public ProcessGrade MakmeokGrade { get; set; } = ProcessGrade.None;
     public ProcessGrade SawingGrade { get; set; } = ProcessGrade.None;
     public ProcessGrade ChiselingGrade { get; set; } = ProcessGrade.None;
@@ -90,6 +133,7 @@ public sealed class UserProgressData
     public void Reset()
     {
         NextProcess = ProcessId.Prologue;
+        PlayerPose = null;
         MakmeokGrade = ProcessGrade.None;
         SawingGrade = ProcessGrade.None;
         ChiselingGrade = ProcessGrade.None;

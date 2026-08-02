@@ -5,7 +5,8 @@ using UnityEngine;
 /// every core interaction must stay reachable without an HMD.
 ///
 /// 이동 W/A/S/D · 시점 마우스(우클릭 유지) · 스냅 턴 Q/E ·
-/// 왼손 잡기 F · 오른손 잡기 마우스 좌클릭 · 상호작용 R · PTT T · 일시정지 Esc
+/// 왼손 잡기 F · 오른손 잡기 마우스 좌클릭 · 상호작용 R · PTT T · 일시정지 Esc ·
+/// 컷씬 건너뛰기 Space(2초 유지)
 /// </summary>
 public sealed class DesktopInputSource : IPlayerInputSource
 {
@@ -41,6 +42,9 @@ public sealed class DesktopInputSource : IPlayerInputSource
         commands.Interact = input.GetKeyDown(KeyCode.R);
         commands.PushToTalk = input.GetKey(KeyCode.T);
         commands.Pause = input.GetKeyDown(KeyCode.Escape);
+
+        // GetKey, not GetKeyDown: the cutscene measures how long this stays down.
+        commands.Skip = input.GetKey(KeyCode.Space);
     }
 
     static GrabPhase ReadKeyPhase(UserInput input, KeyCode key) =>
