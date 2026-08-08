@@ -14,6 +14,8 @@ public sealed class GrabHandModule : Module
 
     Grabbable _hovered;
     float _trackingLostAt = -1f;
+    bool _isDistanceGrab;
+    int _lockedAxis = 0; // 0 = None, 1 = Rotate, 2 = PushPull
 
     public GrabHandModule(Player player, XRHandSide hand) : base(player)
     {
@@ -36,13 +38,23 @@ public sealed class GrabHandModule : Module
 
         if (Held != null)
         {
+            UpdateLaser(anchor); // Turn off laser when holding
+            UpdatePushPullAndRotate();
+
+            if (_player.Input.Commands.GetInteract(_hand))
+            {
+                Held.Activate();
+            }
+
             // Grip is hold-to-keep, so anything other than an active press drops the object.
             if (phase is GrabPhase.Released or GrabPhase.None) Release();
             return;
         }
 
         UpdateHover(anchor);
-        if (phase == GrabPhase.Pressed && _hovered != null) Grab(_hovered);
+        UpdateLaser(anchor);
+
+        if (phase == GrabPhase.Pressed && _hovered != null) Grab(_hovered, _isDistanceGrab);
     }
 
     public override void OnRemoved()
@@ -90,6 +102,8 @@ public sealed class GrabHandModule : Module
 
     Grabbable FindClosest(Transform anchor)
     {
+        // 1. 구체 범위 탐색 (근거리 잡기)
+        _isDistanceGrab = false;
         var count = Physics.OverlapSphereNonAlloc(
             anchor.position, _player.GrabRadius, _candidates, _player.GrabLayers, QueryTriggerInteraction.Ignore);
 
@@ -113,7 +127,162 @@ public sealed class GrabHandModule : Module
             closestDistance = distance;
         }
 
+        // 2. 근거리(구체) 안에 잡을 물체가 없으면, 전방으로 레이저(Raycast)를 쏴서 원거리 잡기 탐색
+        if (closest == null)
+        {
+            Vector3 rayOrigin = anchor.position;
+            Vector3 rayDir = anchor.forward;
+
+            if (_player.Input.Commands.IsDesktop)
+            {
+                rayOrigin = _player.Head.position;
+                rayDir = _player.Head.forward;
+            }
+            else
+            {
+                rayDir = anchor.rotation * Quaternion.Euler(40f, 0f, 0f) * Vector3.forward;
+            }
+
+            if (RaycastGrabbable(rayOrigin, rayDir, out var hit, out var candidate))
+            {
+                closest = candidate;
+                _isDistanceGrab = true;
+            }
+        }
+
         return closest;
+    }
+
+    public Quaternion GetRayRotation()
+    {
+        if (_player.Input.Commands.IsDesktop)
+            return _player.Head.rotation;
+        return Anchor.rotation * Quaternion.Euler(40f, 0f, 0f);
+    }
+
+    bool RaycastGrabbable(Vector3 origin, Vector3 dir, out RaycastHit bestHit, out Grabbable candidate)
+    {
+        var hits = Physics.RaycastAll(origin, dir, 5f, _player.GrabLayers, QueryTriggerInteraction.Ignore);
+        System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+        
+        foreach (var hit in hits)
+        {
+            var c = hit.collider.GetComponentInParent<Grabbable>();
+            if (c != null && c.CanGrab)
+            {
+                if (c.Holder == this) continue; // Skip what THIS hand is already holding
+                bestHit = hit;
+                candidate = c;
+                return true;
+            }
+
+            if (hit.collider.transform.IsChildOf(_player.transform)) continue;
+            
+            bestHit = hit;
+            candidate = null;
+            return false;
+        }
+        
+        bestHit = default;
+        candidate = null;
+        return false;
+    }
+
+    void UpdatePushPullAndRotate()
+    {
+        if (Held == null) return;
+
+        var commands = _player.Input.Commands;
+
+        var rotate = _hand == XRHandSide.Left ? commands.RotateLeft : commands.RotateRight;
+        var pushPull = _hand == XRHandSide.Left ? commands.PushPullLeft : commands.PushPullRight;
+
+        if (Mathf.Abs(rotate) < 0.05f && Mathf.Abs(pushPull) < 0.05f)
+        {
+            _lockedAxis = 0;
+        }
+
+        if (_lockedAxis == 0)
+        {
+            if (Mathf.Abs(rotate) > 0.05f || Mathf.Abs(pushPull) > 0.05f)
+            {
+                if (Mathf.Abs(rotate) > Mathf.Abs(pushPull)) _lockedAxis = 1;
+                else _lockedAxis = 2;
+            }
+        }
+
+        if (!Held.UseDynamicAttach) rotate = 0f;
+
+        if (_lockedAxis == 1) pushPull = 0f;
+        else if (_lockedAxis == 2) rotate = 0f;
+        else { rotate = 0f; pushPull = 0f; }
+
+        if (Mathf.Abs(rotate) > 0.05f)
+        {
+            Held.transform.Rotate(Vector3.up, rotate * -135f * Time.deltaTime, Space.World);
+        }
+
+        if (!_isDistanceGrab) return;
+
+        if (Mathf.Abs(pushPull) > 0.05f)
+        {
+            var offset = Held.transform.localPosition;
+            var dist = offset.magnitude;
+            dist += pushPull * 2f * Time.deltaTime; // 초당 2m 속도
+            Held.transform.localPosition = offset.normalized * Mathf.Clamp(dist, 0.2f, 5f);
+        }
+    }
+
+    void UpdateLaser(Transform anchor)
+    {
+        var line = anchor.GetComponent<LineRenderer>();
+        if (line == null) return;
+
+        if (Held != null)
+        {
+            line.enabled = false;
+            return;
+        }
+
+        line.enabled = true;
+        line.useWorldSpace = true;
+        
+        if (_player.LaserMaterial != null && line.sharedMaterial != _player.LaserMaterial)
+            line.sharedMaterial = _player.LaserMaterial;
+
+        Vector3 rayOrigin = anchor.position;
+        Vector3 rayDir = anchor.forward;
+
+        if (_player.Input.Commands.IsDesktop)
+        {
+            rayOrigin = _player.Head.position;
+            rayDir = _player.Head.forward;
+        }
+        else
+        {
+            rayDir = anchor.rotation * Quaternion.Euler(40f, 0f, 0f) * Vector3.forward;
+        }
+
+        line.SetPosition(0, rayOrigin);
+
+        if (RaycastGrabbable(rayOrigin, rayDir, out var hit, out var candidate))
+        {
+            line.SetPosition(1, hit.point);
+            line.startColor = Color.red;
+            line.endColor = Color.red;
+        }
+        else if (hit.collider != null) // Hit a non-grabbable object like a wall
+        {
+            line.SetPosition(1, hit.point);
+            line.startColor = new Color(1f, 0f, 0f, 1f);
+            line.endColor = new Color(1f, 0f, 0f, 0f);
+        }
+        else
+        {
+            line.SetPosition(1, rayOrigin + rayDir * 5f);
+            line.startColor = new Color(1f, 0f, 0f, 1f);
+            line.endColor = new Color(1f, 0f, 0f, 0f);
+        }
     }
 
     void SetHovered(Grabbable target)
@@ -125,9 +294,9 @@ public sealed class GrabHandModule : Module
         if (_hovered != null) _hovered.SetHighlighted(true);
     }
 
-    void Grab(Grabbable target)
+    void Grab(Grabbable target, bool distanceGrab)
     {
-        if (!target.Attach(this, Anchor)) return;
+        if (!target.Attach(this, Anchor, distanceGrab)) return;
 
         Held = target;
         SetHovered(null);

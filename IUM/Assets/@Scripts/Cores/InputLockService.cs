@@ -95,7 +95,11 @@ public static class InputLockService
             commands.RightGrab = MaskGrab(commands.RightGrab);
         }
 
-        if ((locks & InputLockFlags.Interact) != 0) commands.Interact = false;
+        if ((locks & InputLockFlags.Interact) != 0)
+        {
+            commands.InteractLeft = false;
+            commands.InteractRight = false;
+        }
         if ((locks & InputLockFlags.PushToTalk) != 0) commands.PushToTalk = false;
         if ((locks & InputLockFlags.Pause) != 0) commands.Pause = false;
     }

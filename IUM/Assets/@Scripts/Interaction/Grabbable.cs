@@ -18,6 +18,7 @@ public class Grabbable : MonoThing
     [Header("Modules")]
     [SerializeField] bool highlightOnHover = true;
     [SerializeField] bool returnWhenLost = true;
+    [SerializeField] bool useDynamicAttach = true;
 
     Transform _homeParent;
     Pose _homePose;
@@ -26,6 +27,7 @@ public class Grabbable : MonoThing
     /// <summary>Raised after the object is attached to or detached from a hand.</summary>
     public event Action<Grabbable, GrabHandModule> Grabbed;
     public event Action<Grabbable, GrabHandModule> Released;
+    public event Action<Grabbable> Activated;
 
     public Transform GrabPoint => grabPoint != null ? grabPoint : transform;
 
@@ -34,8 +36,9 @@ public class Grabbable : MonoThing
     public bool IsWithinGrabDistance(float distance) => maxGrabDistance <= 0f || distance <= maxGrabDistance;
     public GrabHandModule Holder { get; private set; }
     public bool IsHeld => Holder != null;
-    public bool CanGrab => grabEnabled && Holder == null && isActiveAndEnabled;
+    public bool CanGrab => grabEnabled && isActiveAndEnabled;
     public Pose HomePose => _homePose;
+    public bool UseDynamicAttach => useDynamicAttach;
 
     /// <summary>
     /// Process locking (F-014 5.3) turns this off so a tool for a later process cannot be picked up.
@@ -66,9 +69,14 @@ public class Grabbable : MonoThing
     public void SetHighlighted(bool value) => GetModule<GrabHighlightModule>()?.SetHighlighted(value);
 
     /// <summary>Called by <see cref="GrabHandModule"/>. Returns false when the object is not grabbable.</summary>
-    public bool Attach(GrabHandModule hand, Transform anchor)
+    public bool Attach(GrabHandModule hand, Transform anchor, bool distanceGrab = false)
     {
         if (hand == null || anchor == null || !CanGrab) return false;
+
+        if (Holder != null && Holder != hand)
+        {
+            Holder.Release();
+        }
 
         Holder = hand;
         SetHighlighted(false);
@@ -81,11 +89,23 @@ public class Grabbable : MonoThing
         }
 
         transform.SetParent(anchor, true);
-        AlignToAnchor(anchor);
+        if (!distanceGrab) 
+        {
+            if (!useDynamicAttach)
+            {
+                AlignToAnchor(anchor);
+            }
+        }
+        else if (!useDynamicAttach)
+        {
+            AlignRotationToRay(hand.GetRayRotation());
+        }
 
         Grabbed?.Invoke(this, hand);
         return true;
     }
+
+    public void Activate() => Activated?.Invoke(this);
 
     public void Detach(GrabHandModule hand)
     {
@@ -134,7 +154,6 @@ public class Grabbable : MonoThing
     }
 
     // Lines the grab point up with the anchor instead of snapping the object's own origin,
-    // so a tool is held by its handle.
     void AlignToAnchor(Transform anchor)
     {
         var point = GrabPoint;
@@ -149,5 +168,19 @@ public class Grabbable : MonoThing
 
         var rotation = anchor.rotation * Quaternion.Inverse(pointLocalRotation);
         transform.SetPositionAndRotation(anchor.position - rotation * pointLocalOffset, rotation);
+    }
+
+    void AlignRotationToRay(Quaternion rayRotation)
+    {
+        var point = GrabPoint;
+        if (point == transform)
+        {
+            transform.rotation = rayRotation;
+            return;
+        }
+
+        var pointLocalRotation = Quaternion.Inverse(transform.rotation) * point.rotation;
+        var rotation = rayRotation * Quaternion.Inverse(pointLocalRotation);
+        transform.rotation = rotation;
     }
 }

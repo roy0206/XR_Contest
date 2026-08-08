@@ -29,6 +29,7 @@ public sealed class Player : MonoThing
     [SerializeField] LayerMask grabLayers = ~0;
     [Tooltip("How long a held object keeps its last valid pose after tracking is lost (F-005 1.7).")]
     [SerializeField, Min(0f)] float trackingLossGrace = 1f;
+    [SerializeField] Material laserMaterial;
 
     public CharacterController Controller { get; private set; }
     public PlayerInputModule Input { get; private set; }
@@ -39,6 +40,7 @@ public sealed class Player : MonoThing
     public float MoveSpeed => moveSpeed;
     public float SnapTurnAngle => snapTurnAngle;
     public float Gravity => gravity;
+    public Material LaserMaterial => laserMaterial;
     public float LookSensitivity => lookSensitivity;
     public float PitchLimit => pitchLimit;
     public Vector3 DesktopHandOffset => desktopHandOffset;
