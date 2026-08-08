@@ -5,24 +5,51 @@
         <ui:VisualElement class="ambient ambient--bottom" />
         <ui:VisualElement class="menu-card">
             <ui:Label text="IUM" class="eyebrow" />
-            <ui:Label text="IMMERSIVE UNIVERSE" class="title" />
-            <ui:Label text="새로운 공간으로 들어갈 준비가 되셨나요?" class="subtitle" />
+            <ui:Label text="PROJECT 이음" class="title" />
+            <ui:Label text="숭례문 복원 현장으로 들어갈 준비가 되셨나요?" class="subtitle" />
             <ui:VisualElement class="divider" />
-            <ui:Button name="start-button" text="시작" class="menu-button menu-button--primary" />
+            <ui:Button name="start-button" text="게임 시작" class="menu-button menu-button--primary" />
+            <ui:Button name="continue-button" text="이어하기" class="menu-button" />
             <ui:Button name="options-button" text="옵션" class="menu-button" />
             <ui:Button name="exit-button" text="나가기" class="menu-button menu-button--quiet" />
+            <ui:Label name="save-notice" class="save-notice" />
         </ui:VisualElement>
 
         <ui:VisualElement name="options-panel" class="modal-layer">
             <ui:VisualElement class="options-card">
                 <ui:Label name="options-title" text="옵션" class="options-title" />
-                <ui:Label name="master-volume-label" text="전체 사운드" class="field-label" />
-                <ui:Slider name="volume-slider" low-value="0" high-value="1" value="1" show-input-field="false" class="volume-slider" />
+
+                <ui:Label text="음악 볼륨" class="field-label" />
+                <ui:Slider name="music-volume-slider" low-value="0" high-value="100"
+                           show-input-field="false" class="volume-slider" />
+
+                <ui:Label text="대사 볼륨" class="field-label field-label--spaced" />
+                <ui:Slider name="dialogue-volume-slider" low-value="0" high-value="100"
+                           show-input-field="false" class="volume-slider" />
+
+                <ui:Label text="환경 볼륨" class="field-label field-label--spaced" />
+                <ui:Slider name="environment-volume-slider" low-value="0" high-value="100"
+                           show-input-field="false" class="volume-slider" />
+
                 <ui:VisualElement class="volume-scale">
                     <ui:Label text="음소거" />
                     <ui:Label text="최대" />
                 </ui:VisualElement>
-                <ui:Button name="close-options-button" text="완료" class="menu-button menu-button--primary close-button" />
+
+                <ui:Button name="close-options-button" text="완료"
+                           class="menu-button menu-button--primary close-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="confirm-panel" class="modal-layer">
+            <ui:VisualElement class="options-card">
+                <ui:Label text="기존 진행 기록이 있습니다." class="options-title" />
+                <ui:Label name="confirm-message" class="confirm-message"
+                          text="새 게임을 시작하면 이전 진행 기록이 초기화됩니다." />
+                <ui:Button name="confirm-new-game-button" text="새로 시작"
+                           class="menu-button menu-button--primary" />
+                <ui:Button name="cancel-new-game-button" text="취소"
+                           class="menu-button menu-button--quiet" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

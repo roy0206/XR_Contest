@@ -19,7 +19,11 @@ public sealed class AddressableDataProvider : IDataTextProvider
 
     async Task InitializeInternalAsync()
     {
-        var handle = Addressables.InitializeAsync();
+        // autoReleaseHandle: false. The parameterless overload reclaims the handle the moment the
+        // operation completes, which lands before the await resumes through the synchronization
+        // context — reading Status afterwards then throws on an already-released handle. Owning
+        // the release here keeps the status check and the finally below consistent.
+        var handle = Addressables.InitializeAsync(false);
         try
         {
             await handle.Task;

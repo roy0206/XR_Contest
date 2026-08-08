@@ -104,3 +104,26 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# Local AI agent instructions
+/IUM/AGENT.md
+/IUM/CLAUDE.md
+/IUM/.claude/
+
+# 이음이 AI 서비스 자격 증명 (개인 파일, 커밋 금지)
+/IUM/Assets/StreamingAssets/ai_secrets.json
+/IUM/Assets/StreamingAssets/ai_secrets.json.meta
+/IUM/Assets/StreamingAssets/ai_service_account.json
+/IUM/Assets/StreamingAssets/ai_service_account.json.meta
+/IUM/Assets/StreamingAssets/ai_oauth_client.json
+/IUM/Assets/StreamingAssets/ai_oauth_client.json.meta
+/IUM/Assets/StreamingAssets/client_secret_*.json
+/IUM/Assets/StreamingAssets/client_secret_*.json.meta
+
+# 로컬 STT 모델 (약 120MB, 각자 Model Manager로 내려받는다)
+/IUM/Assets/StreamingAssets/sherpa-onnx/
+/IUM/Assets/StreamingAssets/sherpa-onnx.meta
+
+# 개인 IDE 설정 (작업자별로 다르므로 공유하지 않는다)
+/IUM/.vscode/
+/IUM/.idea/

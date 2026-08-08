@@ -5,6 +5,21 @@
       "key": "app",
       "address": "ium/data/static/app",
       "required": true
+    },
+    {
+      "key": "dialogue",
+      "address": "ium/data/static/dialogue",
+      "required": false
+    },
+    {
+      "key": "cutscene",
+      "address": "ium/data/static/cutscene",
+      "required": false
+    },
+    {
+      "key": "flow",
+      "address": "ium/data/static/flow",
+      "required": false
     }
   ]
 }

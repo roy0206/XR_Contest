@@ -1,0 +1,27 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="IeumiHud.uss" />
+    <ui:VisualElement name="ai-hud" class="hud" picking-mode="Ignore">
+        <ui:VisualElement name="ai-status" class="status">
+            <ui:Label name="ai-state-icon" text="●" class="state-icon" />
+            <ui:Label name="ai-state-label" text="사용 불가" class="state-label" />
+            <ui:VisualElement name="ai-level-track" class="level-track">
+                <ui:VisualElement name="ai-level-fill" class="level-fill" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="ai-center" class="center" picking-mode="Ignore">
+            <ui:Label name="ai-transcript" text="" class="transcript" />
+            <ui:Label name="ai-subtitle" text="" class="subtitle" />
+            <ui:VisualElement name="ai-suggestions" class="suggestions" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="ai-debug" class="debug">
+            <ui:Label name="ai-service-label" text="초기화 중" class="debug-label" />
+            <ui:VisualElement class="debug-row">
+                <ui:TextField name="ai-question-field" class="debug-field" />
+                <ui:Button name="ai-ask-button" text="질문" class="debug-button" />
+            </ui:VisualElement>
+            <ui:Label name="ai-hint-label" text="T 키를 누른 채 말하고, 떼면 질문이 전송됩니다." class="debug-hint" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

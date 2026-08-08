@@ -1,0 +1,45 @@
+/* 자막은 화면 하단에 둔다. 이음이 HUD가 중앙을 쓰므로 두 자막이 겹치지 않는다. */
+.subtitle-root {
+    flex-grow: 1;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 48px;
+}
+
+.subtitle-box {
+    display: none;
+    max-width: 880px;
+    padding: 16px 28px;
+    border-width: 1px;
+    border-color: rgba(148, 190, 230, 0.22);
+    border-radius: 14px;
+    background-color: rgba(12, 20, 36, 0.9);
+    align-items: center;
+}
+
+.subtitle-box--visible {
+    display: flex;
+}
+
+.subtitle-speaker {
+    margin-bottom: 6px;
+    font-size: 16px;
+    -unity-font-style: bold;
+    color: rgb(180, 200, 225);
+}
+
+.subtitle-speaker--nojang {
+    color: rgb(255, 205, 96);
+}
+
+.subtitle-speaker--ieumi {
+    color: rgb(79, 203, 255);
+}
+
+/* 긴 문장은 2줄 이내로 분리한다 (F-018 1.4). max-width가 줄바꿈 지점을 정한다. */
+.subtitle-text {
+    font-size: 22px;
+    color: rgb(237, 245, 255);
+    white-space: normal;
+    -unity-text-align: middle-center;
+}

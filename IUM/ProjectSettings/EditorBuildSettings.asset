@@ -9,8 +9,17 @@ EditorBuildSettings:
     path: Assets/@Scenes/StartScene.unity
     guid: 4e9fef26e6adb88479ad1b9834a32d94
   - enabled: 1
-    path: Assets/@Scenes/SampleScene.unity
-    guid: 55daccc09a3b69647bbab145b54a3ab3
+    path: Assets/@Developers/RYU/Scenes/Cutscene/Cutscene_Prologue.unity
+    guid: aca4a8807cf1cc147a7f0590777c61fc
+  - enabled: 1
+    path: Assets/@Developers/RYU/Scenes/Cutscene/Cutscene_Ending.unity
+    guid: f86892f8f996ced41a6b85b17473f8b9
+  - enabled: 1
+    path: Assets/@Developers/RYU/Scenes/Dev/FlowTest.unity
+    guid: d013e7dcf8582534587c7b0a13e05167
+  - enabled: 1
+    path: Assets/@Developers/RYU/Scenes/Dev/FreePlayTest.unity
+    guid: 272bf83835f3385489c0d717fa2ec6ec
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: bfa1182bd221b4ca89619141f66f1260, type: 2}
     Unity.XR.WindowsMR.Settings: {fileID: 11400000, guid: dc5a169419fa04987b057f65238cf3ba, type: 2}

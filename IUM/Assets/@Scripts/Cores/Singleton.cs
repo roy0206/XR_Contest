@@ -38,13 +38,6 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
         return value != null;
     }
 
-    //[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    static void ResetStatics()
-    {
-        instance = null;
-        isQuitting = false;
-    }
-
     protected virtual void Awake()
     {
         if (instance != null && instance != this as T)
@@ -53,6 +46,11 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
             return;
         }
 
+        // Entering play mode with domain reload disabled keeps statics alive, so the quit flag from
+        // the previous session has to be cleared here. An initialize-on-load hook cannot do it:
+        // Unity never invokes those on an open generic type such as Singleton<T>. A stale instance
+        // needs no reset because a destroyed component already compares equal to null.
+        isQuitting = false;
         instance = this as T;
 
         // A persistent manager must be a root object. Detach only the manager

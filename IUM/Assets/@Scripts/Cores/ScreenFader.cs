@@ -28,8 +28,21 @@ public class ScreenFader : Singleton<ScreenFader>
 
     void LateUpdate()
     {
-        if (_canvas != null && _canvas.worldCamera == null)
+        // Also rebinds when the bound camera is merely disabled, not destroyed. A cutscene overlay
+        // switches the main camera off for its own, and a disabled camera is not null — leaving the
+        // canvas pointed at it renders nothing at all.
+        if (_canvas != null && (_canvas.worldCamera == null || !_canvas.worldCamera.isActiveAndEnabled))
             BindCamera();
+    }
+
+    /// <summary>
+    /// Re-resolves the camera immediately. Call right after enabling or disabling a camera so the
+    /// fade does not blink out for the one frame before <see cref="LateUpdate"/> notices.
+    /// </summary>
+    public void Rebind()
+    {
+        EnsureOverlay();
+        BindCamera();
     }
 
     protected override void OnDestroy()
@@ -75,10 +88,30 @@ public class ScreenFader : Singleton<ScreenFader>
     void BindCamera()
     {
         if (_canvas == null) return;
-        var camera = Camera.main;
+        var camera = ResolveCamera();
         if (camera == null) return;
         _canvas.worldCamera = camera;
         _canvas.planeDistance = Mathf.Max(camera.nearClipPlane + cameraPlaneOffset, 0.1f);
+    }
+
+    /// <summary>
+    /// Camera.main only ever returns an enabled camera tagged MainCamera, so it goes null while a
+    /// cutscene has the main camera switched off for its own untagged one. Falling back to whichever
+    /// enabled camera draws last keeps the fade attached to what the player is actually seeing.
+    /// </summary>
+    static Camera ResolveCamera()
+    {
+        var main = Camera.main;
+        if (main != null) return main;
+
+        // Camera.allCameras lists enabled cameras only.
+        var cameras = Camera.allCameras;
+        Camera last = null;
+        for (var i = 0; i < cameras.Length; i++)
+            if (last == null || cameras[i].depth > last.depth)
+                last = cameras[i];
+
+        return last;
     }
 
     public Tween FadeOut(float duration, Action onComplete = null) => FadeTo(1f, duration, onComplete);

@@ -1,0 +1,64 @@
+/* 컷씬 레이어. 자막은 SubtitleView가, 배경과 연출은 컷씬 씬이 그리므로
+   여기에는 캡션과 건너뛰기 게이지만 둔다. */
+.cutscene-root {
+    flex-grow: 1;
+}
+
+.cutscene-caption-box {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    justify-content: center;
+    align-items: center;
+    padding: 96px;
+}
+
+.cutscene-caption-box--visible {
+    display: flex;
+}
+
+/* 자막(22px)보다 크게 잡아 화자의 말이 아니라 화면 표제임이 구분되게 한다. */
+.cutscene-caption {
+    font-size: 40px;
+    -unity-font-style: bold;
+    color: rgb(245, 248, 255);
+    white-space: normal;
+    -unity-text-align: middle-center;
+    letter-spacing: 2px;
+}
+
+/* 우하단. 자막이 하단 중앙을 쓰므로 겹치지 않는다. */
+.cutscene-skip {
+    display: none;
+    position: absolute;
+    right: 48px;
+    bottom: 48px;
+    align-items: flex-end;
+}
+
+.cutscene-skip--visible {
+    display: flex;
+}
+
+.cutscene-skip-label {
+    margin-bottom: 8px;
+    font-size: 16px;
+    color: rgb(206, 218, 235);
+}
+
+.cutscene-skip-track {
+    width: 180px;
+    height: 6px;
+    border-radius: 3px;
+    background-color: rgba(255, 255, 255, 0.18);
+}
+
+.cutscene-skip-fill {
+    width: 0;
+    height: 100%;
+    border-radius: 3px;
+    background-color: rgb(255, 205, 96);
+}

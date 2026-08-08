@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="Subtitle.uss" />
+    <ui:VisualElement name="subtitle-root" class="subtitle-root" picking-mode="Ignore">
+        <ui:VisualElement name="subtitle-box" class="subtitle-box" picking-mode="Ignore">
+            <ui:Label name="subtitle-speaker" text="" class="subtitle-speaker" />
+            <ui:Label name="subtitle-text" text="" class="subtitle-text" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
