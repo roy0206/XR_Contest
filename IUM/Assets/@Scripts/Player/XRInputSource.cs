@@ -22,10 +22,19 @@ public sealed class XRInputSource : IPlayerInputSource
         commands.Move = Vector2.ClampMagnitude(input.GetXRPrimaryAxis(XRHandSide.Left), 1f);
         commands.SnapTurn = ReadSnapTurn(input.GetXRPrimaryAxis(XRHandSide.Right).x);
 
+        var leftAxis = input.GetXRPrimaryAxis(XRHandSide.Left);
+        var rightAxis = input.GetXRPrimaryAxis(XRHandSide.Right);
+        
+        commands.PushPullLeft = leftAxis.y;
+        commands.PushPullRight = rightAxis.y;
+        commands.RotateLeft = leftAxis.x;
+        commands.RotateRight = rightAxis.x;
+
         commands.SetGrab(XRHandSide.Left, ReadGrabPhase(input, XRHandSide.Left));
         commands.SetGrab(XRHandSide.Right, ReadGrabPhase(input, XRHandSide.Right));
 
-        commands.Interact = input.GetXRButtonDown(XRHandSide.Right, XRInputButton.Select);
+        commands.InteractLeft = input.GetXRButtonDown(XRHandSide.Left, XRInputButton.Select);
+        commands.InteractRight = input.GetXRButtonDown(XRHandSide.Right, XRInputButton.Select);
         commands.PushToTalk = input.GetXRButton(XRHandSide.Left, XRInputButton.Primary);
         commands.Pause = input.GetXRButtonDown(XRHandSide.Left, XRInputButton.Menu);
 

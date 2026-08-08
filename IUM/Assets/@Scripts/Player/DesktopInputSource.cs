@@ -36,10 +36,22 @@ public sealed class DesktopInputSource : IPlayerInputSource
         if (input.GetKeyDown(KeyCode.Q)) commands.SnapTurn = -1f;
         else if (input.GetKeyDown(KeyCode.E)) commands.SnapTurn = 1f;
 
+        var scroll = input.ScrollDelta.y * 50f;
+        commands.PushPullLeft = scroll;
+        commands.PushPullRight = scroll;
+
+        var rotate = 0f;
+        if (input.GetKey(KeyCode.C)) rotate += 1f;
+        if (input.GetKey(KeyCode.Z)) rotate -= 1f;
+        commands.RotateLeft = rotate;
+        commands.RotateRight = rotate;
+
         commands.SetGrab(XRHandSide.Left, ReadKeyPhase(input, KeyCode.F));
         commands.SetGrab(XRHandSide.Right, ReadMousePhase(input, MouseButton.Left));
 
-        commands.Interact = input.GetKeyDown(KeyCode.R);
+        bool rPressed = input.GetKeyDown(KeyCode.R);
+        commands.InteractLeft = rPressed;
+        commands.InteractRight = rPressed;
         commands.PushToTalk = input.GetKey(KeyCode.T);
         commands.Pause = input.GetKeyDown(KeyCode.Escape);
 

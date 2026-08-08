@@ -18,7 +18,10 @@ public sealed class LocomotionModule : Module
     {
         if (IsLocked) return;
 
-        var snapTurn = _player.Input.Commands.SnapTurn;
+        var isDesktop = _player.Input.Commands.IsDesktop;
+        var rightHand = _player.GetHand(XRHandSide.Right);
+        var snapTurn = (!isDesktop && rightHand != null && rightHand.Held != null) ? 0f : _player.Input.Commands.SnapTurn;
+        
         if (!Mathf.Approximately(snapTurn, 0f))
             _player.transform.Rotate(Vector3.up, Mathf.Sign(snapTurn) * _player.SnapTurnAngle, Space.World);
     }
@@ -28,7 +31,10 @@ public sealed class LocomotionModule : Module
         var controller = _player.Controller;
         if (controller == null || !controller.enabled) return;
 
-        var move = IsLocked ? Vector2.zero : _player.Input.Commands.Move;
+        var isDesktop = _player.Input.Commands.IsDesktop;
+        var leftHand = _player.GetHand(XRHandSide.Left);
+        var isLeftHeld = (!isDesktop && leftHand != null && leftHand.Held != null);
+        var move = (IsLocked || isLeftHeld) ? Vector2.zero : _player.Input.Commands.Move;
 
         var forward = Vector3.ProjectOnPlane(_player.Head.forward, Vector3.up);
         if (forward.sqrMagnitude < 0.0001f) forward = _player.transform.forward;

@@ -26,7 +26,12 @@ public struct PlayerCommands
 
     public GrabPhase LeftGrab;
     public GrabPhase RightGrab;
-    public bool Interact;
+    public float PushPullLeft;
+    public float PushPullRight;
+    public float RotateLeft;
+    public float RotateRight;
+    public bool InteractLeft;
+    public bool InteractRight;
     public bool PushToTalk;
     public bool Pause;
 
@@ -45,6 +50,8 @@ public struct PlayerCommands
     public Pose RightHandPose;
     public bool HasLeftHandPose;
     public bool HasRightHandPose;
+
+    public bool GetInteract(XRHandSide hand) => hand == XRHandSide.Left ? InteractLeft : InteractRight;
 
     public GrabPhase GetGrab(XRHandSide hand) => hand == XRHandSide.Left ? LeftGrab : RightGrab;
 

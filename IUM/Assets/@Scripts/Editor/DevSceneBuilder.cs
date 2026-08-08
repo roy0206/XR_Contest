@@ -43,6 +43,24 @@ public static class DevSceneBuilder
     const string CorrectMaterialPath = "Assets/Textures/CorrectMat.mat";
     const string WrongMaterialPath = "Assets/Textures/WrongMat.mat";
 
+    [MenuItem("IUM/Dev/Inject PC Player Into Current Scene")]
+    public static void InjectPlayerIntoCurrentScene()
+    {
+        if (Object.FindAnyObjectByType<Player>() != null)
+        {
+            Debug.LogWarning("[DevSceneBuilder] A Player already exists in this scene.");
+            return;
+        }
+
+        var defaultCamera = Camera.main;
+        if (defaultCamera != null) Object.DestroyImmediate(defaultCamera.gameObject);
+
+        CreatePlayer();
+        CreateEventSystem(); // UI 조작을 위한 이벤트 시스템도 함께 주입
+
+        Debug.Log("[DevSceneBuilder] 현재 씬에 PC 플레이어(키보드/마우스 조작)가 주입되었습니다.");
+    }
+
     [MenuItem("IUM/Dev/Create Interaction Test Scene")]
     public static void CreateInteractionTestScene()
     {
@@ -885,12 +903,28 @@ public static class DevSceneBuilder
         camera.nearClipPlane = 0.05f;
         head.AddComponent<AudioListener>();
 
+        // PC 테스트용 크로스헤어(조준점) 추가
+        var canvasObj = new GameObject("CrosshairCanvas");
+        canvasObj.transform.SetParent(head.transform, false);
+        var canvas = canvasObj.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        var canvasScaler = canvasObj.AddComponent<UnityEngine.UI.CanvasScaler>();
+        canvasScaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        var crosshairObj = new GameObject("Crosshair");
+        crosshairObj.transform.SetParent(canvasObj.transform, false);
+        var img = crosshairObj.AddComponent<UnityEngine.UI.Image>();
+        img.color = new Color(1, 1, 1, 0.5f);
+        img.rectTransform.sizeDelta = new Vector2(4, 4);
+
         // Hand anchors are children of the root, not the head: XR device poses arrive in
         // tracking space, which is the root's local space.
         var leftHand = new GameObject("LeftHand");
         leftHand.transform.SetParent(player.transform, false);
+        AddHandLaser(leftHand);
+
         var rightHand = new GameObject("RightHand");
         rightHand.transform.SetParent(player.transform, false);
+        AddHandLaser(rightHand);
 
         var component = player.AddComponent<Player>();
         var serialized = new SerializedObject(component);
@@ -927,5 +961,18 @@ public static class DevSceneBuilder
         var serialized = new SerializedObject(component);
         serialized.FindProperty("attachPoint").objectReferenceValue = attachPoint.transform;
         serialized.ApplyModifiedPropertiesWithoutUndo();
+    }
+
+    static void AddHandLaser(GameObject hand)
+    {
+        var line = hand.AddComponent<LineRenderer>();
+        line.startWidth = 0.005f;
+        line.endWidth = 0.005f;
+        line.material = new Material(Shader.Find("Sprites/Default"));
+        line.startColor = Color.red;
+        line.endColor = Color.red;
+        line.useWorldSpace = false;
+        line.SetPositions(new[] { Vector3.zero, new Vector3(0, 0, 5f) }); // 기본 5m
+        line.enabled = false; // 기본적으론 꺼져있음
     }
 }
