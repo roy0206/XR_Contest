@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -13,7 +14,7 @@ public sealed class AiProcessDebugSwitcher : MonoBehaviour
 {
     [SerializeField] bool logChanges = true;
 
-    bool _locked;
+    IDisposable _pttLock;
 
     void Update()
     {
@@ -49,9 +50,30 @@ public sealed class AiProcessDebugSwitcher : MonoBehaviour
         if (!input.GetKeyDown(KeyCode.L)) return;
 
         // 노장 대사 재생 중 PTT 잠금 (F-011 1.4) without the 노장 system existing yet.
-        _locked = !_locked;
-        AiConversationManager.Instance.SetInputLocked(_locked);
-        Log(_locked ? "노장 대사 잠금 켜짐" : "노장 대사 잠금 꺼짐");
+        //
+        // Held through InputLockService rather than by calling SetInputLocked directly: the
+        // 대사 시스템 already holds PTT that way, and PushToTalkLockBridge is the single writer
+        // that follows the combined result. A second direct caller would let a 대사 ending
+        // release this toggle — and this toggle release a 대사 that is still playing.
+        if (_pttLock == null)
+        {
+            _pttLock = InputLockService.Acquire(InputLockFlags.PushToTalk, "노장 대사 (디버그)");
+            Log("노장 대사 잠금 켜짐");
+        }
+        else
+        {
+            _pttLock.Dispose();
+            _pttLock = null;
+            Log("노장 대사 잠금 꺼짐");
+        }
+    }
+
+    // Without this a disabled switcher would strand PTT for the rest of the scene: the bridge
+    // only unlocks 이음이 when the reference count reaches zero, and nothing else would release it.
+    void OnDisable()
+    {
+        _pttLock?.Dispose();
+        _pttLock = null;
     }
 
     void Apply(ProcessId process, string step)
