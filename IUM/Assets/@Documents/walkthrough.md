@@ -12,8 +12,10 @@
 - **`SawTool.cs`**: 톱의 이동 속도(minCutSpeed)와 방향(앞/뒤 양방향 180도 허용)을 체크하여 유효한 스트로크를 판정합니다. 완료 시 속도와 방향 정확도를 기반으로 `WorkResult`를 채점합니다. 톱밥 파티클(VFX) 및 햅틱 진동 연동이 포함되었습니다.
 
 ### 2. 먹매김 (InkLineZone & InkLineTool)
-- **`InkLineZone.cs`**: `targetStart`, `targetEnd` Transform을 기준으로 실제 찍힌 선과 오차를 계산(거리 오차)하여 점수를 매기도록 확장되었습니다.
-- **`InkLineTool.cs`**: 먹줄을 당겼다 놓을 때, 최대로 당긴 장력(Tension)을 계산하여 `InkLineZone`에 넘겨주며, 이 장력 수치가 점수(QualityScore)에 30% 반영됩니다.
+- **`InkLineZone.cs`**: `pointA`, `pointB` Transform을 기준으로 실제 찍힌 선과 오차를 계산(거리 오차)하여 점수를 매기도록 수정되었습니다. 한 목재에 여러 먹선이 존재할 수 있으므로, 시작/끝 순서를 구분하지 않고 가장 근접한 미완료 먹선을 찾아 판정합니다.
+- **`InkLineTool.cs`**: 
+  - 먹줄을 당겼다 놓을 때, 최대로 당긴 장력(Tension)을 계산하여 `InkLineZone`에 넘겨주며, 이 장력 수치가 점수(QualityScore)에 30% 반영됩니다.
+  - **(New)** 먹통의 끝부분(`ToolEnd`)이 유효한 먹선 영역(`InkLineZone`) 내부에 위치할 때, 핀이 꽂힐 실제 표면 위치를 계산하여 사영(ProjectionVisual)으로 미리 보여줍니다. 영역 밖에서는 핀이 꽂히지 않도록 제한했습니다.
 
 ### 3. 끌과 망치 (ChiselTool, ChiselZone & HammerTool)
 - **`HammerTool.cs`**: 충돌 검사(Continuous Dynamic)를 통해 타격 속도(Velocity)를 `ChiselTool`로 전달합니다. 타격 시 잡고 있는 손에 강한 진동이 옵니다.

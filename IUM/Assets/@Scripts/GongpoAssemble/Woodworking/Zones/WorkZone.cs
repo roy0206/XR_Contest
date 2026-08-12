@@ -27,6 +27,7 @@ public abstract class WorkZone : MonoBehaviour
     public event Action<WorkResult> OnWorkCompletedEvent;
 
     protected bool isCompleted = false;
+    public bool IsCompleted => isCompleted;
 
     protected virtual void Start()
     {
