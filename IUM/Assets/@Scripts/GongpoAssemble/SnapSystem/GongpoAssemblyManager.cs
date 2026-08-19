@@ -30,14 +30,24 @@ public class GongpoAssemblyManager : MonoBehaviour
 
     private void Start()
     {
+        Debug.Log("[GongpoAssemblyManager] Start() 호출됨 - 매니저 초기화 시작");
+        
         if (autoFindTargets)
         {
             assemblyTargets.Clear();
-            assemblyTargets.AddRange(FindObjectsByType<AssemblyTarget>(FindObjectsSortMode.None));
+            // 비활성화된 타겟들도 모두 찾을 수 있도록 Include 추가
+            var targets = FindObjectsByType<AssemblyTarget>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            assemblyTargets.AddRange(targets);
+            Debug.Log($"[GongpoAssemblyManager] 씬에서 총 {targets.Length}개의 AssemblyTarget을 찾았습니다.");
         }
 
         totalPartsNeeded = assemblyTargets.Count;
         currentAssembledCount = 0;
+        
+        Debug.Log($"[GongpoAssemblyManager] 조립해야 할 총 부품 수: {totalPartsNeeded}");
+
+        int alreadyOccupied = 0;
+        int subscribed = 0;
 
         foreach (var target in assemblyTargets)
         {
@@ -47,14 +57,22 @@ public class GongpoAssemblyManager : MonoBehaviour
                 if (target.Snap.IsOccupied)
                 {
                     currentAssembledCount++;
+                    alreadyOccupied++;
                 }
                 else
                 {
                     // 조립될 때마다 카운트가 오르도록 이벤트 구독
                     target.Snap.Assembled += HandlePartAssembled;
+                    subscribed++;
                 }
             }
+            else
+            {
+                Debug.LogWarning($"[GongpoAssemblyManager] 타겟이 null이거나 Snap 모듈이 null입니다! Target: {target?.name}");
+            }
         }
+        
+        Debug.Log($"[GongpoAssemblyManager] 초기화 결과: 이미 조립됨({alreadyOccupied}), 이벤트 구독됨({subscribed})");
 
         // 혹시 시작하자마자 이미 다 맞춰져 있는 경우를 대비해 체크
         CheckCompletion();
@@ -63,6 +81,7 @@ public class GongpoAssemblyManager : MonoBehaviour
     private void HandlePartAssembled(Grabbable part)
     {
         currentAssembledCount++;
+        Debug.Log($"[GongpoAssemblyManager] 부품 조립 감지! (현재: {currentAssembledCount} / 목표: {totalPartsNeeded}) - 파트: {part?.name}");
         CheckCompletion();
     }
 
@@ -71,7 +90,7 @@ public class GongpoAssemblyManager : MonoBehaviour
         if (!_isCompleted && totalPartsNeeded > 0 && currentAssembledCount >= totalPartsNeeded)
         {
             _isCompleted = true;
-            Debug.Log("🎉 공포 조립 미니게임 전체 완료!");
+            Debug.Log("🎉 [GongpoAssemblyManager] 공포 조립 미니게임 전체 완료! OnMinigameComplete 이벤트 호출합니다.");
             OnMinigameComplete?.Invoke();
         }
     }

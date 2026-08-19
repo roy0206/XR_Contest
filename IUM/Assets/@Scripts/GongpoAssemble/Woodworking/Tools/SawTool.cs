@@ -102,8 +102,8 @@ public class SawTool : MonoBehaviour, IWoodTool
             if (cutGraceTimer <= 0f)
             {
                 FinishStroke();
+                StopFeedback();
             }
-            StopFeedback();
         }
 
         lastPosition = currentPos;

@@ -90,8 +90,8 @@ public class HandPlaneTool : MonoBehaviour, IWoodTool
 
                 isCutting             = false;
                 currentStrokeDistance = 0f;
+                StopFeedback();
             }
-            StopFeedback();
         }
 
         lastPosition = currentPos;

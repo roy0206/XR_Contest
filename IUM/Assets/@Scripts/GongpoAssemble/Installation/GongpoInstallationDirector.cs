@@ -5,12 +5,14 @@ using UnityEngine.Events;
 
 public class GongpoInstallationDirector : MonoBehaviour
 {
-    [Header("Asset Settings")]
-    [Tooltip("설치될 공포 프리팹")]
-    public GameObject gongpoPrefab;
+    [Header("Asset & Placement Settings")]
+    [Tooltip("[방식 1] 이미 씬에 완벽히 배치된 공포들의 부모 객체 (추천!)")]
+    public Transform gongpoGroupParent;
 
-    [Header("Placement Settings (Option B: Anchor List)")]
-    [Tooltip("공포가 설치될 앵커 위치들")]
+    [Space(10)]
+    [Tooltip("[방식 2] 프리팹을 생성할 경우 사용 (방식 1 사용 시 비워두세요)")]
+    public GameObject gongpoPrefab;
+    [Tooltip("[방식 2] 공포가 생성될 앵커 위치들")]
     public List<Transform> placementAnchors = new List<Transform>();
 
     [Header("Animation & Timing")]
@@ -30,6 +32,11 @@ public class GongpoInstallationDirector : MonoBehaviour
     [Header("Events")]
     public UnityEvent OnInstallationComplete;
 
+    /// <summary>
+    /// 연출이 모두 완료되었는지 외부 스크립트에서 체크할 수 있는 프로퍼티입니다.
+    /// </summary>
+    public bool IsInstallationComplete { get; private set; } = false;
+
     private AudioSource audioSource;
 
     private void Awake()
@@ -41,16 +48,21 @@ public class GongpoInstallationDirector : MonoBehaviour
     [ContextMenu("Test Installation")]
     public void StartInstallation()
     {
-        if (gongpoPrefab == null)
+        Debug.Log("[GongpoInstallationDirector] StartInstallation() 연출 시작 호출됨!");
+
+        if (gongpoGroupParent == null && (gongpoPrefab == null || placementAnchors == null || placementAnchors.Count == 0))
         {
-            Debug.LogError("GongpoPrefab이 할당되지 않았습니다!");
+            Debug.LogError("[GongpoInstallationDirector] 부모 객체(gongpoGroupParent)를 할당하거나, 프리팹+앵커를 할당해야 합니다!");
             return;
         }
 
-        if (placementAnchors == null || placementAnchors.Count == 0)
+        // 방식 1: 시작 전 모든 공포 크기를 0으로 숨김
+        if (gongpoGroupParent != null)
         {
-            Debug.LogError("Placement Anchors가 설정되지 않았습니다!");
-            return;
+            foreach (Transform child in gongpoGroupParent)
+            {
+                child.localScale = Vector3.zero;
+            }
         }
 
         StartCoroutine(InstallationRoutine());
@@ -60,40 +72,48 @@ public class GongpoInstallationDirector : MonoBehaviour
     {
         WaitForSeconds wait = new WaitForSeconds(delayBetweenInstalls);
 
-        foreach (var anchor in placementAnchors)
+        // 방식 1: 씬에 이미 배치된 자식들 활용
+        if (gongpoGroupParent != null)
         {
-            if (anchor == null) continue;
-
-            // 공포 인스턴스화
-            GameObject newGongpo = Instantiate(gongpoPrefab, anchor.position, anchor.rotation, anchor);
-            
-            // 효과음 재생
-            if (installSound != null)
+            foreach (Transform child in gongpoGroupParent)
             {
-                audioSource.PlayOneShot(installSound);
+                if (child == null) continue;
+                PlayEffectsAndAnimate(child, child.position);
+                yield return wait;
             }
-
-            // 이펙트 생성
-            if (installEffectPrefab != null)
+        }
+        // 방식 2: 앵커에 프리팹 생성
+        else
+        {
+            foreach (var anchor in placementAnchors)
             {
-                Instantiate(installEffectPrefab, anchor.position, Quaternion.identity);
+                if (anchor == null) continue;
+
+                GameObject newGongpo = Instantiate(gongpoPrefab, anchor.position, anchor.rotation, anchor);
+                PlayEffectsAndAnimate(newGongpo.transform, anchor.position);
+                
+                yield return wait;
             }
-
-            // 애니메이션 실행 (스케일 업)
-            StartCoroutine(AnimateGongpo(newGongpo.transform));
-
-            yield return wait;
         }
 
+        IsInstallationComplete = true;
         OnInstallationComplete?.Invoke();
+    }
+
+    private void PlayEffectsAndAnimate(Transform targetTransform, Vector3 effectPosition)
+    {
+        if (installSound != null) audioSource.PlayOneShot(installSound);
+        if (installEffectPrefab != null) Instantiate(installEffectPrefab, effectPosition, Quaternion.identity);
+        
+        StartCoroutine(AnimateGongpo(targetTransform));
     }
 
     private IEnumerator AnimateGongpo(Transform targetTransform)
     {
         float time = 0f;
-        Vector3 targetScale = targetTransform.localScale;
+        // 씬에 배치되어 있던 원래 크기를 목표 스케일로 잡음
+        Vector3 targetScale = (gongpoGroupParent != null) ? Vector3.one : targetTransform.localScale;
         
-        // 초기 스케일 0
         targetTransform.localScale = Vector3.zero;
 
         while (time < appearDuration)
@@ -106,6 +126,6 @@ public class GongpoInstallationDirector : MonoBehaviour
             yield return null;
         }
 
-        targetTransform.localScale = targetScale; // 보정
+        targetTransform.localScale = targetScale;
     }
 }
