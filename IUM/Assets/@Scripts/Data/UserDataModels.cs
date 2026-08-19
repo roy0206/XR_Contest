@@ -44,12 +44,21 @@ public sealed class UserSettingsData
     public float DialogueVolume { get; set; } = 1f;
     public float EnvironmentVolume { get; set; } = 0.8f;
 
+    /// <summary>
+    /// mp4 컷씬 재생 음량 (F-002 2.2). 영상은 배경음악·내레이션·효과음이 이미 하나로 믹스되어
+    /// 있어 나머지 세 분류로 나눌 수 없다. 쪼갤 수 없으므로 분류를 하나 늘렸다 (ISSUE-020).
+    ///
+    /// 인게임 연출 컷씬은 이 항목과 무관하다. 그쪽 소리는 대사·환경 볼륨을 그대로 탄다.
+    /// </summary>
+    public float VideoVolume { get; set; } = 1f;
+
     public void Clamp()
     {
         MasterVolume = Mathf.Clamp01(MasterVolume);
         MusicVolume = Mathf.Clamp01(MusicVolume);
         DialogueVolume = Mathf.Clamp01(DialogueVolume);
         EnvironmentVolume = Mathf.Clamp01(EnvironmentVolume);
+        VideoVolume = Mathf.Clamp01(VideoVolume);
     }
 }
 
@@ -103,6 +112,8 @@ public sealed class UserProgressData
     public ProcessGrade MakmeokGrade { get; set; } = ProcessGrade.None;
     public ProcessGrade SawingGrade { get; set; } = ProcessGrade.None;
     public ProcessGrade ChiselingGrade { get; set; } = ProcessGrade.None;
+    public ProcessGrade PurlinInstallGrade { get; set; } = ProcessGrade.None;
+    public ProcessGrade GongpoPuzzleGrade { get; set; } = ProcessGrade.None;
 
     [JsonIgnore] public bool HasSaveData => NextProcess != ProcessId.Prologue;
 
@@ -113,6 +124,8 @@ public sealed class UserProgressData
         ProcessId.Makmeok => MakmeokGrade,
         ProcessId.Sawing => SawingGrade,
         ProcessId.Chiseling => ChiselingGrade,
+        ProcessId.PurlinInstall => PurlinInstallGrade,
+        ProcessId.GongpoPuzzle => GongpoPuzzleGrade,
         _ => ProcessGrade.None
     };
 
@@ -137,6 +150,8 @@ public sealed class UserProgressData
         MakmeokGrade = ProcessGrade.None;
         SawingGrade = ProcessGrade.None;
         ChiselingGrade = ProcessGrade.None;
+        PurlinInstallGrade = ProcessGrade.None;
+        GongpoPuzzleGrade = ProcessGrade.None;
     }
 
     void SetGrade(ProcessId process, ProcessGrade grade)
@@ -146,6 +161,8 @@ public sealed class UserProgressData
             case ProcessId.Makmeok: MakmeokGrade = grade; break;
             case ProcessId.Sawing: SawingGrade = grade; break;
             case ProcessId.Chiseling: ChiselingGrade = grade; break;
+            case ProcessId.PurlinInstall: PurlinInstallGrade = grade; break;
+            case ProcessId.GongpoPuzzle: GongpoPuzzleGrade = grade; break;
         }
     }
 }

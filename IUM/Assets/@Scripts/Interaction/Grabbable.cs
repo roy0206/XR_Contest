@@ -20,6 +20,15 @@ public class Grabbable : MonoThing
     [SerializeField] bool returnWhenLost = true;
     [SerializeField] bool useDynamicAttach = true;
 
+    // 복구 임계값을 여기서 노출하는 이유는 씬마다 규모가 다르기 때문이다. 기본값은 넓은 작업장을
+    // 상정한 것이라, 20x20 크기의 개발 씬에서는 거리 조건에 닿을 방법이 없어 복구가 영영
+    // 일어나지 않는다. 기본값 자체는 종전과 같으므로 기존 오브젝트의 동작은 바뀌지 않는다.
+    [Tooltip("홈 포즈보다 이만큼 아래로 떨어지면 되돌린다.")]
+    [SerializeField, Min(0f)] float returnFallDepth = 3f;
+
+    [Tooltip("홈 포즈에서 이만큼 멀어지면 되돌린다.")]
+    [SerializeField, Min(0f)] float returnMaxDistance = 25f;
+
     Transform _homeParent;
     Pose _homePose;
     bool _restKinematic;
@@ -63,7 +72,13 @@ public class Grabbable : MonoThing
         _restKinematic = rigidbody3D != null && rigidbody3D.isKinematic;
 
         if (highlightOnHover) Attach(new GrabHighlightModule(this));
-        if (returnWhenLost) Attach(new GrabReturnModule(this));
+
+        if (returnWhenLost)
+        {
+            var recovery = Attach(new GrabReturnModule(this));
+            recovery.FallDepth = returnFallDepth;
+            recovery.MaxDistance = returnMaxDistance;
+        }
     }
 
     public void SetHighlighted(bool value) => GetModule<GrabHighlightModule>()?.SetHighlighted(value);

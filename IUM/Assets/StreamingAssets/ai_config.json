@@ -43,6 +43,23 @@
     "format": "wav",
     "timeoutSeconds": 12
   },
+  "dialogueVoices": {
+    "nojang": {
+      "googleVoiceName": "ko-KR-Wavenet-C",
+      "googleSpeakingRate": 0.92,
+      "googlePitch": -4.0
+    },
+    "ieumi": {
+      "googleVoiceName": "ko-KR-Wavenet-A",
+      "googleSpeakingRate": 1.05,
+      "googlePitch": 3.0
+    },
+    "narration": {
+      "googleVoiceName": "ko-KR-Wavenet-D",
+      "googleSpeakingRate": 0.95,
+      "googlePitch": -1.0
+    }
+  },
   "conversation": {
     "minRecordSeconds": 0.4,
     "maxRecordSeconds": 15,

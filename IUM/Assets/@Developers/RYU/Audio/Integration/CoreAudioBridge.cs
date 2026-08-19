@@ -69,14 +69,11 @@ public sealed class CoreAudioBridge : MonoBehaviour, ISceneEventListener
         mixer.BgmVolume = settings.MusicVolume;
         mixer.SfxVolume = settings.EnvironmentVolume;
         mixer.DialogueVolume = settings.DialogueVolume;
+        mixer.VideoVolume = settings.VideoVolume;
     }
 
-    // 옵션 슬라이더를 움직이면 VolumeOptionsPanel이 DataManager.ApplyAudioSettings를 부르는데,
-    // 그 메서드는 아직 구 AudioManager만 갱신한다. DataManager를 수정하지 않고 이 모듈을
-    // 시험하려면 여기서 변화를 따라가는 수밖에 없다. 프로퍼티 setter가 같은 값이면 이벤트를
-    // 내지 않으므로 매 프레임 비교해도 재계산은 실제 변경 시에만 일어난다.
-    // ApplyAudioSettings가 이 버스를 직접 쓰게 되면 이 Update는 지운다.
-    void Update() => Sync();
+    // 매 프레임 폴링하던 Update는 지웠다 (ISSUE-015). DataManager.ApplyAudioSettings가 이제
+    // 이 버스를 직접 갱신하므로, 옵션 슬라이더 변경이 폴링 없이 곧바로 반영된다.
 
     public void OnSceneLoadStart(string sceneName)
     {

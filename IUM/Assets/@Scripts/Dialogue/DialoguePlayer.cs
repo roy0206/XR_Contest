@@ -135,14 +135,13 @@ public sealed class DialoguePlayer
         StartLine(_lineIndex + 1);
     }
 
-    /// <summary>Applies 대사 볼륨. The mixer has no dialogue channel yet (DataSystem 4.2).</summary>
-    public void ApplyVolume()
-    {
-        var volume = 1f;
-        if (DataManager.HasInstance && DataManager.Instance.IsReady)
-            volume = DataManager.Instance.Settings.DialogueVolume;
-        _source.volume = Mathf.Clamp01(volume);
-    }
+    /// <summary>
+    /// Applies 대사 볼륨 through the DIALOGUE bus (ISSUE-015). 마스터 볼륨과 뮤트가 함께 걸린다.
+    ///
+    /// 버스가 없으면 저장된 값을 직접 읽는다. <c>CoreAudioBootstrap</c>이 모든 씬에 버스를 세우므로
+    /// 정상 경로는 아니지만, 볼륨 하나 때문에 대사가 사라지는 것보다는 낫다.
+    /// </summary>
+    public void ApplyVolume() => _source.volume = AudioBusVolume.Resolve(Core.Audio.AudioBus.Dialogue);
 
     public void Dispose()
     {

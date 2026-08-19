@@ -32,14 +32,11 @@ public sealed class AiVoicePlayer
     /// <summary>Raised on the main thread when the answer finished playing or was stopped.</summary>
     public event Action Finished;
 
-    /// <summary>Uses the stored 대사 볼륨. The mixer has no dialogue channel yet (DataSystem 4.2).</summary>
-    public void ApplyVolume()
-    {
-        var volume = 1f;
-        if (DataManager.HasInstance && DataManager.Instance.IsReady)
-            volume = DataManager.Instance.Settings.DialogueVolume;
-        _source.volume = Mathf.Clamp01(volume);
-    }
+    /// <summary>
+    /// 이음이 음성도 대사이므로 DIALOGUE 버스를 지난다 (ISSUE-015). 노장 대사와 같은 슬라이더가
+    /// 걸리고, 마스터 볼륨과 뮤트도 함께 적용된다.
+    /// </summary>
+    public void ApplyVolume() => _source.volume = AudioBusVolume.Resolve(Core.Audio.AudioBus.Dialogue);
 
     public void Play(string text, AudioClip clip)
     {
@@ -58,7 +55,11 @@ public sealed class AiVoicePlayer
         }
 
         IsSpeaking = true;
-        _endTime = Time.unscaledTime + duration + _config.SubtitleTailSeconds;
+
+        // PauseService.Now는 일시정지 구간을 뺀 시각이다 (ISSUE-008). Time.unscaledTime을 쓰면
+        // 메뉴를 여는 동안에도 시계가 흘러, AudioListener.pause로 멈춰 선 음성보다 자막이 먼저
+        // 끝난다.
+        _endTime = PauseService.Now + duration + _config.SubtitleTailSeconds;
     }
 
     public void Stop(bool raiseFinished = true)
@@ -85,7 +86,7 @@ public sealed class AiVoicePlayer
     public void Tick()
     {
         if (!IsSpeaking) return;
-        if (Time.unscaledTime < _endTime) return;
+        if (PauseService.Now < _endTime) return;
         Stop();
     }
 

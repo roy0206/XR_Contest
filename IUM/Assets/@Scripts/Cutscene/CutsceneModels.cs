@@ -16,8 +16,21 @@ public sealed class CutsceneDefinition
 {
     public string Id { get; set; }
 
-    /// <summary>Name of the scene to overlay, as registered in Build Settings.</summary>
+    /// <summary>Name of the scene to overlay, as registered in Build Settings. Optional when
+    /// <see cref="Video"/> is set.</summary>
     public string Scene { get; set; }
+
+    /// <summary>
+    /// 재생할 영상. StreamingAssets 기준 상대 경로이며(`Cutscenes/prologue.mp4`), 스킴이 붙어 있으면
+    /// URL로 그대로 쓴다.
+    ///
+    /// 영상만 지정하면 씬을 올리지 않고 <see cref="CutsceneVideoSurface"/>가 재생을 맡는다. mp4 한
+    /// 편마다 빈 씬과 Build Settings 항목을 만들지 않기 위해서다. <see cref="Scene"/>과 함께 쓰면
+    /// 영상 위에 씬 연출을 얹으며, 그때는 스테이지가 끝나는 시점이 컷씬의 끝이 된다.
+    /// </summary>
+    public string Video { get; set; }
+
+    public bool HasVideo => !string.IsNullOrWhiteSpace(Video);
 
     /// <summary>
     /// False blocks 건너뛰기 outright. 최초 플레이의 프롤로그를 건너뛸 수 있게 할지는 팀 협의
@@ -55,7 +68,9 @@ public sealed class CutsceneDefinition
     /// </summary>
     public bool ClearsProgress { get; set; }
 
-    public bool IsValid => !string.IsNullOrWhiteSpace(Id) && !string.IsNullOrWhiteSpace(Scene);
+    /// <summary>둘 중 하나는 있어야 재생할 것이 있다.</summary>
+    public bool IsValid => !string.IsNullOrWhiteSpace(Id) &&
+                           (!string.IsNullOrWhiteSpace(Scene) || HasVideo);
 }
 
 /// <summary>Timing shared by every cutscene. Tuned from data, not code.</summary>

@@ -88,6 +88,16 @@ namespace Core.Audio
             set => Mixer.DialogueVolume = value;
         }
 
+        /// <summary>
+        /// 영상 버스 볼륨. 대사와 같은 구조로, 이 매니저는 영상을 재생하지 않는다.
+        /// <c>CutsceneVideoSurface</c>가 자기 AudioSource를 들고 볼륨만 받아 간다.
+        /// </summary>
+        public float VideoVolume
+        {
+            get => Mixer.VideoVolume;
+            set => Mixer.VideoVolume = value;
+        }
+
         public bool MasterMuted
         {
             get => Mixer.MasterMuted;

@@ -1,4 +1,6 @@
 {
+  "_comment": "대사 원본은 Assets/@Documents/대사/ 의 흐름도 이미지 3장이다. 평가 분기는 이미지의 '적합도 미만 / 90% 미만 / 90% 이상'을 ProcessGrade.Fail / Pass / Excellent에 대응시켜 {공정}_result_{등급} 규약으로 정규화했다. 도움 완료(Assisted) 분기는 원본에 없어 넣지 않았다.",
+  "_comment_draft": "text가 '[임시]'로 시작하는 줄은 기획 확정본이 아니라 임의로 쓴 초안이다 (ISSUE-018). 원본 흐름도가 튜토리얼 잡기 항목만 쓰고 나머지는 '같은 맥락으로 진행'이라고만 적어 두었기에, 데스크톱 조작키 확정본(공포조립_인수인계_0809.pdf)을 근거로 채웠다. 확정 문안이 오면 '[임시] '를 지우고 문장을 교체한다. 자막에 그대로 보이므로 지우지 않은 채 빌드하면 바로 드러난다. 조작키를 대사에 직접 박은 것도 임시다 — VR 버튼 배치가 미정이라(07 문서 미정 17번) 별도 안내 UI가 생기면 키 이름은 대사에서 빼야 한다.",
   "settings": {
     "speechCharsPerSecond": 9,
     "minLineSeconds": 1.2,
@@ -7,25 +9,319 @@
   },
   "sequences": [
     {
+      "id": "prologue_narration_fire",
+      "speaker": "narration",
+      "blocksProcess": false,
+      "priority": 10,
+      "interruptible": false,
+      "lines": [
+        { "id": "prologue_narration_fire_1", "text": "2008년 2월 10일 밤, 대한민국 국보 숭례문에서 큰불이 발생했습니다." },
+        { "id": "prologue_narration_fire_2", "text": "불길은 누각 전체로 번졌고, 오랜 세월 자리를 지켜온 숭례문은 결국 무너져 내렸습니다." },
+        { "id": "prologue_narration_fire_3", "text": "그날, 우리는 하나의 건물을 잃었습니다." }
+      ]
+    },
+    {
+      "id": "prologue_narration_ruins",
+      "speaker": "narration",
+      "blocksProcess": false,
+      "priority": 10,
+      "interruptible": false,
+      "lines": [
+        { "id": "prologue_narration_ruins_1", "text": "그러나 사라질 위기에 놓인 것은 눈앞의 건물만이 아니었습니다." },
+        { "id": "prologue_narration_ruins_2", "text": "수백 년 동안 나무를 고르고, 깎고, 맞추고, 세워 온 선조들의 기술." },
+        { "id": "prologue_narration_ruins_3", "text": "기록만으로는 온전히 남길 수 없는, 손에서 손으로 이어져 온 지식이었습니다." }
+      ]
+    },
+    {
+      "id": "prologue_nojang",
+      "speaker": "nojang",
+      "blocksProcess": false,
+      "priority": 10,
+      "interruptible": false,
+      "lines": [
+        { "id": "prologue_nojang_1", "text": "건물은 다시 세울 수 있네." },
+        { "id": "prologue_nojang_2", "text": "하지만 기술은 이어받을 사람이 없으면 다시 세울 수 없지." }
+      ]
+    },
+    {
+      "id": "tutorial_nojang_welcome",
+      "speaker": "nojang",
+      "blocksProcess": true,
+      "priority": 10,
+      "interruptible": false,
+      "lines": [
+        { "id": "tutorial_nojang_welcome_1", "text": "어서 오게." },
+        { "id": "tutorial_nojang_welcome_2", "text": "오늘부터 자네도 복원 작업에 참여하게 되었네." },
+        { "id": "tutorial_nojang_welcome_3", "text": "작업 환경이 위험하니 집중할 수 있도록 합세." },
+        { "id": "tutorial_nojang_welcome_4", "text": "그렇다고 너무 긴장은 말게! 내가 옆에서 도울 테니." }
+      ]
+    },
+    {
+      "id": "tutorial_greeting",
+      "speaker": "ieumi",
+      "blocksProcess": true,
+      "priority": 10,
+      "interruptible": false,
+      "lines": [
+        { "id": "tutorial_greeting_1", "text": "안녕! 내 이름은 이음이, 네가 숭례문을 복원할 수 있도록 도울 나무정령이야." },
+        { "id": "tutorial_greeting_2", "text": "안심해도 좋아, 난 네게만 보이니까." },
+        { "id": "tutorial_greeting_3", "text": "그럼 도구 사용법을 알려줄게." }
+      ]
+    },
+    {
+      "id": "tutorial_look_intro",
+      "speaker": "ieumi",
+      "blocksProcess": true,
+      "priority": 10,
+      "interruptible": false,
+      "lines": [
+        { "id": "tutorial_look_intro_1", "text": "[임시] 먼저 주변을 둘러보자." },
+        { "id": "tutorial_look_intro_2", "text": "[임시] 마우스 오른쪽 버튼을 누른 채 움직이면 고개가 돌아가." }
+      ]
+    },
+    {
+      "id": "tutorial_look_retry",
+      "speaker": "ieumi",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "tutorial_look_retry_1", "text": "[임시] 아직 둘러보지 않았네. 천천히 해도 괜찮아." }
+      ]
+    },
+    {
+      "id": "tutorial_look_success",
+      "speaker": "ieumi",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "tutorial_look_success_1", "text": "[임시] 좋아! 여기가 숭례문 복원 현장이야." }
+      ]
+    },
+    {
+      "id": "tutorial_move_intro",
+      "speaker": "ieumi",
+      "blocksProcess": true,
+      "priority": 10,
+      "interruptible": false,
+      "lines": [
+        { "id": "tutorial_move_intro_1", "text": "[임시] 이제 걸어가 보자." },
+        { "id": "tutorial_move_intro_2", "text": "[임시] W A S D 키로 앞뒤좌우로 움직일 수 있어." }
+      ]
+    },
+    {
+      "id": "tutorial_move_retry",
+      "speaker": "ieumi",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "tutorial_move_retry_1", "text": "[임시] 발이 안 떨어지나 보네. 한 걸음만 내디뎌 봐." }
+      ]
+    },
+    {
+      "id": "tutorial_move_success",
+      "speaker": "ieumi",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "tutorial_move_success_1", "text": "[임시] 잘했어! 작업장은 넓으니까 부지런히 다녀야 해." }
+      ]
+    },
+    {
+      "id": "tutorial_turn_intro",
+      "speaker": "ieumi",
+      "blocksProcess": true,
+      "priority": 10,
+      "interruptible": false,
+      "lines": [
+        { "id": "tutorial_turn_intro_1", "text": "[임시] 몸의 방향도 바꿔 보자." },
+        { "id": "tutorial_turn_intro_2", "text": "[임시] Q 키로 왼쪽, E 키로 오른쪽으로 돌 수 있어." }
+      ]
+    },
+    {
+      "id": "tutorial_turn_retry",
+      "speaker": "ieumi",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "tutorial_turn_retry_1", "text": "[임시] 방향을 아직 안 바꿨어. Q나 E를 눌러 봐." }
+      ]
+    },
+    {
+      "id": "tutorial_turn_success",
+      "speaker": "ieumi",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "tutorial_turn_success_1", "text": "[임시] 그렇지! 뒤를 돌아봐야 할 일이 자주 생길 거야." }
+      ]
+    },
+    {
+      "id": "tutorial_point_intro",
+      "speaker": "ieumi",
+      "blocksProcess": true,
+      "priority": 10,
+      "interruptible": false,
+      "lines": [
+        { "id": "tutorial_point_intro_1", "text": "[임시] 멀리 있는 물건은 손을 뻗지 않아도 돼." },
+        { "id": "tutorial_point_intro_2", "text": "[임시] 화면 가운데를 물건에 맞추면 빛이 닿을 거야." }
+      ]
+    },
+    {
+      "id": "tutorial_point_retry",
+      "speaker": "ieumi",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "tutorial_point_retry_1", "text": "[임시] 조준이 빗나갔나 봐. 화면 가운데를 물건에 맞춰 봐." }
+      ]
+    },
+    {
+      "id": "tutorial_point_success",
+      "speaker": "ieumi",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "tutorial_point_success_1", "text": "[임시] 좋아! 이렇게 가리키면 멀리 있는 것도 다룰 수 있어." }
+      ]
+    },
+    {
+      "id": "tutorial_grab_intro",
+      "speaker": "ieumi",
+      "blocksProcess": true,
+      "priority": 10,
+      "interruptible": false,
+      "lines": [
+        { "id": "tutorial_grab_intro_1", "text": "먼저 물건을 잡는 방법이야." },
+        { "id": "tutorial_grab_intro_2", "text": "잡고자 하는 물건에 손을 뻗어 봐." },
+        { "id": "tutorial_grab_intro_3", "text": "[임시] 왼손은 F 키, 오른손은 마우스 왼쪽 버튼이야." }
+      ]
+    },
+    {
+      "id": "tutorial_grab_retry",
+      "speaker": "ieumi",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "tutorial_grab_retry_1", "text": "다시 설명할게, 잘 들어!" }
+      ]
+    },
+    {
+      "id": "tutorial_grab_success",
+      "speaker": "ieumi",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "tutorial_grab_success_1", "text": "잘했어! 재료와 도구를 잡는 것은 모든 일의 시작이지!" }
+      ]
+    },
+    {
+      "id": "tutorial_place_intro",
+      "speaker": "ieumi",
+      "blocksProcess": true,
+      "priority": 10,
+      "interruptible": false,
+      "lines": [
+        { "id": "tutorial_place_intro_1", "text": "[임시] 잡았으면 내려놓을 줄도 알아야지." },
+        { "id": "tutorial_place_intro_2", "text": "[임시] 표시된 자리 위에서 잡은 손을 놓으면 돼." }
+      ]
+    },
+    {
+      "id": "tutorial_place_retry",
+      "speaker": "ieumi",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "tutorial_place_retry_1", "text": "[임시] 자리에 잘 맞지 않았어. 표시된 곳 위에서 놓아 봐." }
+      ]
+    },
+    {
+      "id": "tutorial_place_success",
+      "speaker": "ieumi",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "tutorial_place_success_1", "text": "[임시] 잘했어! 도구를 제자리에 두는 건 목수의 기본이야." }
+      ]
+    },
+    {
+      "id": "tutorial_ptt_intro",
+      "speaker": "ieumi",
+      "blocksProcess": true,
+      "priority": 10,
+      "interruptible": false,
+      "lines": [
+        { "id": "tutorial_ptt_intro_1", "text": "[임시] 마지막이야. 모르는 게 생기면 나를 부르면 돼." },
+        { "id": "tutorial_ptt_intro_2", "text": "[임시] T 키를 누른 채로 말하면 내가 듣고 있을게." }
+      ]
+    },
+    {
+      "id": "tutorial_ptt_retry",
+      "speaker": "ieumi",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "tutorial_ptt_retry_1", "text": "[임시] 아직 안 불렀네. 눌러만 봐도 괜찮아." }
+      ]
+    },
+    {
+      "id": "tutorial_ptt_success",
+      "speaker": "ieumi",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "tutorial_ptt_success_1", "text": "[임시] 잘했어! 이제 언제든 물어봐. 내가 옆에 있을게." }
+      ]
+    },
+    {
+      "id": "tutorial_complete",
+      "speaker": "nojang",
+      "blocksProcess": true,
+      "priority": 10,
+      "interruptible": false,
+      "lines": [
+        { "id": "tutorial_complete_1", "text": "기운차군. 아주 좋아!" },
+        { "id": "tutorial_complete_2", "text": "몸을 다 풀었다면 이제 본 작업을 시작합세." }
+      ]
+    },
+    {
       "id": "chapter1_intro",
       "speaker": "nojang",
       "blocksProcess": true,
       "priority": 10,
       "interruptible": false,
       "lines": [
-        { "id": "chapter1_intro_1", "text": "오늘은 도리를 하나 만들 걸세." },
-        { "id": "chapter1_intro_2", "text": "먹을 놓고, 켜고, 파낸다. 순서는 그뿐이네." }
+        { "id": "chapter1_intro_1", "text": "오늘 자네가 맡을 첫 작업은 도리를 만드는 것일세." },
+        { "id": "chapter1_intro_2", "text": "도리는 여러 기둥을 이어 지붕을 받쳐주는 중요한 부재일세." },
+        { "id": "chapter1_intro_3", "text": "한번 직접 만들어보게나. 완성되면 내가 살펴보겠네." }
       ]
     },
     {
       "id": "makmeok_intro",
-      "speaker": "nojang",
+      "speaker": "ieumi",
       "blocksProcess": true,
       "priority": 10,
       "interruptible": false,
       "lines": [
-        { "id": "makmeok_intro_1", "text": "먹줄을 당겨 도리 위에 기준선을 놓게." },
-        { "id": "makmeok_intro_2", "text": "선이 어긋나면 그 뒤는 전부 어긋나네." }
+        { "id": "makmeok_intro_1", "text": "도리를 만드는구나!" },
+        { "id": "makmeok_intro_2", "text": "도리는 긴 나무 부재라 정확한 치수와 가공이 무엇보다 중요해." },
+        { "id": "makmeok_intro_3", "text": "조금이라도 오차가 생기면 다른 부재와 맞물리지 않을 수도 있어." },
+        { "id": "makmeok_intro_4", "text": "가공을 시작하기 전에 먼저 먹매김으로 가공할 위치를 표시해야 해." },
+        { "id": "makmeok_intro_5", "text": "먹선을 따라 정확히 표시하는 것이 중요해." },
+        { "id": "makmeok_intro_6", "text": "내가 예시를 보여줄 테니 선을 따라 먹매김을 해보자!" }
       ]
     },
     {
@@ -39,34 +335,283 @@
       ]
     },
     {
-      "id": "makmeok_result_pass",
-      "speaker": "nojang",
-      "blocksProcess": true,
-      "priority": 20,
-      "interruptible": false,
-      "lines": [
-        { "id": "makmeok_result_pass_1", "text": "됐네. 선이 곧게 섰군." }
-      ]
-    },
-    {
       "id": "makmeok_result_fail",
       "speaker": "nojang",
       "blocksProcess": true,
       "priority": 20,
       "interruptible": false,
       "lines": [
-        { "id": "makmeok_result_fail_1", "text": "선이 기울었네. 새 재료로 다시 하세." }
+        { "id": "makmeok_result_fail_1", "text": "먹선은 모든 가공의 기준이 되네." },
+        { "id": "makmeok_result_fail_2", "text": "선을 잘못 긋는다면 아무리 잘 깎아도 부재는 맞지 않지." },
+        { "id": "makmeok_result_fail_3", "text": "조급해하지 말고 다시 한 번 차분히 해보게." }
       ]
     },
     {
-      "id": "prologue_nojang",
+      "id": "makmeok_result_pass",
       "speaker": "nojang",
-      "blocksProcess": false,
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "makmeok_result_pass_1", "text": "나쁘지 않네." },
+        { "id": "makmeok_result_pass_2", "text": "조금의 오차는 있지만 충분히 다음 작업을 진행할 수 있겠어." },
+        { "id": "makmeok_result_pass_3", "text": "다음에는 선을 조금 더 차분하게 그어 보게." }
+      ]
+    },
+    {
+      "id": "makmeok_result_excellent",
+      "speaker": "nojang",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "makmeok_result_excellent_1", "text": "아주 훌륭해." },
+        { "id": "makmeok_result_excellent_2", "text": "먹선이 반듯해야 뒤의 가공도 정확해지는 법이지." },
+        { "id": "makmeok_result_excellent_3", "text": "이 정도면 다음 작업으로 넘어가도 되겠네." }
+      ]
+    },
+    {
+      "id": "sawing_intro",
+      "speaker": "ieumi",
+      "blocksProcess": true,
       "priority": 10,
       "interruptible": false,
       "lines": [
-        { "id": "prologue_nojang_1", "text": "건물은 다시 세울 수 있습니다." },
-        { "id": "prologue_nojang_2", "text": "하지만 기술은 사람이 없으면 이어지지 않습니다." }
+        { "id": "sawing_intro_1", "text": "먹매김이 끝났어!" },
+        { "id": "sawing_intro_2", "text": "이제 필요 없는 부분을 잘라내 보자." },
+        { "id": "sawing_intro_3", "text": "처음부터 깊게 자르지 말고 먹선을 따라 천천히 톱질해 봐." }
+      ]
+    },
+    {
+      "id": "sawing_result_fail",
+      "speaker": "nojang",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "sawing_result_fail_1", "text": "먹선을 넘겨 버렸군." },
+        { "id": "sawing_result_fail_2", "text": "톱질은 한 번 잘못하면 되돌릴 수 없는 법일세." },
+        { "id": "sawing_result_fail_3", "text": "이대로는 다른 부재와 정확히 맞물릴 수 없겠어." },
+        { "id": "sawing_result_fail_4", "text": "다시 한 번 차분히 해보게." }
+      ]
+    },
+    {
+      "id": "sawing_result_pass",
+      "speaker": "nojang",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "sawing_result_pass_1", "text": "나쁘지 않네." },
+        { "id": "sawing_result_pass_2", "text": "먹선을 조금 넘긴 곳도 있지만 충분히 사용할 수 있겠어." },
+        { "id": "sawing_result_pass_3", "text": "다음에는 톱을 조금 더 곧게 움직여 보게." }
+      ]
+    },
+    {
+      "id": "sawing_result_excellent",
+      "speaker": "nojang",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "sawing_result_excellent_1", "text": "아주 좋아." },
+        { "id": "sawing_result_excellent_2", "text": "먹선을 정확히 따라 반듯하게 잘 잘랐군." },
+        { "id": "sawing_result_excellent_3", "text": "이 정도 솜씨라면 다음 공정으로 넘어가도 되겠네." }
+      ]
+    },
+    {
+      "id": "chiseling_intro",
+      "speaker": "ieumi",
+      "blocksProcess": true,
+      "priority": 10,
+      "interruptible": false,
+      "lines": [
+        { "id": "chiseling_intro_1", "text": "이제 결구가 들어갈 부분을 끌로 조금씩 파내자." },
+        { "id": "chiseling_intro_2", "text": "한 번에 많이 파기보다 조금씩 깊이를 맞추는 것이 중요해." }
+      ]
+    },
+    {
+      "id": "chiseling_result_fail",
+      "speaker": "nojang",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "chiseling_result_fail_1", "text": "끌질이 너무 깊거나 먹선을 벗어났군." },
+        { "id": "chiseling_result_fail_2", "text": "결구는 조금씩 다듬으며 맞춤을 확인하는 것이 중요하네." },
+        { "id": "chiseling_result_fail_3", "text": "한 번 깎아낸 나무는 다시 붙일 수 없는 법이지." },
+        { "id": "chiseling_result_fail_4", "text": "다시 한 번 차분히 해보게." }
+      ]
+    },
+    {
+      "id": "chiseling_result_pass",
+      "speaker": "nojang",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "chiseling_result_pass_1", "text": "나쁘지 않네." },
+        { "id": "chiseling_result_pass_2", "text": "조금 거친 부분은 있지만 결구는 충분히 사용할 수 있겠어." },
+        { "id": "chiseling_result_pass_3", "text": "다음에는 힘으로 파기보다 조금씩 확인하며 다듬어 보게." },
+        { "id": "chiseling_result_pass_4", "text": "장인의 솜씨는 신중함에서 나오는 법일세." }
+      ]
+    },
+    {
+      "id": "chiseling_result_excellent",
+      "speaker": "nojang",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "chiseling_result_excellent_1", "text": "아주 훌륭하군." },
+        { "id": "chiseling_result_excellent_2", "text": "깊이와 모양이 일정하고 결구도 반듯하게 다듬었네." },
+        { "id": "chiseling_result_excellent_3", "text": "이 정도면 다른 부재와도 빈틈없이 맞물릴 걸세." }
+      ]
+    },
+    {
+      "id": "chapter1_complete",
+      "speaker": "nojang",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "chapter1_complete_1", "text": "도리 제작이 끝났군." },
+        { "id": "chapter1_complete_2", "text": "아주 훌륭히 수행해주었어." },
+        { "id": "chapter1_complete_3", "text": "하지만 우리의 일은 목재 가공에서 그치지 않는다네. 이제 도리를 설치하러 가봄세." }
+      ]
+    },
+    {
+      "id": "chapter2_intro",
+      "speaker": "nojang",
+      "blocksProcess": true,
+      "priority": 10,
+      "interruptible": false,
+      "lines": [
+        { "id": "chapter2_intro_1", "text": "우리의 일은 좋은 부재를 만드는 것에서 끝나지 않네." },
+        { "id": "chapter2_intro_2", "text": "부재는 제자리를 찾아 정확히 맞물려야 비로소 건물의 일부가 되는 법이지." },
+        { "id": "chapter2_intro_3", "text": "오늘은 자네 손으로 도리를 제자리에 설치해 보게." }
+      ]
+    },
+    {
+      "id": "purlin_align_intro",
+      "speaker": "ieumi",
+      "blocksProcess": true,
+      "priority": 10,
+      "interruptible": false,
+      "lines": [
+        { "id": "purlin_align_intro_1", "text": "이제 도리를 설치해 보자!" },
+        { "id": "purlin_align_intro_2", "text": "도리는 정해진 방향으로 기둥 위에 올려야 해." },
+        { "id": "purlin_align_intro_3", "text": "무리하게 밀어 넣지 말고, 먼저 방향과 각도를 맞춰 보자." }
+      ]
+    },
+    {
+      "id": "purlin_align_result_fail",
+      "speaker": "nojang",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "purlin_align_result_fail_1", "text": "도리의 방향이 맞지 않았군." },
+        { "id": "purlin_align_result_fail_2", "text": "결구는 정해진 방향으로 맞물려야 하는 법이네." },
+        { "id": "purlin_align_result_fail_3", "text": "억지로 돌리거나 밀어 넣으면 부재가 손상될 수도 있지." },
+        { "id": "purlin_align_result_fail_4", "text": "방향을 다시 맞춰보게." }
+      ]
+    },
+    {
+      "id": "purlin_align_result_pass",
+      "speaker": "nojang",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "purlin_align_result_pass_1", "text": "좋아." },
+        { "id": "purlin_align_result_pass_2", "text": "방향은 거의 맞았네." },
+        { "id": "purlin_align_result_pass_3", "text": "조금만 더 세밀하게 각도를 맞춰 보게." }
+      ]
+    },
+    {
+      "id": "purlin_align_result_excellent",
+      "speaker": "nojang",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "purlin_align_result_excellent_1", "text": "아주 훌륭하군." },
+        { "id": "purlin_align_result_excellent_2", "text": "도리의 방향을 정확히 맞췄네." },
+        { "id": "purlin_align_result_excellent_3", "text": "이제 자연스럽게 결구를 맞춰보게." }
+      ]
+    },
+    {
+      "id": "purlin_joint_intro",
+      "speaker": "ieumi",
+      "blocksProcess": true,
+      "priority": 10,
+      "interruptible": false,
+      "lines": [
+        { "id": "purlin_joint_intro_1", "text": "이제 도리를 천천히 내려 결구를 맞물려 보자." },
+        { "id": "purlin_joint_intro_2", "text": "힘으로 누르지 말고, 조금씩 위치를 조정하면서 삽입해 봐." }
+      ]
+    },
+    {
+      "id": "purlin_joint_result_fail",
+      "speaker": "nojang",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "purlin_joint_result_fail_1", "text": "도리의 방향이 맞지 않았군." },
+        { "id": "purlin_joint_result_fail_2", "text": "결구는 정해진 방향으로 맞물려야 하는 법이네." },
+        { "id": "purlin_joint_result_fail_3", "text": "억지로 돌리거나 밀어 넣으면 부재가 손상될 수도 있지." },
+        { "id": "purlin_joint_result_fail_4", "text": "방향을 다시 맞춰보게." }
+      ]
+    },
+    {
+      "id": "purlin_joint_result_pass",
+      "speaker": "nojang",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "purlin_joint_result_pass_1", "text": "좋군." },
+        { "id": "purlin_joint_result_pass_2", "text": "조금 뻑뻑했지만 무리 없이 결구가 맞물렸군." },
+        { "id": "purlin_joint_result_pass_3", "text": "다음에는 힘보다 맞춤을 먼저 생각해 보게." }
+      ]
+    },
+    {
+      "id": "purlin_joint_result_excellent",
+      "speaker": "nojang",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "purlin_joint_result_excellent_1", "text": "완벽해." },
+        { "id": "purlin_joint_result_excellent_2", "text": "결구가 빈틈없이 자연스럽게 맞물렸네." },
+        { "id": "purlin_joint_result_excellent_3", "text": "이것이 전통 목조건축의 정확한 맞춤일세." }
+      ]
+    },
+    {
+      "id": "purlin_complete_ieumi",
+      "speaker": "ieumi",
+      "blocksProcess": true,
+      "priority": 10,
+      "interruptible": false,
+      "lines": [
+        { "id": "purlin_complete_ieumi_1", "text": "도리 설치를 무사히 마쳤구나!" },
+        { "id": "purlin_complete_ieumi_2", "text": "이제 지붕을 받칠 든든한 뼈대가 완성된 거야." }
+      ]
+    },
+    {
+      "id": "chapter2_complete",
+      "speaker": "nojang",
+      "blocksProcess": true,
+      "priority": 20,
+      "interruptible": false,
+      "lines": [
+        { "id": "chapter2_complete_1", "text": "수고했네." },
+        { "id": "chapter2_complete_2", "text": "자네가 만든 도리가 제자리를 찾았군." },
+        { "id": "chapter2_complete_3", "text": "전통 목조건축은 못으로 버티는 것이 아니라 정확한 맞춤으로 서로를 지탱하는 구조라네." },
+        { "id": "chapter2_complete_4", "text": "오늘 자네는 그 첫걸음을 직접 완성했네." },
+        { "id": "chapter2_complete_5", "text": "더 나아가 이 도리 위에 또 다른 부재를 올려 숭례문을 함께 복원해 보세." }
       ]
     },
     {
@@ -88,16 +633,6 @@
       "interruptible": false,
       "lines": [
         { "id": "ending_ieumi_1", "text": "고생 많았어. 다음에 또 물어볼 게 생기면 불러줘." }
-      ]
-    },
-    {
-      "id": "tutorial_greeting",
-      "speaker": "ieumi",
-      "blocksProcess": false,
-      "priority": 5,
-      "interruptible": true,
-      "lines": [
-        { "id": "tutorial_greeting_1", "text": "안녕! 나는 이음이야. 모르는 게 있으면 언제든 물어봐." }
       ]
     }
   ]

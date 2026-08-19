@@ -72,15 +72,30 @@ public sealed class DataManager : Singleton<DataManager>
         }
     }
 
-    /// <summary>Applies stored volumes to the mixer. Call again after an options change.</summary>
+    /// <summary>
+    /// Applies stored volumes to the mixer. Call again after an options change.
+    ///
+    /// 두 곳에 싣는다. 구 <see cref="AudioManager"/>는 효과음·배경음 재생을 아직 맡고 있고,
+    /// <c>Core.Audio</c> 버스는 대사와 영상 음량의 권한이다 (ISSUE-002, ISSUE-015). 후자가
+    /// 없으면 조용히 건너뛴다 — 볼륨 적용 실패가 게임을 막을 이유는 없다.
+    /// </summary>
     public void ApplyAudioSettings()
     {
         if (User == null) return;
+
         var audio = AudioManager.Instance;
         audio.MasterVolume = User.Settings.MasterVolume;
         audio.BGMVolume = User.Settings.MusicVolume;
         audio.SFXVolume = User.Settings.EnvironmentVolume;
-        // DialogueVolume has no mixer channel yet; it is stored and applied with the options UI.
+
+        if (!Core.Audio.AudioManager.TryGetInstance(out var buses)) return;
+
+        var mixer = buses.Mixer;
+        mixer.MasterVolume = User.Settings.MasterVolume;
+        mixer.BgmVolume = User.Settings.MusicVolume;
+        mixer.SfxVolume = User.Settings.EnvironmentVolume;
+        mixer.DialogueVolume = User.Settings.DialogueVolume;
+        mixer.VideoVolume = User.Settings.VideoVolume;
     }
 
     /// <summary>

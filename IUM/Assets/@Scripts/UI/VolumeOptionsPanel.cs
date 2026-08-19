@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 /// <summary>
-/// 옵션의 볼륨 조정부 (F-002). Binds three sliders to <see cref="UserSettingsData"/> and writes the
+/// 옵션의 볼륨 조정부 (F-002). Binds four sliders to <see cref="UserSettingsData"/> and writes the
 /// file back on a debounce.
 ///
 /// A plain class rather than a MonoBehaviour so both the 일시정지 메뉴 and the 메인 화면 옵션 can
@@ -20,15 +20,17 @@ public sealed class VolumeOptionsPanel
     readonly Slider _music;
     readonly Slider _dialogue;
     readonly Slider _environment;
+    readonly Slider _video;
     readonly float _debounceSeconds;
 
     bool _savePending;
     float _saveAt;
     bool _suppressCallbacks;
 
-    public bool IsBound => _music != null && _dialogue != null && _environment != null;
+    public bool IsBound =>
+        _music != null && _dialogue != null && _environment != null && _video != null;
 
-    /// <param name="root">Element containing the three sliders.</param>
+    /// <param name="root">Element containing the four sliders.</param>
     public VolumeOptionsPanel(VisualElement root, float debounceSeconds = 0.35f)
     {
         if (root == null) throw new ArgumentNullException(nameof(root));
@@ -37,6 +39,7 @@ public sealed class VolumeOptionsPanel
         _music = root.Q<Slider>("music-volume-slider");
         _dialogue = root.Q<Slider>("dialogue-volume-slider");
         _environment = root.Q<Slider>("environment-volume-slider");
+        _video = root.Q<Slider>("video-volume-slider");
 
         if (!IsBound)
         {
@@ -47,6 +50,7 @@ public sealed class VolumeOptionsPanel
         _music.RegisterValueChangedCallback(OnMusicChanged);
         _dialogue.RegisterValueChangedCallback(OnDialogueChanged);
         _environment.RegisterValueChangedCallback(OnEnvironmentChanged);
+        _video.RegisterValueChangedCallback(OnVideoChanged);
     }
 
     /// <summary>Pulls saved values into the sliders. Call whenever the panel becomes visible.</summary>
@@ -62,6 +66,7 @@ public sealed class VolumeOptionsPanel
         _music.SetValueWithoutNotify(settings.MusicVolume * DisplayScale);
         _dialogue.SetValueWithoutNotify(settings.DialogueVolume * DisplayScale);
         _environment.SetValueWithoutNotify(settings.EnvironmentVolume * DisplayScale);
+        _video.SetValueWithoutNotify(settings.VideoVolume * DisplayScale);
         _suppressCallbacks = false;
     }
 
@@ -79,6 +84,7 @@ public sealed class VolumeOptionsPanel
         _music.UnregisterValueChangedCallback(OnMusicChanged);
         _dialogue.UnregisterValueChangedCallback(OnDialogueChanged);
         _environment.UnregisterValueChangedCallback(OnEnvironmentChanged);
+        _video.UnregisterValueChangedCallback(OnVideoChanged);
 
         // 옵션 변경은 즉시 저장한다 (F-002 2.5). Closing the panel must not drop a pending write.
         if (_savePending) _ = FlushAsync();
@@ -95,6 +101,9 @@ public sealed class VolumeOptionsPanel
     void OnEnvironmentChanged(ChangeEvent<float> evt) =>
         Apply(settings => settings.EnvironmentVolume = ToNormalized(evt.newValue));
 
+    void OnVideoChanged(ChangeEvent<float> evt) =>
+        Apply(settings => settings.VideoVolume = ToNormalized(evt.newValue));
+
     void Apply(Action<UserSettingsData> mutate)
     {
         if (_suppressCallbacks) return;
@@ -110,6 +119,7 @@ public sealed class VolumeOptionsPanel
 
         // 변경된 소리를 즉시 미리 듣기 (F-002 2.3): music and environment reach the mixer here.
         // 대사 볼륨은 아직 믹서 채널이 없어 DialoguePlayer가 다음 줄에서 읽는다 (ISSUE-002).
+        // 영상 볼륨도 같은 사정이라 CutsceneVideoSurface가 재생 중 매 프레임 다시 읽는다.
         DataManager.Instance.ApplyAudioSettings();
 
         _savePending = true;

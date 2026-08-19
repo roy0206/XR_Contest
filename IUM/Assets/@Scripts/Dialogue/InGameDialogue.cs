@@ -20,11 +20,13 @@ public sealed class InGameDialogue : Singleton<InGameDialogue>, ISceneEventListe
     public const string DataKey = "dialogue";
 
     /// <summary>
-    /// Supplies the TTS service used when a line has no recorded clip. Assign before the first
-    /// access; null keeps dialogue on recorded audio only, which is the offline-safe default
-    /// and the correct behaviour if 사전 녹음 is chosen (07 문서 미정 16번).
+    /// Supplies the TTS service used when a line has no recorded clip, per speaker — 노장과 이음이가
+    /// 같은 목소리로 말하지 않도록 화자를 받는다. Null keeps dialogue on recorded audio only, which
+    /// is the offline-safe default and the correct behaviour if 사전 녹음 is chosen (07 문서 미정 16번).
+    ///
+    /// <see cref="DialogueVoiceBootstrap"/>가 기본값을 채운다. 줄마다 호출되므로 늦게 준비돼도 된다.
     /// </summary>
-    public static Func<IAiTextToSpeechService> TextToSpeechResolver { get; set; }
+    public static Func<DialogueSpeaker, IAiTextToSpeechService> TextToSpeechResolver { get; set; }
 
     readonly List<DialogueSequence> _queue = new();
 
@@ -72,7 +74,7 @@ public sealed class InGameDialogue : Singleton<InGameDialogue>, ISceneEventListe
         _table = await LoadTableAsync();
         _table.Prepare();
 
-        _voices = new DialogueVoiceLibrary(TextToSpeechResolver?.Invoke());
+        _voices = new DialogueVoiceLibrary(speaker => TextToSpeechResolver?.Invoke(speaker));
         _player = new DialoguePlayer(transform, _table.Settings, _voices);
         _player.LineStarted += OnLineStarted;
         _player.LineFinished += OnLineFinished;

@@ -1,0 +1,166 @@
+{
+  "_comment": "공정별 단계 정의. process는 ProcessId, condition은 StepCondition의 값이다. target·unlock은 씬의 ProcessTarget 컴포넌트에 적은 키를 가리킨다 — JSON이 씬 오브젝트를 직접 참조할 수 없어 이름으로 잇는다. amount는 조건마다 단위가 다르다: look은 시점 이동 누적량, move는 이동 시간에 비례하는 값, snapTurn은 횟수. holdSeconds는 조건을 유지해야 하는 시간이다. unlock을 비우면 target 하나만 잡을 수 있게 열린다.",
+  "_comment_tutorial": "튜토리얼 단계 순서는 02 문서 F-004 4.2의 학습 항목 일곱 가지를 따른다. 대사 ID는 dialogue.json의 tutorial_* 이며 상당수가 아직 [임시] 초안이다 (ISSUE-018). 판정 수치는 프로토타입 값이고 실제 조작감은 테스트로 정한다 (07 문서 미정 사항).",
+  "settings": {
+    "retryAfterSeconds": 10,
+    "stepGapSeconds": 0.4
+  },
+  "processes": [
+    {
+      "process": "tutorial",
+      "introDialogue": "tutorial_nojang_welcome",
+      "completeDialogue": "tutorial_complete",
+      "grade": "none",
+      "steps": [
+        {
+          "id": "greeting",
+          "condition": "none",
+          "introDialogue": "tutorial_greeting",
+          "goal": "이음이의 인사를 듣는다"
+        },
+        {
+          "id": "look",
+          "condition": "look",
+          "amount": 90,
+          "introDialogue": "tutorial_look_intro",
+          "retryDialogue": "tutorial_look_retry",
+          "successDialogue": "tutorial_look_success",
+          "goal": "주변을 둘러본다"
+        },
+        {
+          "id": "move",
+          "condition": "move",
+          "amount": 3,
+          "introDialogue": "tutorial_move_intro",
+          "retryDialogue": "tutorial_move_retry",
+          "successDialogue": "tutorial_move_success",
+          "goal": "작업장을 걸어 본다"
+        },
+        {
+          "id": "turn",
+          "condition": "snapTurn",
+          "amount": 2,
+          "introDialogue": "tutorial_turn_intro",
+          "retryDialogue": "tutorial_turn_retry",
+          "successDialogue": "tutorial_turn_success",
+          "goal": "몸의 방향을 바꾼다"
+        },
+        {
+          "id": "point",
+          "condition": "point",
+          "target": "tool_saw",
+          "unlock": ["tool_saw"],
+          "holdSeconds": 0.5,
+          "introDialogue": "tutorial_point_intro",
+          "retryDialogue": "tutorial_point_retry",
+          "successDialogue": "tutorial_point_success",
+          "goal": "톱을 가리킨다"
+        },
+        {
+          "id": "grab",
+          "condition": "grab",
+          "target": "tool_saw",
+          "unlock": ["tool_saw"],
+          "holdSeconds": 1,
+          "introDialogue": "tutorial_grab_intro",
+          "retryDialogue": "tutorial_grab_retry",
+          "successDialogue": "tutorial_grab_success",
+          "goal": "톱을 1초 이상 쥔다"
+        },
+        {
+          "id": "place",
+          "condition": "place",
+          "target": "socket_bench",
+          "unlock": ["tool_saw"],
+          "introDialogue": "tutorial_place_intro",
+          "retryDialogue": "tutorial_place_retry",
+          "successDialogue": "tutorial_place_success",
+          "goal": "톱을 작업대의 표시된 자리에 놓는다"
+        },
+        {
+          "id": "ptt",
+          "condition": "pushToTalk",
+          "holdSeconds": 0.5,
+          "introDialogue": "tutorial_ptt_intro",
+          "retryDialogue": "tutorial_ptt_retry",
+          "successDialogue": "tutorial_ptt_success",
+          "goal": "이음이를 불러 본다"
+        }
+      ]
+    },
+    {
+      "process": "makmeok",
+      "introDialogue": "makmeok_intro",
+      "completeDialogue": "makmeok_result_pass",
+      "grade": "pass",
+      "steps": [
+        {
+          "id": "draw_reference_lines",
+          "condition": "signal",
+          "target": "main.makmeok.lines",
+          "amount": 2,
+          "retryDialogue": "makmeok_hint_slow",
+          "goal": "먹줄을 사용해 목재의 두 기준선에 먹매김한다"
+        }
+      ]
+    },
+    {
+      "process": "sawing",
+      "introDialogue": "sawing_intro",
+      "completeDialogue": "sawing_result_pass",
+      "grade": "pass",
+      "steps": [
+        {
+          "id": "sawing_plane_work",
+          "condition": "signal",
+          "target": "main.sawing.complete",
+          "amount": 1,
+          "goal": "대패 작업 구역에서 요구 스트로크를 완료한다"
+        }
+      ]
+    },
+    {
+      "process": "chiseling",
+      "introDialogue": "chiseling_intro",
+      "completeDialogue": "chiseling_result_pass",
+      "grade": "pass",
+      "steps": [
+        {
+          "id": "chiseling_placeholder",
+          "condition": "signal",
+          "target": "main.placeholder.chiseling",
+          "amount": 1,
+          "goal": "끌질 공정 검증 (도구 연결 예정)"
+        }
+      ]
+    },
+    {
+      "process": "purlinInstall",
+      "introDialogue": "purlin_align_intro",
+      "completeDialogue": "purlin_complete_ieumi",
+      "grade": "pass",
+      "steps": [
+        {
+          "id": "install_first_floor_member",
+          "condition": "signal",
+          "target": "main.purlin.install",
+          "amount": 1,
+          "goal": "1floor 부재를 첫 결합 위치에 설치한다"
+        }
+      ]
+    },
+    {
+      "process": "gongpoPuzzle",
+      "grade": "pass",
+      "steps": [
+        {
+          "id": "assemble_gongpo_stack",
+          "condition": "signal",
+          "target": "main.gongpo.assembled",
+          "amount": 37,
+          "goal": "남은 공포 부재 37개를 순서대로 조립한다"
+        }
+      ]
+    }
+  ]
+}

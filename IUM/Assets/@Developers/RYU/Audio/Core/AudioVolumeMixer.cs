@@ -13,10 +13,12 @@ namespace Core.Audio
         private float sfxVolume = 1f;
         private float bgmVolume = 1f;
         private float dialogueVolume = 1f;
+        private float videoVolume = 1f;
         private bool masterMuted;
         private bool sfxMuted;
         private bool bgmMuted;
         private bool dialogueMuted;
+        private bool videoMuted;
 
         public event Action Changed;
 
@@ -44,6 +46,12 @@ namespace Core.Audio
             set => SetVolume(ref dialogueVolume, value);
         }
 
+        public float VideoVolume
+        {
+            get => videoVolume;
+            set => SetVolume(ref videoVolume, value);
+        }
+
         public bool MasterMuted
         {
             get => masterMuted;
@@ -68,6 +76,12 @@ namespace Core.Audio
             set => SetMuted(ref dialogueMuted, value);
         }
 
+        public bool VideoMuted
+        {
+            get => videoMuted;
+            set => SetMuted(ref videoMuted, value);
+        }
+
         public float Calculate(AudioBus bus, float baseVolume)
         {
             if (masterMuted || IsMuted(bus))
@@ -85,14 +99,16 @@ namespace Core.Audio
             sfxVolume = Mathf.Clamp01(settings.sfxVolume);
             bgmVolume = Mathf.Clamp01(settings.bgmVolume);
             dialogueVolume = Mathf.Clamp01(settings.dialogueVolume);
+            videoVolume = Mathf.Clamp01(settings.videoVolume);
             masterMuted = settings.masterMuted;
             sfxMuted = settings.sfxMuted;
             bgmMuted = settings.bgmMuted;
             dialogueMuted = settings.dialogueMuted;
+            videoMuted = settings.videoMuted;
             Changed?.Invoke();
         }
 
-        // 버스가 셋으로 늘면서 삼항 연산자로는 표현이 안 된다. 새 버스를 추가할 때 여기 두 곳만
+        // 버스가 넷으로 늘면서 삼항 연산자로는 표현이 안 된다. 새 버스를 추가할 때 여기 두 곳만
         // 채우면 되도록 분리해 두었다. default는 던지지 않고 통과시킨다. 알 수 없는 버스 때문에
         // 소리가 사라지는 것보다 마스터 볼륨으로라도 나오는 편이 낫다.
         private bool IsMuted(AudioBus bus) => bus switch
@@ -100,6 +116,7 @@ namespace Core.Audio
             AudioBus.Sfx => sfxMuted,
             AudioBus.Bgm => bgmMuted,
             AudioBus.Dialogue => dialogueMuted,
+            AudioBus.Video => videoMuted,
             _ => false
         };
 
@@ -108,6 +125,7 @@ namespace Core.Audio
             AudioBus.Sfx => sfxVolume,
             AudioBus.Bgm => bgmVolume,
             AudioBus.Dialogue => dialogueVolume,
+            AudioBus.Video => videoVolume,
             _ => 1f
         };
 

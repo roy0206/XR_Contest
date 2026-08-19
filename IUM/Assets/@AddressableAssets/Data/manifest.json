@@ -20,6 +20,11 @@
       "key": "flow",
       "address": "ium/data/static/flow",
       "required": false
+    },
+    {
+      "key": "process",
+      "address": "ium/data/static/process",
+      "required": false
     }
   ]
 }

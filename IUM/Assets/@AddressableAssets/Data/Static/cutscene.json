@@ -1,4 +1,5 @@
 {
+  "_comment": "컷씬은 씬으로도 영상으로도 재생한다. scene은 겹쳐 올릴 씬 이름(Build Settings 등록 필요)이고 그 씬의 CutsceneStage가 연출과 종료 시점을 맡는다. video는 Assets/StreamingAssets 기준 상대 경로이며(예: \"Cutscenes/prologue.mp4\") 씬 없이 영상만 재생한다. 스킴이 붙은 문자열은 URL로 그대로 쓴다. 둘을 함께 적으면 영상 위에 씬 연출을 얹고, 그때는 스테이지가 끝나는 시점이 컷씬의 끝이 된다. 건너뛰기·암전·진행 저장·nextScene은 어느 방식이든 동일하게 적용된다.",
   "settings": {
     "skipHoldSeconds": 2,
     "enterFadeSeconds": 0.5,
@@ -8,7 +9,17 @@
   },
   "cutscenes": [
     {
+      "_comment": "프롤로그를 영상으로 재생한다. 지금 파일은 자리를 지키는 샘플이고, 실제 프롤로그 mp4가 들어오면 video 값만 바꾸면 된다. 인게임 연출본은 아래 prologue_scene에 그대로 남겨 두었다 — 되돌리려면 두 항목의 id를 맞바꾼다.",
       "id": "prologue",
+      "video": "OnboardingVideoVRT.webm",
+      "skippable": true,
+      "revealOnEnter": true,
+      "nextScene": "",
+      "completesProcess": "prologue"
+    },
+    {
+      "_comment": "영상 도입 이전의 인게임 프롤로그 연출. 현재 흐름에서는 쓰이지 않는다.",
+      "id": "prologue_scene",
       "scene": "Cutscene_Prologue",
       "skippable": true,
       "makeSceneActive": false,
@@ -23,7 +34,15 @@
       "makeSceneActive": false,
       "revealOnEnter": true,
       "clearsProgress": true,
-      "nextScene": "FlowTest"
+      "nextScene": "StartScene"
+    },
+    {
+      "_comment": "영상 재생 경로 검증용 임시 항목. 실제 컷씬이 아니며 진행을 기록하지 않는다. VRTemplateAssets의 샘플 영상을 StreamingAssets로 복사해 쓴다. 검증이 끝나면 이 항목과 해당 파일, CutsceneDebugController의 2 키를 함께 지운다.",
+      "id": "video_test",
+      "video": "OnboardingVideoVRT.webm",
+      "skippable": true,
+      "revealOnEnter": true,
+      "nextScene": ""
     }
   ]
 }

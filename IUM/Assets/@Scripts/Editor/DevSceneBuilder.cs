@@ -11,8 +11,8 @@ using UnityEngine.UIElements;
 /// Menu: IUM > Dev > Create Interaction Test Scene, IUM > Dev > Create AI Voice Test Scene,
 /// IUM > Dev > Create Gongpo Test Scene, IUM > Dev > Create Dialogue Test Scene,
 /// IUM > Dev > Create Cutscene Test Scene, IUM > Dev > Create Flow Test Scene,
-/// IUM > Dev > Create Free Play Test Scene, IUM > Dev > Create Prologue Cutscene Scene,
-/// IUM > Dev > Create Ending Cutscene Scene.
+/// IUM > Dev > Create Free Play Test Scene, IUM > Dev > Create Tutorial Scene,
+/// IUM > Dev > Create Prologue Cutscene Scene, IUM > Dev > Create Ending Cutscene Scene.
 /// </summary>
 public static class DevSceneBuilder
 {
@@ -26,6 +26,8 @@ public static class DevSceneBuilder
     const string FlowScenePath = SceneDirectory + "/" + FlowSceneName + ".unity";
     const string FreePlaySceneName = "FreePlayTest";
     const string FreePlayScenePath = SceneDirectory + "/" + FreePlaySceneName + ".unity";
+    const string TutorialSceneName = "TutorialScene";
+    const string TutorialScenePath = SceneDirectory + "/" + TutorialSceneName + ".unity";
     const string CutsceneSceneDirectory = "Assets/@Developers/RYU/Scenes/Cutscene";
     const string PrologueScenePath = CutsceneSceneDirectory + "/Cutscene_Prologue.unity";
     const string EndingScenePath = CutsceneSceneDirectory + "/Cutscene_Ending.unity";
@@ -470,6 +472,152 @@ public static class DevSceneBuilder
     /// 메인 화면 UI (F-001). Reuses the authored StartMenu.uxml and its PanelSettings, so this scene
     /// and StartScene show the same menu.
     /// </summary>
+    /// <summary>
+    /// 조작 튜토리얼 씬 (F-004). flow.json의 tutorial 항목이 여기를 가리킨다.
+    ///
+    /// 단계 순서와 대사는 process.json이 들고 있고, 이 씬은 그 데이터가 이름으로 가리킬 대상만
+    /// 놓는다 — 톱(tool_saw)과 작업대의 자리(socket_bench)다. 판정 로직은 <see cref="ProcessRunner"/>에
+    /// 있으므로 이 씬에는 아무 공정 코드도 없다.
+    ///
+    /// 튜토리얼을 마치면 러너가 진행을 저장하고 GameFlow에 다음 목적지를 묻는다. 지금은 그 다음이
+    /// FreePlayTest(임시 구간)다.
+    /// </summary>
+    [MenuItem("IUM/Dev/Create Tutorial Scene")]
+    public static void CreateTutorialScene()
+    {
+        if (File.Exists(TutorialScenePath) &&
+            !EditorUtility.DisplayDialog(
+                "Tutorial Scene",
+                $"{TutorialScenePath} already exists. Overwrite it?",
+                "Overwrite", "Cancel"))
+            return;
+
+        if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+
+        var scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
+
+        var defaultCamera = Camera.main;
+        if (defaultCamera != null) Object.DestroyImmediate(defaultCamera.gameObject);
+
+        CreateGround();
+        CreateBox("Table", new Vector3(0f, 0.5f, 1f), new Vector3(1.8f, 1f, 0.5f));
+        CreatePlayer();
+
+        // 시점·이동·회전 단계에서 자기가 움직였는지 알아볼 기준점. 허허벌판이면 판정이 통과해도
+        // 무엇이 달라졌는지 눈으로 확인할 수 없다.
+        CreateBox("Marker_North", new Vector3(0f, 1f, 8f), new Vector3(1f, 2f, 1f));
+        CreateBox("Marker_East", new Vector3(8f, 1f, 0f), new Vector3(1f, 2f, 1f));
+        CreateBox("Marker_West", new Vector3(-8f, 1f, 0f), new Vector3(1f, 2f, 1f));
+
+        CreateTutorialTool("tool_saw", "Tool_Saw", new Vector3(-0.5f, 1.04f, 0.9f), new Vector3(0.5f, 0.05f, 0.12f));
+        CreateTutorialSocket("socket_bench", "Socket_Bench", new Vector3(0.5f, 1.02f, 0.9f), new Vector3(0.6f, 0.2f, 0.3f));
+
+        var services = new GameObject("Core Services");
+        services.AddComponent<SceneController>();
+        services.AddComponent<AudioManager>();
+        services.AddComponent<DataManager>();
+
+        var flow = new GameObject("GameFlow");
+        flow.AddComponent<GameFlow>();
+
+        var dialogue = new GameObject("InGameDialogue");
+        dialogue.AddComponent<InGameDialogue>();
+
+        var director = new GameObject("CutsceneDirector");
+        director.AddComponent<CutsceneDirector>();
+
+        var runner = new GameObject("ProcessRunner");
+        var component = runner.AddComponent<ProcessRunner>();
+        runner.AddComponent<PlayerPoseTracker>();
+
+        var serialized = new SerializedObject(component);
+        serialized.FindProperty("player").objectReferenceValue = Object.FindAnyObjectByType<Player>();
+
+        // 씬을 직접 열었을 때 저장된 진행이 다른 공정을 가리켜도 튜토리얼이 돌아가게 한다.
+        serialized.FindProperty("sceneProcess").enumValueIndex = (int)ProcessId.Tutorial;
+        serialized.ApplyModifiedPropertiesWithoutUndo();
+
+        CreateSubtitleView();
+        CreateCutsceneView();
+        CreatePauseMenu(FlowSceneName);
+
+        Undo.ClearAll();
+        Directory.CreateDirectory(SceneDirectory);
+        EditorSceneManager.SaveScene(scene, TutorialScenePath);
+        AssetDatabase.Refresh();
+
+        RegisterInBuildSettings(TutorialScenePath);
+
+        Debug.Log($"[DevSceneBuilder] Created {TutorialScenePath}. " +
+                  "process.json의 tutorial 정의를 따라 여덟 단계가 순서대로 진행됩니다. " +
+                  "둘러보기 → 이동 → 회전 → 가리키기 → 잡기 → 놓기 → PTT 순이며, " +
+                  "Enter로 현재 단계를 강제 통과시킬 수 있습니다. " +
+                  "마지막 단계를 마치면 진행이 저장되고 GameFlow가 다음 목적지로 넘깁니다.",
+            component);
+    }
+
+    /// <summary>
+    /// 튜토리얼 대상 도구. <see cref="CreateTool"/>에 <see cref="ProcessTarget"/> 키와 연속 충돌
+    /// 판정을 더한 것이다.
+    ///
+    /// <see cref="GrabReturnModule"/>은 켜고, 임계값을 이 씬 규모에 맞춘다. 기본값(낙하 3m,
+    /// 이탈 25m)은 넓은 작업장을 상정한 것이라 여기서는 아무 의미가 없다 — 바닥이 20x20이라
+    /// 25m를 넘을 방법이 없고, 작업대가 1m라 3m를 떨어질 방법도 없다. 그대로 두면 켜 놓고도
+    /// 복구가 영영 일어나지 않는다.
+    ///
+    /// 낙하 0.5m는 작업대(1.0m)에서 바닥으로 떨어진 것을 잡아내고, 이탈 6m는 구석에 두고 온
+    /// 도구를 되돌린다. 소켓은 홈에서 1m 거리라 걸리지 않는다.
+    ///
+    /// 연속 충돌 판정은 얇은 도구가 바닥을 통과하는 것을 막는다. 두께 0.05인 물체가 1.3m에서
+    /// 떨어지면 한 물리 스텝에 0.1m를 지나 판정을 건너뛴다.
+    /// </summary>
+    static void CreateTutorialTool(string key, string name, Vector3 position, Vector3 size)
+    {
+        var tool = CreateBox(name, position, size);
+
+        var body = tool.AddComponent<Rigidbody>();
+        body.mass = 1f;
+        body.interpolation = RigidbodyInterpolation.Interpolate;
+        body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+
+        var grabbable = tool.AddComponent<Grabbable>();
+        var serialized = new SerializedObject(grabbable);
+        serialized.FindProperty("returnWhenLost").boolValue = true;
+        serialized.FindProperty("returnFallDepth").floatValue = 0.5f;
+        serialized.FindProperty("returnMaxDistance").floatValue = 6f;
+        serialized.ApplyModifiedPropertiesWithoutUndo();
+
+        AddProcessTarget(tool, key);
+    }
+
+    static void CreateTutorialSocket(string key, string name, Vector3 position, Vector3 size)
+    {
+        var socket = new GameObject(name);
+        socket.transform.position = position;
+
+        var trigger = socket.AddComponent<BoxCollider>();
+        trigger.isTrigger = true;
+        trigger.size = size;
+
+        var attachPoint = new GameObject("AttachPoint");
+        attachPoint.transform.SetParent(socket.transform, false);
+
+        var component = socket.AddComponent<GrabSocket>();
+        var serialized = new SerializedObject(component);
+        serialized.FindProperty("attachPoint").objectReferenceValue = attachPoint.transform;
+        serialized.ApplyModifiedPropertiesWithoutUndo();
+
+        AddProcessTarget(socket, key);
+    }
+
+    static void AddProcessTarget(GameObject host, string key)
+    {
+        var target = host.AddComponent<ProcessTarget>();
+        var serialized = new SerializedObject(target);
+        serialized.FindProperty("key").stringValue = key;
+        serialized.ApplyModifiedPropertiesWithoutUndo();
+    }
+
     static void CreateStartMenu()
     {
         var uxml = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(StartUxmlPath);
@@ -686,6 +834,47 @@ public static class DevSceneBuilder
     /// Adds the scene to Build Settings, which additive loading requires. Asks first: Build
     /// Settings is shared project configuration, not this tool's to change unprompted.
     /// </summary>
+    /// <summary>
+    /// 테스트 흐름이 지나는 씬을 전부 Build Settings에 넣는다. Menu: IUM > Dev > Register Test Flow Scenes.
+    ///
+    /// <see cref="GameFlow"/>가 <c>Application.CanStreamedLevelBeLoaded</c>로 목적지를 검사하므로,
+    /// 등록되지 않은 씬은 흐름에서 열리지 않는다. 씬을 다시 만들 때마다 등록되지만, 다른 사람이
+    /// 받은 프로젝트나 설정이 되돌아간 경우를 위해 한 번에 맞출 수단을 둔다.
+    /// </summary>
+    [MenuItem("IUM/Dev/Register Test Flow Scenes")]
+    public static void RegisterTestFlowScenes()
+    {
+        string[] paths =
+        {
+            FlowScenePath,
+            PrologueScenePath,
+            TutorialScenePath,
+            FreePlayScenePath,
+            EndingScenePath
+        };
+
+        var missing = new System.Collections.Generic.List<string>();
+        foreach (var path in paths)
+        {
+            if (!File.Exists(path))
+            {
+                missing.Add(path);
+                continue;
+            }
+
+            RegisterInBuildSettings(path);
+        }
+
+        var message = missing.Count == 0
+            ? "테스트 흐름 씬을 모두 Build Settings에 등록했습니다.\n\n" +
+              "FlowTest에서 재생하고 새 게임을 누르면\n프롤로그(영상) → 튜토리얼 → 자유 플레이 → 엔딩 순으로 진행됩니다."
+            : "다음 씬이 없어 등록하지 못했습니다. 해당 생성 메뉴를 먼저 실행하십시오.\n\n" +
+              string.Join("\n", missing);
+
+        Debug.Log($"[DevSceneBuilder] {message.Replace("\n", " ")}");
+        EditorUtility.DisplayDialog("Register Test Flow Scenes", message, "확인");
+    }
+
     static void RegisterInBuildSettings(string scenePath)
     {
         var scenes = EditorBuildSettings.scenes;

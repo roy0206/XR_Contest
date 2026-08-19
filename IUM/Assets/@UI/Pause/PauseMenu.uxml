@@ -18,6 +18,8 @@
                        show-input-field="true" class="pause-slider" />
             <ui:Slider name="environment-volume-slider" label="환경 볼륨" low-value="0" high-value="100"
                        show-input-field="true" class="pause-slider" />
+            <ui:Slider name="video-volume-slider" label="영상 볼륨" low-value="0" high-value="100"
+                       show-input-field="true" class="pause-slider" />
 
             <ui:Button name="close-options-button" text="뒤로" class="pause-button" />
         </ui:VisualElement>

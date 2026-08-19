@@ -31,6 +31,10 @@
                 <ui:Slider name="environment-volume-slider" low-value="0" high-value="100"
                            show-input-field="false" class="volume-slider" />
 
+                <ui:Label text="영상 볼륨" class="field-label field-label--spaced" />
+                <ui:Slider name="video-volume-slider" low-value="0" high-value="100"
+                           show-input-field="false" class="volume-slider" />
+
                 <ui:VisualElement class="volume-scale">
                     <ui:Label text="음소거" />
                     <ui:Label text="최대" />

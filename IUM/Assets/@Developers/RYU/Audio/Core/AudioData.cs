@@ -35,9 +35,11 @@ namespace Core.Audio
         public float sfxVolume = 1f;
         public float bgmVolume = 1f;
         public float dialogueVolume = 1f;
+        public float videoVolume = 1f;
         public bool masterMuted;
         public bool sfxMuted;
         public bool bgmMuted;
         public bool dialogueMuted;
+        public bool videoMuted;
     }
 }

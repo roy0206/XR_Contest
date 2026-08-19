@@ -67,6 +67,28 @@ public static class AiServiceFactory
     }
 
     /// <summary>
+    /// 화자 하나를 위한 TTS 서비스를 만든다. 대사 재생이 화자별로 다른 목소리를 쓰려면
+    /// (<see cref="AiDialogueVoicesConfig"/>) 서비스 인스턴스도 화자 수만큼 필요하다 —
+    /// <see cref="IAiTextToSpeechService.SynthesizeAsync"/>가 화자를 인자로 받지 않고, 목소리는
+    /// 설정에 박혀 생성 시점에 정해지기 때문이다.
+    ///
+    /// 인터페이스를 바꾸는 대신 이 길을 택했다. 인자를 늘리면 구현 셋과 이음이 대화 경로까지
+    /// 전부 따라 바뀌는데, 그쪽은 목소리가 하나여도 아무 문제가 없다.
+    /// </summary>
+    public static IAiTextToSpeechService CreateTextToSpeech(AiRuntimeSettings settings, AiVoiceOverride voice)
+    {
+        settings ??= new AiRuntimeSettings();
+        var config = settings.Config ?? new AiConfig();
+        var secrets = settings.Secrets ?? new AiSecrets();
+
+        if (voice != null)
+            config = config.CloneWithTts(voice.ApplyTo(config.Tts ?? new AiTtsConfig()));
+
+        var tokens = CreateGoogleTokenProvider(settings, secrets);
+        return CreateTextToSpeech(config, secrets, tokens, config.ForceMockServices);
+    }
+
+    /// <summary>
     /// On-device recognition is preferred because it keeps working without a network.
     /// Google is the fallback when the package is missing, and the mock is the last resort
     /// so the pipeline always has a recognizer.

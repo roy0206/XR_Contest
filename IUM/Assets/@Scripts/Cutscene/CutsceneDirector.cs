@@ -47,7 +47,7 @@ public sealed class CutsceneDirector : Singleton<CutsceneDirector>, ISceneEventL
     /// Supplies the TTS service for cutscene lines with no recording. Same contract as
     /// <see cref="InGameDialogue.TextToSpeechResolver"/>; null keeps playback on recorded audio.
     /// </summary>
-    public static Func<IAiTextToSpeechService> TextToSpeechResolver { get; set; }
+    public static Func<DialogueSpeaker, IAiTextToSpeechService> TextToSpeechResolver { get; set; }
 
     // Own input sources instead of reading PlayerCommands from the player rig: 건너뛰기 is the one
     // input that must survive InputLockFlags.Cutscene, and a cutscene has to be playable in a scene
@@ -65,6 +65,7 @@ public sealed class CutsceneDirector : Singleton<CutsceneDirector>, ISceneEventL
 
     CutsceneDefinition _definition;
     CutsceneStage _stage;
+    CutsceneVideoSurface _videoSurface;
     Camera _suspendedCamera;
     Scene _scene;
     Phase _phase = Phase.Idle;
@@ -133,7 +134,7 @@ public sealed class CutsceneDirector : Singleton<CutsceneDirector>, ISceneEventL
         _dialogueTable = await LoadAsync<DialogueTable>(InGameDialogue.DataKey) ?? DialogueTable.CreateEmpty();
         _dialogueTable.Prepare();
 
-        _voices = new DialogueVoiceLibrary(TextToSpeechResolver?.Invoke());
+        _voices = new DialogueVoiceLibrary(speaker => TextToSpeechResolver?.Invoke(speaker));
         _player = new DialoguePlayer(transform, _dialogueTable.Settings, _voices);
         _player.SubtitleChanged += OnSubtitleChanged;
 
@@ -191,7 +192,7 @@ public sealed class CutsceneDirector : Singleton<CutsceneDirector>, ISceneEventL
 
         if (!definition.IsValid)
         {
-            Debug.LogWarning($"[Cutscene] '{definition.Id}'에 씬 이름이 없습니다.");
+            Debug.LogWarning($"[Cutscene] '{definition.Id}'에 씬 이름도 영상 경로도 없습니다.");
             return false;
         }
 
@@ -227,6 +228,7 @@ public sealed class CutsceneDirector : Singleton<CutsceneDirector>, ISceneEventL
 
         _stage?.Cancel();
         _player?.Stop();
+        _videoSurface?.Stop();
         RaiseCaption(string.Empty);
 
         // Fire and forget: an abort usually comes from a scene change that unloads this anyway.
@@ -263,7 +265,7 @@ public sealed class CutsceneDirector : Singleton<CutsceneDirector>, ISceneEventL
 
             case Phase.Playing:
                 TickSkipInput(Time.unscaledDeltaTime);
-                if (_phase == Phase.Playing && (_stage == null || _stage.IsFinished)) BeginExit(false);
+                if (_phase == Phase.Playing && IsPerformanceOver()) BeginExit(false);
                 break;
 
             case Phase.ExitFade:
@@ -272,6 +274,17 @@ public sealed class CutsceneDirector : Singleton<CutsceneDirector>, ISceneEventL
 
             // Loading and Unloading advance from their tasks.
         }
+    }
+
+    /// <summary>
+    /// 누가 끝을 정하는가. 씬 연출이 있으면 스테이지가, 영상뿐이면 영상이 정한다. 둘 다 없는
+    /// 조합은 재생할 것이 없다는 뜻이므로 즉시 끝난 것으로 본다.
+    /// </summary>
+    bool IsPerformanceOver()
+    {
+        if (_stage != null) return _stage.IsFinished;
+        if (_videoSurface != null && _videoSurface.IsActive) return _videoSurface.IsFinished;
+        return true;
     }
 
     void EnterPhase(Phase phase, float seconds)
@@ -283,13 +296,68 @@ public sealed class CutsceneDirector : Singleton<CutsceneDirector>, ISceneEventL
     void BeginLoad()
     {
         _phase = Phase.Loading;
-        _ = LoadStageAsync();
+        _ = LoadContentAsync();
     }
 
-    async Task LoadStageAsync()
+    /// <summary>
+    /// 컷씬이 재생할 것을 준비한다. 영상, 씬, 또는 둘 다 — 어느 쪽이든 준비가 끝나면 같은 위상
+    /// 기계로 돌아온다.
+    /// </summary>
+    async Task LoadContentAsync()
     {
         var definition = _definition;
 
+        if (definition.HasVideo && !await PrepareVideoAsync(definition)) return;
+        if (!string.IsNullOrWhiteSpace(definition.Scene) && !await LoadStageAsync(definition)) return;
+
+        // 씬 연출보다 뒤에 시작한다. 스테이지가 첫 캡션을 세우는 동안 영상이 흘러가면 도입부를
+        // 놓친다. 표면은 컷씬 사이에 살아남으므로 이번 컷씬이 실제로 영상을 열었을 때만 재생한다.
+        if (_videoSurface != null && _videoSurface.IsPrepared) _videoSurface.Play();
+
+        if (!definition.RevealOnEnter)
+        {
+            _phase = Phase.Playing;
+            return;
+        }
+
+        EnterPhase(Phase.RevealFade, _table.Settings.EnterFadeSeconds);
+        ScreenFader.Instance?.FadeIn(_table.Settings.EnterFadeSeconds);
+    }
+
+    /// <summary>
+    /// 영상을 첫 프레임까지 열어 둔다. 재생은 씬까지 준비된 뒤에 시작한다 — 준비와 재생을 나누지
+    /// 않으면 씬 로드가 걸리는 동안 영상만 앞서 나간다.
+    ///
+    /// False는 호출자가 이미 컷씬을 접었거나 접었어야 한다는 뜻이다.
+    /// </summary>
+    async Task<bool> PrepareVideoAsync(CutsceneDefinition definition)
+    {
+        var prepared = false;
+
+        try
+        {
+            prepared = await EnsureVideoSurface().PrepareAsync(definition.Video);
+        }
+        catch (Exception exception)
+        {
+            Debug.LogException(exception);
+        }
+
+        // Stop() may have run while the preparation was in flight.
+        if (_phase != Phase.Loading || !ReferenceEquals(_definition, definition)) return false;
+        if (prepared) return true;
+
+        Debug.LogError($"[Cutscene] '{definition.Id}'의 영상 '{definition.Video}'을 열지 못했습니다.");
+
+        // 씬 연출이 함께 선언되어 있으면 그것만으로 이어간다. 영상은 이미 스스로 내려갔다.
+        if (!string.IsNullOrWhiteSpace(definition.Scene)) return true;
+
+        BeginExit(false);
+        return false;
+    }
+
+    async Task<bool> LoadStageAsync(CutsceneDefinition definition)
+    {
         try
         {
             _scene = await SceneController.Instance.LoadAdditiveAsync(definition.Scene, definition.MakeSceneActive);
@@ -301,23 +369,32 @@ public sealed class CutsceneDirector : Singleton<CutsceneDirector>, ISceneEventL
         }
 
         // Stop() may have run while the load was in flight.
-        if (_phase != Phase.Loading || !ReferenceEquals(_definition, definition)) return;
+        if (_phase != Phase.Loading || !ReferenceEquals(_definition, definition)) return false;
 
         if (!_scene.IsValid() || !_scene.isLoaded)
         {
             Debug.LogError($"[Cutscene] '{definition.Id}'의 씬 '{definition.Scene}'을 올리지 못했습니다.");
             BeginExit(false);
-            return;
+            return false;
         }
 
         _stage = FindStage(_scene);
         if (_stage == null)
         {
+            // 영상이 있으면 스테이지 없는 씬은 배경으로 성립한다. 끝나는 시점은 영상이 정한다.
+            if (definition.HasVideo)
+            {
+                Debug.LogWarning(
+                    $"[Cutscene] 씬 '{definition.Scene}'에 CutsceneStage가 없어 배경으로만 씁니다. " +
+                    "종료 시점은 영상이 정합니다.");
+                return true;
+            }
+
             Debug.LogError(
                 $"[Cutscene] 씬 '{definition.Scene}'에 CutsceneStage 컴포넌트가 없습니다. " +
                 "연출을 시작할 수 없어 즉시 종료합니다.");
             BeginExit(false);
-            return;
+            return false;
         }
 
         TakeOverCamera();
@@ -325,15 +402,20 @@ public sealed class CutsceneDirector : Singleton<CutsceneDirector>, ISceneEventL
         // Begun before the reveal so a stage can put its first caption up while the screen is
         // still black, which is what the prologue opens with.
         _stage.Begin(_context);
+        return true;
+    }
 
-        if (!definition.RevealOnEnter)
-        {
-            _phase = Phase.Playing;
-            return;
-        }
+    /// <summary>
+    /// 영상 표면을 한 번 만들어 계속 쓴다. 컷씬에 영상이 없으면 아예 만들어지지 않는다.
+    /// </summary>
+    CutsceneVideoSurface EnsureVideoSurface()
+    {
+        if (_videoSurface != null) return _videoSurface;
 
-        EnterPhase(Phase.RevealFade, _table.Settings.EnterFadeSeconds);
-        ScreenFader.Instance?.FadeIn(_table.Settings.EnterFadeSeconds);
+        var host = new GameObject(nameof(CutsceneVideoSurface));
+        host.transform.SetParent(transform, false);
+        _videoSurface = host.AddComponent<CutsceneVideoSurface>();
+        return _videoSurface;
     }
 
     /// <summary>
@@ -389,6 +471,11 @@ public sealed class CutsceneDirector : Singleton<CutsceneDirector>, ISceneEventL
         _skipped = skipped;
 
         _player?.Stop();
+
+        // 암전이 시작되는 지점에서 함께 내린다. 페이드가 끝날 때까지 두면 건너뛰기를 눌러도
+        // 소리가 계속 들린다.
+        _videoSurface?.Stop();
+
         RaiseCaption(string.Empty);
         SetSkipProgress(0f);
 
@@ -482,6 +569,7 @@ public sealed class CutsceneDirector : Singleton<CutsceneDirector>, ISceneEventL
     {
         // Idempotent, so covering the abort path here costs nothing.
         RestoreCamera();
+        _videoSurface?.Stop();
 
         _stage = null;
         _scene = default;

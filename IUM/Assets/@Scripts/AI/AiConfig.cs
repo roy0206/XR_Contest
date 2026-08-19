@@ -12,6 +12,13 @@ public sealed class AiConfig
     public AiSttConfig Stt { get; set; } = new();
     public AiLlmConfig Llm { get; set; } = new();
     public AiTtsConfig Tts { get; set; } = new();
+
+    /// <summary>
+    /// 노장·이음이·내레이션의 음색. <see cref="Tts"/> 위에 덮어쓸 값만 담는다. 비우면 모든 화자가
+    /// 같은 목소리로 말한다.
+    /// </summary>
+    public AiDialogueVoicesConfig DialogueVoices { get; set; } = new();
+
     public AiConversationConfig Conversation { get; set; } = new();
 
     /// <summary>Patterns used by <see cref="AiSafetyFilter"/>. Defaults apply when omitted.</summary>
@@ -28,12 +35,24 @@ public sealed class AiConfig
         Stt ??= new AiSttConfig();
         Llm ??= new AiLlmConfig();
         Tts ??= new AiTtsConfig();
+        DialogueVoices ??= new AiDialogueVoicesConfig();
         Conversation ??= new AiConversationConfig();
         Safety ??= new AiSafetyRules();
         Stt.Clamp();
         Llm.Clamp();
         Tts.Clamp();
         Conversation.Clamp();
+    }
+
+    /// <summary>
+    /// TTS 설정만 교체한 사본. 나머지 구획은 참조를 공유한다 — 화자별 서비스를 만들 때 STT나 LLM
+    /// 설정까지 복제할 이유가 없고, 어느 쪽도 생성 후에 값을 바꾸지 않는다.
+    /// </summary>
+    public AiConfig CloneWithTts(AiTtsConfig tts)
+    {
+        var copy = (AiConfig)MemberwiseClone();
+        copy.Tts = tts;
+        return copy;
     }
 }
 
@@ -210,6 +229,73 @@ public sealed class AiTtsConfig
         if (GoogleSampleRateHertz < 8000) GoogleSampleRateHertz = 24000;
         if (string.IsNullOrWhiteSpace(GoogleLanguageCode)) GoogleLanguageCode = "ko-KR";
     }
+
+    /// <summary>화자별 음색을 만들 때 쓰는 얕은 사본. 값 타입과 문자열뿐이라 이걸로 충분하다.</summary>
+    public AiTtsConfig Clone() => (AiTtsConfig)MemberwiseClone();
+}
+
+/// <summary>
+/// 화자 하나의 음색. <see cref="AiTtsConfig"/> 위에 덮어쓸 값만 적고 나머지는 물려받는다.
+///
+/// 기본값을 "비어 있음"으로 표현해야 해서 문자열은 null, 수치는 범위 밖 값을 센티널로 쓴다.
+/// 0은 유효한 피치라 센티널이 될 수 없다.
+/// </summary>
+[Serializable]
+public sealed class AiVoiceOverride
+{
+    public const float NoFloat = float.NaN;
+    public const int NoInt = int.MinValue;
+
+    /// <summary>Google 보이스 이름. ko-KR-Wavenet-A·B는 여성, C·D는 남성이다.</summary>
+    public string GoogleVoiceName { get; set; }
+
+    public float GoogleSpeakingRate { get; set; } = NoFloat;
+    public float GooglePitch { get; set; } = NoFloat;
+
+    /// <summary>CLOVA 화자 ID.</summary>
+    public string Speaker { get; set; }
+
+    public int Speed { get; set; } = NoInt;
+    public int Pitch { get; set; } = NoInt;
+
+    /// <summary>덮어쓴 사본을 돌려준다. 원본은 건드리지 않는다.</summary>
+    public AiTtsConfig ApplyTo(AiTtsConfig baseConfig)
+    {
+        var copy = baseConfig.Clone();
+
+        if (!string.IsNullOrWhiteSpace(GoogleVoiceName)) copy.GoogleVoiceName = GoogleVoiceName;
+        if (!float.IsNaN(GoogleSpeakingRate)) copy.GoogleSpeakingRate = GoogleSpeakingRate;
+        if (!float.IsNaN(GooglePitch)) copy.GooglePitch = GooglePitch;
+
+        if (!string.IsNullOrWhiteSpace(Speaker)) copy.Speaker = Speaker;
+        if (Speed != NoInt) copy.Speed = Speed;
+        if (Pitch != NoInt) copy.Pitch = Pitch;
+
+        copy.Clamp();
+        return copy;
+    }
+}
+
+/// <summary>
+/// 화자별 음색 (F-011). 기본 <see cref="AiTtsConfig"/>는 이음이 기준으로 잡혀 있어서, 노장 대사를
+/// 그대로 태우면 노인이 아이 목소리로 말한다. 그래서 화자마다 덮어쓸 값을 따로 둔다.
+///
+/// 사전 녹음이 확정되면 이 설정은 쓰이지 않는다 — 녹음 클립이 TTS보다 우선한다 (F-011 1.3).
+/// </summary>
+[Serializable]
+public sealed class AiDialogueVoicesConfig
+{
+    public AiVoiceOverride Nojang { get; set; }
+    public AiVoiceOverride Ieumi { get; set; }
+    public AiVoiceOverride Narration { get; set; }
+
+    public AiVoiceOverride For(DialogueSpeaker speaker) => speaker switch
+    {
+        DialogueSpeaker.Nojang => Nojang,
+        DialogueSpeaker.Ieumi => Ieumi,
+        DialogueSpeaker.Narration => Narration,
+        _ => null
+    };
 }
 
 /// <summary>Conversation policy: F-013 3.4~3.6 and the offline/failure rules.</summary>
