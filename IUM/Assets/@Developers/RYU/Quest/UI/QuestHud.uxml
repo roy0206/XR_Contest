@@ -2,27 +2,30 @@
     <Style src="QuestHud.uss" />
     <ui:VisualElement name="quest-root" class="quest-root" picking-mode="Ignore">
         <ui:VisualElement name="quest-card" class="quest-card" picking-mode="Ignore">
-            <ui:VisualElement class="quest-header">
-                <ui:VisualElement>
-                    <ui:Label name="quest-category" text="현재 퀘스트" class="quest-category" />
-                    <ui:Label name="quest-title" text="기초 조작 훈련" class="quest-title" />
+            <ui:VisualElement class="quest-accent" picking-mode="Ignore" />
+            <ui:VisualElement class="quest-body" picking-mode="Ignore">
+                <ui:VisualElement class="quest-header">
+                    <ui:VisualElement>
+                        <ui:Label name="quest-category" text="현재 퀘스트" class="quest-category" />
+                        <ui:Label name="quest-title" text="기초 조작 훈련" class="quest-title" />
+                    </ui:VisualElement>
+                    <ui:Label name="quest-count" text="0 / 0" class="quest-count" />
                 </ui:VisualElement>
-                <ui:Label name="quest-count" text="0 / 0" class="quest-count" />
+                <ui:VisualElement class="quest-divider" />
+                <ui:VisualElement class="quest-state-row">
+                    <ui:Label name="quest-state" text="준비 중" class="quest-state" />
+                    <ui:Label text="OBJECTIVE" class="quest-section-label" />
+                </ui:VisualElement>
+                <ui:Label name="quest-goal" text="훈련 안내를 확인하세요." class="quest-goal" />
+                <ui:VisualElement name="quest-progress" class="quest-progress">
+                    <ui:VisualElement name="quest-progress-fill" class="quest-progress-fill" />
+                </ui:VisualElement>
+                <ui:VisualElement class="quest-hint-row">
+                    <ui:VisualElement class="quest-hint-mark" />
+                    <ui:Label name="quest-hint" text="안내가 끝나면 첫 목표가 시작됩니다." class="quest-hint" />
+                </ui:VisualElement>
+                <ui:Label name="quest-skip" text="Enter  ·  현재 목표 건너뛰기 (개발용)" class="quest-skip" />
             </ui:VisualElement>
-            <ui:VisualElement class="quest-divider" />
-            <ui:VisualElement class="quest-state-row">
-                <ui:Label name="quest-state" text="준비 중" class="quest-state" />
-                <ui:Label text="목표" class="quest-section-label" />
-            </ui:VisualElement>
-            <ui:Label name="quest-goal" text="훈련 안내를 확인하세요." class="quest-goal" />
-            <ui:VisualElement name="quest-progress" class="quest-progress">
-                <ui:VisualElement name="quest-progress-fill" class="quest-progress-fill" />
-            </ui:VisualElement>
-            <ui:VisualElement class="quest-hint-row">
-                <ui:Label text="◆" class="quest-hint-icon" />
-                <ui:Label name="quest-hint" text="안내가 끝나면 첫 목표가 시작됩니다." class="quest-hint" />
-            </ui:VisualElement>
-            <ui:Label name="quest-skip" text="Enter  ·  현재 목표 건너뛰기 (개발용)" class="quest-skip" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

@@ -280,7 +280,12 @@ namespace IUM.CoreLoopVerification.Tests
             Assert.That(File.Exists(Absolute("Assets/QuickOutline/Resources/Materials/OutlineMask.mat")), Is.True);
             Assert.That(File.Exists(Absolute("Assets/QuickOutline/Resources/Materials/OutlineFill.mat")), Is.True);
             Assert.That(File.Exists(Absolute("Assets/@Developers/RYU/Quest/UI/QuestHud.uxml")), Is.True);
-            Assert.That(File.Exists(Absolute("Assets/@Developers/RYU/Quest/UI/QuestHud.uss")), Is.True);
+            const string questHudStylePath = "Assets/@Developers/RYU/Quest/UI/QuestHud.uss";
+            const string questHudFontPath = "Assets/@Developers/RYU/Quest/UI/Fonts/Giants-Bold.ttf";
+            Assert.That(File.Exists(Absolute(questHudStylePath)), Is.True);
+            Assert.That(File.Exists(Absolute(questHudFontPath)), Is.True);
+            StringAssert.Contains("Fonts/Giants-Bold.ttf", File.ReadAllText(Absolute(questHudStylePath)),
+                "Quest HUD가 선별 임포트한 Giants 폰트를 참조하지 않습니다.");
 
             var processFile = ReadJson<ProcessFile>(ProcessPath);
             Assert.That(processFile.processes.Any(process => Names.Equals(process.process, "tutorial")), Is.False,
