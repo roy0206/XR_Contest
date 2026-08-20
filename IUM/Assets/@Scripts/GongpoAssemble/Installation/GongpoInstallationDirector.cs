@@ -6,14 +6,8 @@ using UnityEngine.Events;
 public class GongpoInstallationDirector : MonoBehaviour
 {
     [Header("Asset & Placement Settings")]
-    [Tooltip("[방식 1] 이미 씬에 완벽히 배치된 공포들의 부모 객체 (추천!)")]
-    public Transform gongpoGroupParent;
-
-    [Space(10)]
-    [Tooltip("[방식 2] 프리팹을 생성할 경우 사용 (방식 1 사용 시 비워두세요)")]
-    public GameObject gongpoPrefab;
-    [Tooltip("[방식 2] 공포가 생성될 앵커 위치들")]
-    public List<Transform> placementAnchors = new List<Transform>();
+    [Tooltip("이미 씬에 완벽히 배치된 공포들의 부모 객체들. 지정한 순서대로 자식들의 스케일이 커지며 나타납니다.")]
+    public List<Transform> gongpoGroupParents = new List<Transform>();
 
     [Header("Animation & Timing")]
     [Tooltip("각 공포가 설치되는 시간 간격")]
@@ -50,16 +44,17 @@ public class GongpoInstallationDirector : MonoBehaviour
     {
         Debug.Log("[GongpoInstallationDirector] StartInstallation() 연출 시작 호출됨!");
 
-        if (gongpoGroupParent == null && (gongpoPrefab == null || placementAnchors == null || placementAnchors.Count == 0))
+        if (gongpoGroupParents == null || gongpoGroupParents.Count == 0)
         {
-            Debug.LogError("[GongpoInstallationDirector] 부모 객체(gongpoGroupParent)를 할당하거나, 프리팹+앵커를 할당해야 합니다!");
+            Debug.LogError("[GongpoInstallationDirector] 부모 객체(gongpoGroupParents)를 하나 이상 할당해야 합니다!");
             return;
         }
 
-        // 방식 1: 시작 전 모든 공포 크기를 0으로 숨김
-        if (gongpoGroupParent != null)
+        // 시작 전 모든 공포 크기를 0으로 숨김
+        foreach (var parent in gongpoGroupParents)
         {
-            foreach (Transform child in gongpoGroupParent)
+            if (parent == null) continue;
+            foreach (Transform child in parent)
             {
                 child.localScale = Vector3.zero;
             }
@@ -72,26 +67,13 @@ public class GongpoInstallationDirector : MonoBehaviour
     {
         WaitForSeconds wait = new WaitForSeconds(delayBetweenInstalls);
 
-        // 방식 1: 씬에 이미 배치된 자식들 활용
-        if (gongpoGroupParent != null)
+        foreach (var parent in gongpoGroupParents)
         {
-            foreach (Transform child in gongpoGroupParent)
+            if (parent == null) continue;
+            foreach (Transform child in parent)
             {
                 if (child == null) continue;
                 PlayEffectsAndAnimate(child, child.position);
-                yield return wait;
-            }
-        }
-        // 방식 2: 앵커에 프리팹 생성
-        else
-        {
-            foreach (var anchor in placementAnchors)
-            {
-                if (anchor == null) continue;
-
-                GameObject newGongpo = Instantiate(gongpoPrefab, anchor.position, anchor.rotation, anchor);
-                PlayEffectsAndAnimate(newGongpo.transform, anchor.position);
-                
                 yield return wait;
             }
         }
@@ -112,7 +94,7 @@ public class GongpoInstallationDirector : MonoBehaviour
     {
         float time = 0f;
         // 씬에 배치되어 있던 원래 크기를 목표 스케일로 잡음
-        Vector3 targetScale = (gongpoGroupParent != null) ? Vector3.one : targetTransform.localScale;
+        Vector3 targetScale = Vector3.one;
         
         targetTransform.localScale = Vector3.zero;
 
