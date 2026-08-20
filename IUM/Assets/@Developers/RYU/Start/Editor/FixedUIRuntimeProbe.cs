@@ -55,7 +55,7 @@ static class FixedUIRuntimeProbe
             _phase = 1;
             ValidateBaseScreen();
             CaptureCamera(ScreenshotPath);
-            InvokeOptions();
+            InvokeOptionsThroughPlayer();
             return;
         }
 
@@ -80,13 +80,21 @@ static class FixedUIRuntimeProbe
     {
         var adapter = Object.FindFirstObjectByType<FixedUIStartMenuAdapter>();
         var startMenu = Object.FindFirstObjectByType<StartMenuController>();
+        var playerBootstrap = Object.FindFirstObjectByType<StartScenePlayerBootstrap>();
+        var player = Object.FindFirstObjectByType<Player>();
         var buttons = Object.FindObjectsByType<UguiButton>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         var roots = UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects();
         var missingScripts = roots.Sum(CountMissingScripts);
 
         Add("Adapter", adapter != null);
         Add("StartMenuController", startMenu != null);
+        Add("PlayerBootstrap", playerBootstrap != null);
+        Add("Player", player != null);
+        Add("PlayerCharacterController", player != null && player.GetComponent<CharacterController>() != null);
+        Add("DesktopInputFallback", new DesktopInputSource().IsAvailable);
         Add("MainCamera", Camera.main != null);
+        Add("PlayerMainCamera", playerBootstrap != null &&
+            playerBootstrap.ActiveCamera != null && playerBootstrap.ActiveCamera == Camera.main);
         Add("MissingScripts", missingScripts == 0, missingScripts.ToString());
         Add("Button_Continue", buttons.Any(button => button.name == "Button_Continue"));
         Add("Button_Options", buttons.Any(button => button.name == "Button_Options"));
@@ -142,13 +150,23 @@ static class FixedUIRuntimeProbe
         return count;
     }
 
-    static void InvokeOptions()
+    static void InvokeOptionsThroughPlayer()
     {
         var options = Object.FindObjectsByType<UguiButton>(FindObjectsInactive.Include, FindObjectsSortMode.None)
             .FirstOrDefault(button => button.name == "Button_Options");
         Add("OptionsPersistentListener", options != null && options.onClick.GetPersistentEventCount() == 1,
             options != null ? options.onClick.GetPersistentEventCount().ToString() : "button missing");
-        options?.onClick.Invoke();
+
+        var bootstrap = Object.FindFirstObjectByType<StartScenePlayerBootstrap>();
+        var camera = bootstrap != null ? bootstrap.ActiveCamera : null;
+        if (options == null || bootstrap == null || camera == null)
+        {
+            Add("PlayerButtonInteraction", false, "required object missing");
+            return;
+        }
+
+        camera.transform.LookAt(options.transform.position);
+        Add("PlayerButtonInteraction", bootstrap.TryActivateFocusedButton());
     }
 
     static void ValidateOptions()

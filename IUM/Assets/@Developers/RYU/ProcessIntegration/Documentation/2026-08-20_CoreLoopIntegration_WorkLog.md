@@ -189,3 +189,21 @@ Unity 메뉴 `Tools > IUM > Verify Full Core Loop`, Test Runner, batchmode 세 �
 
 - 타 개발자의 목공 공정 코드와 공포 씬은 수정하지 않았다.
 - 기존 미커밋 파일 `Assets/warehouseFin/Scenes/SampleScene.unity.meta`는 스테이징 및 커밋에서 제외한다.
+
+---
+
+## StartScene 최소기능 플레이어
+
+### 적용 내용
+
+- `StartScenePlayerBootstrap`을 추가해 기존 `Assets/Prefabs/Player.prefab`을 StartScene 실행 시 배치한다.
+- 원본 FixedUI 카메라의 위치, 회전, 시야 설정을 플레이어 카메라가 이어받으며 원본 카메라는 비활성화해 MainCamera와 AudioListener 중복을 막는다.
+- 기존 공용 플레이어 입력을 그대로 사용하므로 데스크톱에서 WASD 이동, 우클릭 시점, Q/E 스냅 회전, F/좌클릭 잡기를 사용할 수 있다.
+- 기존 플레이어의 R 상호작용 명령을 화면 중앙의 World Space uGUI 버튼으로 전달해 시작 메뉴를 키보드로도 선택할 수 있게 했다.
+- FixedUI 자동 프로브에 플레이어 부트스트랩, CharacterController, 데스크톱 입력 대체 경로, 플레이어 MainCamera, R 버튼 실행 검사를 추가했다.
+- 최종 런타임 프로브 결과는 기존 FixedUI 검사를 포함해 19개 항목 모두 PASS였고, 누락 스크립트와 런타임 예외는 0개였다.
+
+### 소유권 보호
+
+- 타 개발자 소유인 `Player.prefab`과 `Assets/@Scripts/Player` 코드는 수정하지 않고 참조만 사용했다.
+- StartScene과 RYU 전용 어댑터/검증 코드만 변경했다.
