@@ -24,6 +24,8 @@ namespace IUM.CoreLoopVerification.Tests
             "Assets/@Developers/RYU/ProcessIntegration/Tests/CoreLoopVerificationProfile.json";
         const string FlowPath = "Assets/@AddressableAssets/Data/Static/flow.json";
         const string ProcessPath = "Assets/@AddressableAssets/Data/Static/process.json";
+        // 튜토리얼 목표는 일반 공정 배열이 아니라 재사용 가능한 퀘스트 그래프 계약으로 검증한다.
+        const string QuestPath = "Assets/@AddressableAssets/Data/Static/quest.json";
         const string DialoguePath = "Assets/@AddressableAssets/Data/Static/dialogue.json";
         const string CutscenePath = "Assets/@AddressableAssets/Data/Static/cutscene.json";
         const string TutorialScenePath = "Assets/@Developers/RYU/Scenes/Dev/TutorialScene.unity";
@@ -95,7 +97,8 @@ namespace IUM.CoreLoopVerification.Tests
             var definitions = UniqueBy(processFile.processes, process => process.process, ProcessPath);
             var dialogueIds = UniqueBy(dialogueFile.sequences, sequence => sequence.id, DialoguePath);
 
-            foreach (var stage in profile.route.Where(stage => stage.requiresProcessDefinition))
+            foreach (var stage in profile.route.Where(stage =>
+                         stage.requiresProcessDefinition && !Names.Equals(stage.process, "tutorial")))
             {
                 Assert.That(definitions.TryGetValue(stage.process, out var definition), Is.True,
                     $"process.json에 '{stage.process}' 정의가 없습니다.");
@@ -269,6 +272,7 @@ namespace IUM.CoreLoopVerification.Tests
         public void TutorialOutlineGuide_CoversEveryObjectInteractionStep()
         {
             var sceneText = File.ReadAllText(Absolute(TutorialScenePath));
+            AssertSceneContainsScript(sceneText, "Assets/@Scripts/Quest/QuestManager.cs");
             AssertSceneContainsScript(sceneText, "Assets/@Scripts/Process/TutorialOutlineGuide.cs");
             AssertSceneContainsScript(sceneText, "Assets/QuickOutline/Scripts/Outline.cs");
 
@@ -276,15 +280,100 @@ namespace IUM.CoreLoopVerification.Tests
             Assert.That(File.Exists(Absolute("Assets/QuickOutline/Resources/Materials/OutlineFill.mat")), Is.True);
 
             var processFile = ReadJson<ProcessFile>(ProcessPath);
-            var tutorial = processFile.processes.Single(process => Names.Equals(process.process, "tutorial"));
-            var point = tutorial.steps.Single(step => Names.Equals(step.condition, "point"));
-            var grab = tutorial.steps.Single(step => Names.Equals(step.condition, "grab"));
-            var place = tutorial.steps.Single(step => Names.Equals(step.condition, "place"));
+            Assert.That(processFile.processes.Any(process => Names.Equals(process.process, "tutorial")), Is.False,
+                "튜토리얼이 process.json에 중복 정의되어 있습니다.");
+
+            var questFile = ReadJson<QuestFile>(QuestPath);
+            var tutorial = questFile.quests.Single(quest => Names.Equals(quest.id, "tutorial"));
+            var route = FollowQuestRoute(tutorial);
+            var objectives = route
+                .Where(node => Names.Equals(node.kind, "objective"))
+                .Select(node => node.objective)
+                .ToArray();
+            var point = objectives.Single(step => Names.Equals(step.condition, "point"));
+            var grab = objectives.Single(step => Names.Equals(step.condition, "grab"));
+            var place = objectives.Single(step => Names.Equals(step.condition, "place"));
 
             Assert.That(point.target, Is.EqualTo("tool_saw"));
             Assert.That(grab.target, Is.EqualTo("tool_saw"));
             Assert.That(place.target, Is.EqualTo("socket_bench"));
             Assert.That(place.unlock, Does.Contain("tool_saw"));
+        }
+
+        [Test]
+        public void TutorialQuestGraph_IsLinearReachableAndHasResolvableDialogue()
+        {
+            var questFile = ReadJson<QuestFile>(QuestPath);
+            var dialogueFile = ReadJson<DialogueFile>(DialoguePath);
+            var dialogueIds = UniqueBy(dialogueFile.sequences, sequence => sequence.id, DialoguePath);
+
+            Assert.That(questFile.schemaVersion, Is.EqualTo(1));
+            var quests = UniqueBy(questFile.quests, quest => quest.id, QuestPath);
+            Assert.That(quests.TryGetValue("tutorial", out var tutorial), Is.True);
+            Assert.That(tutorial.process, Is.EqualTo("tutorial").IgnoreCase);
+
+            var route = FollowQuestRoute(tutorial);
+            Assert.That(route[0].kind, Is.EqualTo("entry").IgnoreCase);
+            Assert.That(route[^1].kind, Is.EqualTo("complete").IgnoreCase);
+            Assert.That(route.Count, Is.EqualTo(tutorial.nodes.Length),
+                "튜토리얼 그래프에 진입점에서 도달할 수 없는 노드가 있습니다.");
+
+            AssertDialogueExists(tutorial.introDialogue, dialogueIds, tutorial.id, "introDialogue");
+            AssertDialogueExists(tutorial.completeDialogue, dialogueIds, tutorial.id, "completeDialogue");
+            foreach (var node in route.Where(node => Names.Equals(node.kind, "objective")))
+            {
+                Assert.That(node.objective, Is.Not.Null, $"'{node.id}' 목표 데이터가 없습니다.");
+                Assert.That(node.objective.id, Is.EqualTo(node.id),
+                    $"'{node.id}' 노드와 목표 ID가 다릅니다.");
+                AssertDialogueExists(node.objective.introDialogue, dialogueIds, tutorial.id,
+                    $"{node.id}.introDialogue");
+                AssertDialogueExists(node.objective.retryDialogue, dialogueIds, tutorial.id,
+                    $"{node.id}.retryDialogue");
+                AssertDialogueExists(node.objective.successDialogue, dialogueIds, tutorial.id,
+                    $"{node.id}.successDialogue");
+            }
+        }
+
+        static IReadOnlyList<QuestNode> FollowQuestRoute(QuestDefinition quest)
+        {
+            Assert.That(quest.nodes, Is.Not.Null.And.Not.Empty, $"'{quest.id}' 노드가 없습니다.");
+            Assert.That(quest.edges, Is.Not.Null, $"'{quest.id}' 연결선이 없습니다.");
+
+            var nodes = UniqueBy(quest.nodes, node => node.id, $"{QuestPath}:{quest.id}.nodes");
+            Assert.That(nodes.ContainsKey(quest.entryNode), Is.True,
+                $"'{quest.id}' 진입 노드 '{quest.entryNode}'를 찾지 못했습니다.");
+
+            var outgoing = new Dictionary<string, QuestEdge>(Names);
+            foreach (var edge in quest.edges)
+            {
+                Assert.That(nodes.ContainsKey(edge.from), Is.True, $"존재하지 않는 시작 노드 '{edge.from}'.");
+                Assert.That(nodes.ContainsKey(edge.to), Is.True, $"존재하지 않는 도착 노드 '{edge.to}'.");
+                Assert.That(outgoing.TryAdd(edge.from, edge), Is.True,
+                    $"'{edge.from}'에 둘 이상의 다음 노드가 있습니다. 현재 런타임은 단일 경로만 지원합니다.");
+            }
+
+            var route = new List<QuestNode>();
+            var visited = new HashSet<string>(Names);
+            var current = quest.entryNode;
+            while (true)
+            {
+                Assert.That(visited.Add(current), Is.True, $"'{quest.id}' 그래프에 순환이 있습니다.");
+                var node = nodes[current];
+                route.Add(node);
+
+                if (Names.Equals(node.kind, "complete"))
+                {
+                    Assert.That(outgoing.ContainsKey(current), Is.False,
+                        $"완료 노드 '{current}'에 다음 연결이 있습니다.");
+                    break;
+                }
+
+                Assert.That(outgoing.TryGetValue(current, out var edge), Is.True,
+                    $"'{current}'에 다음 연결이 없습니다.");
+                current = edge.to;
+            }
+
+            return route;
         }
 
         static string InvokeBridgeSignal(string processName)
@@ -409,6 +498,40 @@ namespace IUM.CoreLoopVerification.Tests
             public string introDialogue;
             public string retryDialogue;
             public string successDialogue;
+        }
+
+        [Serializable]
+        sealed class QuestFile
+        {
+            public int schemaVersion;
+            public QuestDefinition[] quests;
+        }
+
+        [Serializable]
+        sealed class QuestDefinition
+        {
+            public string id;
+            public string process;
+            public string entryNode;
+            public string introDialogue;
+            public string completeDialogue;
+            public QuestNode[] nodes;
+            public QuestEdge[] edges;
+        }
+
+        [Serializable]
+        sealed class QuestNode
+        {
+            public string id;
+            public string kind;
+            public ProcessStep objective;
+        }
+
+        [Serializable]
+        sealed class QuestEdge
+        {
+            public string from;
+            public string to;
         }
 
         [Serializable]

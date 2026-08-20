@@ -1834,7 +1834,7 @@ GameObject:
   - component: {fileID: 1574606012}
   - component: {fileID: 1574606015}
   m_Layer: 0
-  m_Name: ProcessRunner
+  m_Name: QuestManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1865,16 +1865,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1574606011}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cd876e53469057145ad199676de15dd2, type: 3}
+  m_Script: {fileID: 11500000, guid: 6852ebe8fa0f4d0f983073fd5b68d6a7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ProcessRunner
+  m_EditorClassIdentifier: Assembly-CSharp::QuestManager
   player: {fileID: 111007244}
-  sceneProcess: 1
+  sceneQuestId: tutorial
   useSavedProgress: 1
-  continueInSameScene: 0
   showOverlay: 1
-  allowForceStep: 1
-  forceStepKey: 13
+  allowForceObjective: 1
+  forceObjectiveKey: 13
 --- !u!114 &1574606015
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1887,7 +1886,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcf47cdbd400443087afbae53446df0e, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TutorialOutlineGuide
-  runner: {fileID: 1574606013}
+  runner: {fileID: 0}
+  questManager: {fileID: 1574606013}
   outlineColor: {r: 1, g: 0.875, b: 0, a: 1}
   outlineWidth: 2
   proxyAlpha: 0.08

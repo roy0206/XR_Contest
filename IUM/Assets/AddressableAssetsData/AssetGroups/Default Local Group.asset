@@ -51,6 +51,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - ium-data
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 324fc2c61e5e4c2aaca838e00db7ccb9
+    m_Address: ium/data/static/quest
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ium-data
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: f4db83b2ceaa95f4cbb67382876c57b3, type: 2}
   m_SchemaSet:

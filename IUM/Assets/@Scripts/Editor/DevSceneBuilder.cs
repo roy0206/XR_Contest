@@ -475,11 +475,12 @@ public static class DevSceneBuilder
     /// <summary>
     /// 조작 튜토리얼 씬 (F-004). flow.json의 tutorial 항목이 여기를 가리킨다.
     ///
-    /// 단계 순서와 대사는 process.json이 들고 있고, 이 씬은 그 데이터가 이름으로 가리킬 대상만
-    /// 놓는다 — 톱(tool_saw)과 작업대의 자리(socket_bench)다. 판정 로직은 <see cref="ProcessRunner"/>에
+    /// 단계 순서와 대사는 quest.json이 들고 있고, 이 씬은 그 데이터가 이름으로 가리킬 대상만
+    /// 놓는다 — 톱(tool_saw)과 작업대의 자리(socket_bench)다. 판정 로직은 <see cref="QuestManager"/>에
     /// 있으므로 이 씬에는 아무 공정 코드도 없다.
     ///
-    /// 튜토리얼을 마치면 러너가 진행을 저장하고 GameFlow에 다음 목적지를 묻는다. 지금은 그 다음이
+    /// 튜토리얼을 마치면 QuestManager가 GameFlow에 완료를 보고하고, GameFlow가 저장과 다음 목적지를
+    /// 결정한다. 지금은 그 다음이
     /// FreePlayTest(임시 구간)다.
     /// </summary>
     [MenuItem("IUM/Dev/Create Tutorial Scene")]
@@ -526,20 +527,20 @@ public static class DevSceneBuilder
         var director = new GameObject("CutsceneDirector");
         director.AddComponent<CutsceneDirector>();
 
-        var runner = new GameObject("ProcessRunner");
-        var component = runner.AddComponent<ProcessRunner>();
+        var runner = new GameObject("QuestManager");
+        var component = runner.AddComponent<QuestManager>();
         runner.AddComponent<PlayerPoseTracker>();
         var outlineGuide = runner.AddComponent<TutorialOutlineGuide>();
 
         var serialized = new SerializedObject(component);
         serialized.FindProperty("player").objectReferenceValue = Object.FindAnyObjectByType<Player>();
 
-        // 씬을 직접 열었을 때 저장된 진행이 다른 공정을 가리켜도 튜토리얼이 돌아가게 한다.
-        serialized.FindProperty("sceneProcess").enumValueIndex = (int)ProcessId.Tutorial;
+        // 씬을 직접 열었을 때 저장된 진행이 다른 퀘스트를 가리켜도 튜토리얼이 돌아가게 한다.
+        serialized.FindProperty("sceneQuestId").stringValue = "tutorial";
         serialized.ApplyModifiedPropertiesWithoutUndo();
 
         var outlineSerialized = new SerializedObject(outlineGuide);
-        outlineSerialized.FindProperty("runner").objectReferenceValue = component;
+        outlineSerialized.FindProperty("questManager").objectReferenceValue = component;
         outlineSerialized.ApplyModifiedPropertiesWithoutUndo();
 
         CreateSubtitleView();
@@ -554,9 +555,9 @@ public static class DevSceneBuilder
         RegisterInBuildSettings(TutorialScenePath);
 
         Debug.Log($"[DevSceneBuilder] Created {TutorialScenePath}. " +
-                  "process.json의 tutorial 정의를 따라 여덟 단계가 순서대로 진행됩니다. " +
+                  "quest.json의 tutorial 그래프를 따라 여덟 목표가 순서대로 진행됩니다. " +
                   "둘러보기 → 이동 → 회전 → 가리키기 → 잡기 → 놓기 → PTT 순이며, " +
-                  "Enter로 현재 단계를 강제 통과시킬 수 있습니다. " +
+                  "Enter로 현재 목표를 강제 통과시킬 수 있습니다. " +
                   "마지막 단계를 마치면 진행이 저장되고 GameFlow가 다음 목적지로 넘깁니다.",
             component);
     }

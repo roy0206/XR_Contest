@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "settings": {
+    "retryAfterSeconds": 10,
+    "stepGapSeconds": 0.4
+  },
+  "quests": [
+    {
+      "id": "tutorial",
+      "process": "tutorial",
+      "entryNode": "entry",
+      "introDialogue": "tutorial_nojang_welcome",
+      "completeDialogue": "tutorial_complete",
+      "grade": "none",
+      "nodes": [
+        {
+          "id": "entry",
+          "kind": "entry",
+          "position": { "x": 40, "y": 220 }
+        },
+        {
+          "id": "greeting",
+          "kind": "objective",
+          "position": { "x": 300, "y": 220 },
+          "objective": {
+            "id": "greeting",
+            "condition": "none",
+            "introDialogue": "tutorial_greeting",
+            "goal": "이음이의 인사를 듣는다"
+          }
+        },
+        {
+          "id": "look",
+          "kind": "objective",
+          "position": { "x": 560, "y": 220 },
+          "objective": {
+            "id": "look",
+            "condition": "look",
+            "amount": 90,
+            "introDialogue": "tutorial_look_intro",
+            "retryDialogue": "tutorial_look_retry",
+            "successDialogue": "tutorial_look_success",
+            "goal": "주변을 둘러본다"
+          }
+        },
+        {
+          "id": "move",
+          "kind": "objective",
+          "position": { "x": 820, "y": 220 },
+          "objective": {
+            "id": "move",
+            "condition": "move",
+            "amount": 3,
+            "introDialogue": "tutorial_move_intro",
+            "retryDialogue": "tutorial_move_retry",
+            "successDialogue": "tutorial_move_success",
+            "goal": "작업장을 걸어 본다"
+          }
+        },
+        {
+          "id": "turn",
+          "kind": "objective",
+          "position": { "x": 1080, "y": 220 },
+          "objective": {
+            "id": "turn",
+            "condition": "snapTurn",
+            "amount": 2,
+            "introDialogue": "tutorial_turn_intro",
+            "retryDialogue": "tutorial_turn_retry",
+            "successDialogue": "tutorial_turn_success",
+            "goal": "몸의 방향을 바꾼다"
+          }
+        },
+        {
+          "id": "point",
+          "kind": "objective",
+          "position": { "x": 1340, "y": 220 },
+          "objective": {
+            "id": "point",
+            "condition": "point",
+            "target": "tool_saw",
+            "unlock": ["tool_saw"],
+            "holdSeconds": 0.5,
+            "introDialogue": "tutorial_point_intro",
+            "retryDialogue": "tutorial_point_retry",
+            "successDialogue": "tutorial_point_success",
+            "goal": "톱을 가리킨다"
+          }
+        },
+        {
+          "id": "grab",
+          "kind": "objective",
+          "position": { "x": 1600, "y": 220 },
+          "objective": {
+            "id": "grab",
+            "condition": "grab",
+            "target": "tool_saw",
+            "unlock": ["tool_saw"],
+            "holdSeconds": 1,
+            "introDialogue": "tutorial_grab_intro",
+            "retryDialogue": "tutorial_grab_retry",
+            "successDialogue": "tutorial_grab_success",
+            "goal": "톱을 1초 이상 쥔다"
+          }
+        },
+        {
+          "id": "place",
+          "kind": "objective",
+          "position": { "x": 1860, "y": 220 },
+          "objective": {
+            "id": "place",
+            "condition": "place",
+            "target": "socket_bench",
+            "unlock": ["tool_saw"],
+            "introDialogue": "tutorial_place_intro",
+            "retryDialogue": "tutorial_place_retry",
+            "successDialogue": "tutorial_place_success",
+            "goal": "톱을 작업대의 표시된 자리에 놓는다"
+          }
+        },
+        {
+          "id": "ptt",
+          "kind": "objective",
+          "position": { "x": 2120, "y": 220 },
+          "objective": {
+            "id": "ptt",
+            "condition": "pushToTalk",
+            "holdSeconds": 0.5,
+            "introDialogue": "tutorial_ptt_intro",
+            "retryDialogue": "tutorial_ptt_retry",
+            "successDialogue": "tutorial_ptt_success",
+            "goal": "이음이를 불러 본다"
+          }
+        },
+        {
+          "id": "complete",
+          "kind": "complete",
+          "position": { "x": 2380, "y": 220 }
+        }
+      ],
+      "edges": [
+        { "from": "entry", "to": "greeting" },
+        { "from": "greeting", "to": "look" },
+        { "from": "look", "to": "move" },
+        { "from": "move", "to": "turn" },
+        { "from": "turn", "to": "point" },
+        { "from": "point", "to": "grab" },
+        { "from": "grab", "to": "place" },
+        { "from": "place", "to": "ptt" },
+        { "from": "ptt", "to": "complete" }
+      ]
+    }
+  ]
+}

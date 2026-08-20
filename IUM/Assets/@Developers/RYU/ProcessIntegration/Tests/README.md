@@ -11,6 +11,7 @@
 - 흐름이 참조하는 컷씬, 영상, 다음 씬의 존재
 - 각 공정 정의와 단계, 신호 키, 신호 요구량
 - 공정이 참조하는 대사 ID의 존재
+- `quest.json` 튜토리얼의 진입점, 단일 진행 경로, 완료 노드, 대사·상호작용 대상 계약
 - `UserProgressData`의 실제 완료 및 초기화 전이
 - `MainPlayProcessBridge`와 `process.json` 사이의 신호 계약
 - 현재 공정이 아닌 도리·공포 부재의 접근 차단 정책
@@ -58,7 +59,8 @@ Unity 프로젝트가 이미 다른 Editor에서 열려 있으면 동일 경로�
 ## 실패 해석
 
 - `FullRoute_*`: 흐름, 컷씬, 영상 또는 Build Settings 계약이 깨졌다.
-- `ProcessDefinitions_*`: 공정 JSON, 대사 ID 또는 브리지 신호 키가 어긋났다.
+- `ProcessDefinitions_*`: 제작 공정 JSON, 대사 ID 또는 브리지 신호 키가 어긋났다.
+- `TutorialQuestGraph_*`: 튜토리얼 퀘스트 그래프의 경로, 노드 또는 대사 참조가 어긋났다.
 - `ProgressModel_*`: `ProcessId` 순서나 저장 진행 전이가 바뀌었다.
 - `MainPlaySignals_*`: 공정 신호가 누적·초기화되지 않거나 요구량이 잘못됐다.
 - `MainPlayPolicy_*`: 도리나 공포 부재가 잘못된 공정에서 열릴 수 있다.

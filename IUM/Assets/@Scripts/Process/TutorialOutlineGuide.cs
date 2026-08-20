@@ -4,10 +4,9 @@ using UnityEngine.Rendering;
 
 /// <summary>
 /// 현재 튜토리얼 단계가 가리키는 ProcessTarget을 QuickOutline으로 강조한다.
-/// 공정 판정에는 관여하지 않고 ProcessRunner의 단계 변경 이벤트만 읽는다.
+/// 공정 판정에는 관여하지 않고 QuestManager 또는 기존 ProcessRunner의 단계 변경 이벤트만 읽는다.
 /// </summary>
 [DisallowMultipleComponent]
-[RequireComponent(typeof(ProcessRunner))]
 public sealed class TutorialOutlineGuide : MonoBehaviour
 {
     sealed class HighlightEntry
@@ -17,6 +16,7 @@ public sealed class TutorialOutlineGuide : MonoBehaviour
     }
 
     [SerializeField] ProcessRunner runner;
+    [SerializeField] QuestManager questManager;
     [SerializeField] Color outlineColor = new(1f, 0.875f, 0f, 1f);
     [SerializeField, Range(0f, 10f)] float outlineWidth = 2f;
     [SerializeField, Range(0f, 1f)] float proxyAlpha = 0.08f;
@@ -29,6 +29,7 @@ public sealed class TutorialOutlineGuide : MonoBehaviour
 
     void Awake()
     {
+        if (questManager == null) questManager = GetComponent<QuestManager>();
         if (runner == null) runner = GetComponent<ProcessRunner>();
 
         // 씬에 미리 붙여 둔 Outline도 첫 대상 단계 전에는 보이지 않아야 한다.
@@ -48,23 +49,40 @@ public sealed class TutorialOutlineGuide : MonoBehaviour
 
     void OnEnable()
     {
+        if (questManager == null) questManager = GetComponent<QuestManager>();
         if (runner == null) runner = GetComponent<ProcessRunner>();
-        if (runner == null) return;
 
-        runner.StepChanged += HandleStepChanged;
-        runner.Completed += HandleCompleted;
+        if (questManager != null)
+        {
+            questManager.ObjectiveChanged += HandleObjectiveChanged;
+            questManager.Completed += HandleCompleted;
+            ApplyStep(questManager.CurrentObjective);
+            return;
+        }
 
-        ApplyStep(runner.CurrentStep);
+        if (runner != null)
+        {
+            runner.StepChanged += HandleStepChanged;
+            runner.Completed += HandleCompleted;
+            ApplyStep(runner.CurrentStep);
+        }
     }
 
     void Start()
     {
         // 비동기 공정 초기화가 OnEnable과 같은 프레임에 끝난 경우도 현재 단계를 다시 반영한다.
-        if (runner != null) ApplyStep(runner.CurrentStep);
+        if (questManager != null) ApplyStep(questManager.CurrentObjective);
+        else if (runner != null) ApplyStep(runner.CurrentStep);
     }
 
     void OnDisable()
     {
+        if (questManager != null)
+        {
+            questManager.ObjectiveChanged -= HandleObjectiveChanged;
+            questManager.Completed -= HandleCompleted;
+        }
+
         if (runner != null)
         {
             runner.StepChanged -= HandleStepChanged;
@@ -84,6 +102,11 @@ public sealed class TutorialOutlineGuide : MonoBehaviour
     void HandleStepChanged(ProcessStepData step, int index)
     {
         ApplyStep(step);
+    }
+
+    void HandleObjectiveChanged(QuestNodeData node, int index)
+    {
+        ApplyStep(node?.Objective);
     }
 
     void HandleCompleted(ProcessId process)
