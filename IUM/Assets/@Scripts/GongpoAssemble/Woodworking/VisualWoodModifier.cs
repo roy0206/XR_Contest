@@ -11,6 +11,9 @@ public class VisualWoodModifier : MonoBehaviour
     public SkinnedMeshRenderer targetSkinnedMesh;
     public MeshRenderer targetMeshRenderer;
 
+    [Tooltip("톱질 완료 시 사라질 Waste 오브젝트")]
+    public GameObject wasteObject;
+
     [Header("먹줄 데칼 설정")]
     public GameObject inkLineDecalPrefab;
 
@@ -102,6 +105,18 @@ public class VisualWoodModifier : MonoBehaviour
         else
         {
             Debug.LogError("[VisualWoodModifier] 먹줄을 그릴 데칼 프리팹(Ink Line Decal Prefab)이 할당되지 않았습니다! 인스펙터를 확인해주세요.");
+        }
+    }
+
+    /// <summary>
+    /// 톱질 완료 시 Waste(버려지는 부분)를 보이지 않게 처리
+    /// </summary>
+    public void HideWaste()
+    {
+        if (wasteObject != null)
+        {
+            wasteObject.SetActive(false);
+            Debug.Log("[VisualWoodModifier] Waste 부분을 성공적으로 숨겼습니다.");
         }
     }
 }
