@@ -7,6 +7,7 @@
   "quests": [
     {
       "id": "tutorial",
+      "title": "기초 조작 훈련",
       "process": "tutorial",
       "entryNode": "entry",
       "introDialogue": "tutorial_nojang_welcome",
@@ -21,6 +22,7 @@
         {
           "id": "greeting",
           "kind": "objective",
+          "controlHint": "안내를 들으면 자동으로 다음 목표가 시작됩니다.",
           "position": { "x": 300, "y": 220 },
           "objective": {
             "id": "greeting",
@@ -32,6 +34,7 @@
         {
           "id": "look",
           "kind": "objective",
+          "controlHint": "마우스 오른쪽 버튼을 누른 채 시점을 움직이세요.",
           "position": { "x": 560, "y": 220 },
           "objective": {
             "id": "look",
@@ -46,6 +49,7 @@
         {
           "id": "move",
           "kind": "objective",
+          "controlHint": "WASD로 작업장 안을 이동하세요.",
           "position": { "x": 820, "y": 220 },
           "objective": {
             "id": "move",
@@ -60,6 +64,7 @@
         {
           "id": "turn",
           "kind": "objective",
+          "controlHint": "Q 또는 E를 두 번 눌러 방향을 전환하세요.",
           "position": { "x": 1080, "y": 220 },
           "objective": {
             "id": "turn",
@@ -74,6 +79,7 @@
         {
           "id": "point",
           "kind": "objective",
+          "controlHint": "톱을 화면 중앙 레이저로 조준해 0.5초 유지하세요.",
           "position": { "x": 1340, "y": 220 },
           "objective": {
             "id": "point",
@@ -90,6 +96,7 @@
         {
           "id": "grab",
           "kind": "objective",
+          "controlHint": "톱을 조준하고 마우스 왼쪽 버튼을 1초 이상 유지하세요.",
           "position": { "x": 1600, "y": 220 },
           "objective": {
             "id": "grab",
@@ -106,6 +113,7 @@
         {
           "id": "place",
           "kind": "objective",
+          "controlHint": "톱을 강조된 작업대 위치로 옮긴 뒤 왼쪽 버튼을 놓으세요.",
           "position": { "x": 1860, "y": 220 },
           "objective": {
             "id": "place",
@@ -121,6 +129,7 @@
         {
           "id": "ptt",
           "kind": "objective",
+          "controlHint": "T를 0.5초 이상 눌러 이음이를 부르세요.",
           "position": { "x": 2120, "y": 220 },
           "objective": {
             "id": "ptt",

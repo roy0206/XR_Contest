@@ -35,7 +35,7 @@ public sealed class QuestManager : MonoBehaviour
     [SerializeField] bool useSavedProgress = true;
 
     [Header("개발 도구")]
-    [SerializeField] bool showOverlay = true;
+    [SerializeField] bool showOverlay;
     [SerializeField] bool allowForceObjective = true;
     [SerializeField] KeyCode forceObjectiveKey = KeyCode.Return;
 
@@ -51,8 +51,26 @@ public sealed class QuestManager : MonoBehaviour
     bool _introPlayed;
 
     public string QuestId => _definition?.Id;
+    public string QuestTitle => string.IsNullOrWhiteSpace(_definition?.Title) ? QuestId : _definition.Title;
     public ProcessId Process { get; private set; }
     public bool IsRunning => _phase is Phase.Intro or Phase.Objective or Phase.ObjectiveSuccess or Phase.Complete;
+    public bool IsObjectiveActive => _phase == Phase.Objective;
+    public bool CanEvaluateObjective
+    {
+        get
+        {
+            if (!IsObjectiveActive || PauseService.IsPaused || !ProcessGate.IsOpen || IsSpeaking ||
+                PauseService.Now < _resumeAt)
+                return false;
+
+            return !CutsceneDirector.TryGetInstance(out var director) || !director.IsPlaying;
+        }
+    }
+    public int ObjectiveNumber => _objectiveIndex >= 0 ? _objectiveIndex + 1 : 0;
+    public int ObjectiveCount => _objectiveCount;
+    public float ObjectiveProgress => _objective?.Progress ?? 0f;
+    public bool AllowForceObjective => allowForceObjective;
+    public KeyCode ForceObjectiveKey => forceObjectiveKey;
     public QuestNodeData CurrentNode => _node;
     public ProcessStepData CurrentObjective => _objective?.Data;
 

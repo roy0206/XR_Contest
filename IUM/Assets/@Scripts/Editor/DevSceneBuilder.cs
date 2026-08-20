@@ -35,6 +35,8 @@ public static class DevSceneBuilder
     const string HudPanelPath = "Assets/@UI/Ai/IeumiHudPanelSettings.asset";
     const string SubtitleUxmlPath = "Assets/@UI/Dialogue/Subtitle.uxml";
     const string SubtitlePanelPath = "Assets/@UI/Dialogue/SubtitlePanelSettings.asset";
+    const string QuestHudUxmlPath = "Assets/@Developers/RYU/Quest/UI/QuestHud.uxml";
+    const string QuestHudPanelPath = "Assets/@Developers/RYU/Quest/UI/QuestHudPanelSettings.asset";
     const string CutsceneUxmlPath = "Assets/@UI/Cutscene/Cutscene.uxml";
     const string CutscenePanelPath = "Assets/@UI/Cutscene/CutscenePanelSettings.asset";
     const string PauseUxmlPath = "Assets/@UI/Pause/PauseMenu.uxml";
@@ -537,6 +539,7 @@ public static class DevSceneBuilder
 
         // 씬을 직접 열었을 때 저장된 진행이 다른 퀘스트를 가리켜도 튜토리얼이 돌아가게 한다.
         serialized.FindProperty("sceneQuestId").stringValue = "tutorial";
+        serialized.FindProperty("showOverlay").boolValue = false;
         serialized.ApplyModifiedPropertiesWithoutUndo();
 
         var outlineSerialized = new SerializedObject(outlineGuide);
@@ -544,6 +547,7 @@ public static class DevSceneBuilder
         outlineSerialized.ApplyModifiedPropertiesWithoutUndo();
 
         CreateSubtitleView();
+        CreateQuestHud(component);
         CreateCutsceneView();
         CreatePauseMenu(FlowSceneName);
 
@@ -923,6 +927,26 @@ public static class DevSceneBuilder
         // the screen is blacked out — 프롤로그는 암전 상태에서 자막부터 띄운다 (F-003 3.3).
         document.panelSettings = LoadOrCreatePanelSettings(CutscenePanelPath, 6000);
         view.AddComponent<CutsceneView>();
+    }
+
+    static void CreateQuestHud(QuestManager manager)
+    {
+        var uxml = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(QuestHudUxmlPath);
+        if (uxml == null)
+        {
+            Debug.LogError($"[DevSceneBuilder] {QuestHudUxmlPath} is missing; the quest HUD was skipped.");
+            return;
+        }
+
+        var view = new GameObject("QuestHud");
+        var document = view.AddComponent<UIDocument>();
+        document.visualTreeAsset = uxml;
+        document.panelSettings = LoadOrCreatePanelSettings(QuestHudPanelPath, 100);
+
+        var hud = view.AddComponent<QuestHud>();
+        var serialized = new SerializedObject(hud);
+        serialized.FindProperty("questManager").objectReferenceValue = manager;
+        serialized.ApplyModifiedPropertiesWithoutUndo();
     }
 
     /// <summary>

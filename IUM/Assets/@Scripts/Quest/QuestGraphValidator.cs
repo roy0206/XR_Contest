@@ -32,6 +32,8 @@ public static class QuestGraphValidator
             var label = string.IsNullOrWhiteSpace(quest.Id) ? "<이름 없음>" : quest.Id;
             if (string.IsNullOrWhiteSpace(quest.Id)) errors.Add("ID가 없는 퀘스트가 있습니다.");
             else if (!questIds.Add(quest.Id)) errors.Add($"퀘스트 ID '{quest.Id}'가 중복됩니다.");
+            if (string.IsNullOrWhiteSpace(quest.Title))
+                errors.Add($"퀘스트 '{label}'에 인게임 표시 제목이 없습니다.");
 
             if (!processes.Add(quest.Process))
                 errors.Add($"퀘스트 '{label}'의 ProcessId '{quest.Process}'가 다른 퀘스트와 중복됩니다.");
@@ -56,6 +58,7 @@ public static class QuestGraphValidator
         var incoming = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         var completeCount = 0;
         var entryCount = 0;
+        var objectiveCount = 0;
 
         foreach (var node in quest.Nodes)
         {
@@ -76,14 +79,23 @@ public static class QuestGraphValidator
 
             if (node.Kind == QuestNodeKind.Entry) entryCount++;
             if (node.Kind == QuestNodeKind.Complete) completeCount++;
+            if (node.Kind == QuestNodeKind.Objective) objectiveCount++;
             if (node.Kind == QuestNodeKind.Objective && node.Objective == null)
                 errors.Add($"퀘스트 '{label}'의 목표 노드 '{node.Id}'에 objective가 없습니다.");
+            else if (node.Kind == QuestNodeKind.Objective)
+            {
+                if (string.IsNullOrWhiteSpace(node.Objective.Goal))
+                    errors.Add($"퀘스트 '{label}'의 목표 노드 '{node.Id}'에 인게임 목표 문구가 없습니다.");
+                if (string.IsNullOrWhiteSpace(node.ControlHint))
+                    errors.Add($"퀘스트 '{label}'의 목표 노드 '{node.Id}'에 조작 힌트가 없습니다.");
+            }
 
             outgoing.TryAdd(node.Id, new List<string>());
             incoming.TryAdd(node.Id, 0);
         }
 
         if (entryCount != 1) errors.Add($"퀘스트 '{label}'에는 Entry 노드가 정확히 하나 있어야 합니다.");
+        if (objectiveCount == 0) errors.Add($"퀘스트 '{label}'에 목표 노드가 없습니다.");
         if (completeCount == 0) errors.Add($"퀘스트 '{label}'에 Complete 노드가 없습니다.");
         if (string.IsNullOrWhiteSpace(quest.EntryNode) || !nodes.TryGetValue(quest.EntryNode, out var entry))
             errors.Add($"퀘스트 '{label}'의 entryNode가 유효한 노드를 가리키지 않습니다.");

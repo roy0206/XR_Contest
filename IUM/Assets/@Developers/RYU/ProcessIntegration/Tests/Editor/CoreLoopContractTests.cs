@@ -273,11 +273,14 @@ namespace IUM.CoreLoopVerification.Tests
         {
             var sceneText = File.ReadAllText(Absolute(TutorialScenePath));
             AssertSceneContainsScript(sceneText, "Assets/@Scripts/Quest/QuestManager.cs");
+            AssertSceneContainsScript(sceneText, "Assets/@Scripts/Quest/UI/QuestHud.cs");
             AssertSceneContainsScript(sceneText, "Assets/@Scripts/Process/TutorialOutlineGuide.cs");
             AssertSceneContainsScript(sceneText, "Assets/QuickOutline/Scripts/Outline.cs");
 
             Assert.That(File.Exists(Absolute("Assets/QuickOutline/Resources/Materials/OutlineMask.mat")), Is.True);
             Assert.That(File.Exists(Absolute("Assets/QuickOutline/Resources/Materials/OutlineFill.mat")), Is.True);
+            Assert.That(File.Exists(Absolute("Assets/@Developers/RYU/Quest/UI/QuestHud.uxml")), Is.True);
+            Assert.That(File.Exists(Absolute("Assets/@Developers/RYU/Quest/UI/QuestHud.uss")), Is.True);
 
             var processFile = ReadJson<ProcessFile>(ProcessPath);
             Assert.That(processFile.processes.Any(process => Names.Equals(process.process, "tutorial")), Is.False,
@@ -311,6 +314,7 @@ namespace IUM.CoreLoopVerification.Tests
             var quests = UniqueBy(questFile.quests, quest => quest.id, QuestPath);
             Assert.That(quests.TryGetValue("tutorial", out var tutorial), Is.True);
             Assert.That(tutorial.process, Is.EqualTo("tutorial").IgnoreCase);
+            Assert.That(tutorial.title, Is.Not.Null.And.Not.Empty);
 
             var route = FollowQuestRoute(tutorial);
             Assert.That(route[0].kind, Is.EqualTo("entry").IgnoreCase);
@@ -325,6 +329,10 @@ namespace IUM.CoreLoopVerification.Tests
                 Assert.That(node.objective, Is.Not.Null, $"'{node.id}' 목표 데이터가 없습니다.");
                 Assert.That(node.objective.id, Is.EqualTo(node.id),
                     $"'{node.id}' 노드와 목표 ID가 다릅니다.");
+                Assert.That(node.objective.goal, Is.Not.Null.And.Not.Empty,
+                    $"'{node.id}'의 인게임 목표 문구가 없습니다.");
+                Assert.That(node.controlHint, Is.Not.Null.And.Not.Empty,
+                    $"'{node.id}'의 인게임 조작 힌트가 없습니다.");
                 AssertDialogueExists(node.objective.introDialogue, dialogueIds, tutorial.id,
                     $"{node.id}.introDialogue");
                 AssertDialogueExists(node.objective.retryDialogue, dialogueIds, tutorial.id,
@@ -495,6 +503,7 @@ namespace IUM.CoreLoopVerification.Tests
             public string target;
             public string[] unlock;
             public float amount = 1f;
+            public string goal;
             public string introDialogue;
             public string retryDialogue;
             public string successDialogue;
@@ -511,6 +520,7 @@ namespace IUM.CoreLoopVerification.Tests
         sealed class QuestDefinition
         {
             public string id;
+            public string title;
             public string process;
             public string entryNode;
             public string introDialogue;
@@ -524,6 +534,7 @@ namespace IUM.CoreLoopVerification.Tests
         {
             public string id;
             public string kind;
+            public string controlHint;
             public ProcessStep objective;
         }
 

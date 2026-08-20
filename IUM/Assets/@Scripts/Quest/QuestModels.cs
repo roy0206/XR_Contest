@@ -20,6 +20,7 @@ public sealed class QuestNodeData
 {
     public string Id { get; set; }
     public QuestNodeKind Kind { get; set; }
+    public string ControlHint { get; set; }
     public QuestNodePosition Position { get; set; } = new();
     public ProcessStepData Objective { get; set; }
 }
@@ -35,6 +36,7 @@ public sealed class QuestEdgeData
 public sealed class QuestDefinition
 {
     public string Id { get; set; }
+    public string Title { get; set; }
     public ProcessId Process { get; set; }
     public string EntryNode { get; set; }
     public string IntroDialogue { get; set; }

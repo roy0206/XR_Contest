@@ -1,0 +1,132 @@
+.quest-root {
+    flex-grow: 1;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 28px;
+    color: rgb(237, 245, 255);
+}
+
+.quest-card {
+    display: none;
+    width: 430px;
+    padding: 18px 20px 16px 20px;
+    border-width: 1px;
+    border-color: rgba(125, 169, 211, 0.32);
+    border-radius: 16px;
+    background-color: rgba(10, 18, 32, 0.9);
+}
+
+.quest-card--visible {
+    display: flex;
+}
+
+.quest-card--attention {
+    border-width: 2px;
+    border-color: rgb(255, 205, 96);
+    background-color: rgba(31, 29, 25, 0.94);
+}
+
+.quest-header,
+.quest-state-row,
+.quest-hint-row {
+    flex-direction: row;
+    align-items: center;
+}
+
+.quest-header {
+    justify-content: space-between;
+}
+
+.quest-category,
+.quest-section-label {
+    font-size: 11px;
+    color: rgb(119, 151, 187);
+    letter-spacing: 1px;
+}
+
+.quest-title {
+    margin-top: 2px;
+    font-size: 19px;
+    -unity-font-style: bold;
+    color: rgb(245, 249, 255);
+}
+
+.quest-count {
+    min-width: 58px;
+    padding: 6px 10px;
+    border-radius: 12px;
+    background-color: rgba(36, 72, 105, 0.82);
+    font-size: 14px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    color: rgb(126, 213, 255);
+}
+
+.quest-divider {
+    height: 1px;
+    margin-top: 13px;
+    margin-bottom: 12px;
+    background-color: rgba(125, 169, 211, 0.18);
+}
+
+.quest-state-row {
+    justify-content: space-between;
+}
+
+.quest-state {
+    padding: 3px 8px;
+    border-radius: 8px;
+    background-color: rgba(52, 90, 122, 0.7);
+    font-size: 11px;
+    color: rgb(153, 220, 255);
+}
+
+.quest-goal {
+    margin-top: 9px;
+    font-size: 20px;
+    -unity-font-style: bold;
+    white-space: normal;
+    color: rgb(249, 251, 255);
+}
+
+.quest-progress {
+    height: 6px;
+    margin-top: 13px;
+    border-radius: 3px;
+    background-color: rgba(37, 55, 76, 0.92);
+    overflow: hidden;
+}
+
+.quest-progress-fill {
+    width: 0;
+    height: 6px;
+    border-radius: 3px;
+    background-color: rgb(79, 203, 255);
+}
+
+.quest-hint-row {
+    margin-top: 13px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background-color: rgba(25, 38, 55, 0.88);
+}
+
+.quest-hint-icon {
+    margin-right: 9px;
+    font-size: 11px;
+    color: rgb(255, 205, 96);
+}
+
+.quest-hint {
+    flex-grow: 1;
+    font-size: 14px;
+    white-space: normal;
+    color: rgb(205, 220, 237);
+}
+
+.quest-skip {
+    align-self: flex-end;
+    margin-top: 10px;
+    font-size: 11px;
+    color: rgba(143, 164, 188, 0.78);
+}
