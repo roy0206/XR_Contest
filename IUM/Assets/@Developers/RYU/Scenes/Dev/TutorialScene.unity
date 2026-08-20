@@ -1709,6 +1709,76 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1666000001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1666000004}
+  - component: {fileID: 1666000003}
+  - component: {fileID: 1666000002}
+  m_Layer: 0
+  m_Name: QuestHud
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1666000002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1666000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2e3817b5cb94b63afc56905a8e1da47, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::QuestHud
+  questManager: {fileID: 1574606013}
+  showDeveloperSkipHint: 1
+--- !u!114 &1666000003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1666000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name:
+  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
+  m_PanelSettings: {fileID: 11400000, guid: 078eb6c369fc4d45b31f36db81b907c5, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: e5f68290a7e947628c09739e97ff3a34, type: 3}
+  m_SortingOrder: 0
+  m_Position: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
+--- !u!4 &1666000004
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1666000001}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1371028232
 GameObject:
   m_ObjectHideFlags: 0
@@ -1832,8 +1902,9 @@ GameObject:
   - component: {fileID: 1574606014}
   - component: {fileID: 1574606013}
   - component: {fileID: 1574606012}
+  - component: {fileID: 1574606015}
   m_Layer: 0
-  m_Name: ProcessRunner
+  m_Name: QuestManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1864,12 +1935,32 @@ MonoBehaviour:
   m_GameObject: {fileID: 1574606011}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cd876e53469057145ad199676de15dd2, type: 3}
+  m_Script: {fileID: 11500000, guid: 6852ebe8fa0f4d0f983073fd5b68d6a7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ProcessRunner
+  m_EditorClassIdentifier: Assembly-CSharp::QuestManager
   player: {fileID: 111007244}
-  showOverlay: 1
-  forceStepKey: 13
+  sceneQuestId: tutorial
+  useSavedProgress: 1
+  showOverlay: 0
+  allowForceObjective: 1
+  forceObjectiveKey: 13
+--- !u!114 &1574606015
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1574606011}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dcf47cdbd400443087afbae53446df0e, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TutorialOutlineGuide
+  runner: {fileID: 0}
+  questManager: {fileID: 1574606013}
+  outlineColor: {r: 1, g: 0.875, b: 0, a: 1}
+  outlineWidth: 2
+  proxyAlpha: 0.08
 --- !u!4 &1574606014
 Transform:
   m_ObjectHideFlags: 0
@@ -1944,6 +2035,7 @@ GameObject:
   - component: {fileID: 1689933968}
   - component: {fileID: 1689933967}
   - component: {fileID: 1689933966}
+  - component: {fileID: 1689933973}
   m_Layer: 0
   m_Name: Tool_Saw
   m_TagString: Untagged
@@ -2105,6 +2197,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1689933973
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1689933965}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fea29bb7c508c244a1f805a5fd3fc4d, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Outline
+  outlineMode: 0
+  outlineColor: {r: 1, g: 0.875397, b: 0, a: 1}
+  outlineWidth: 2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
 --- !u!1 &1769639446
 GameObject:
   m_ObjectHideFlags: 0

@@ -25,6 +25,11 @@
       "key": "process",
       "address": "ium/data/static/process",
       "required": false
+    },
+    {
+      "key": "quest",
+      "address": "ium/data/static/quest",
+      "required": false
     }
   ]
 }

@@ -11,6 +11,8 @@ using UnityEngine.UIElements;
 [RequireComponent(typeof(UIDocument))]
 public sealed class PauseMenuView : MonoBehaviour
 {
+    const float BindRetrySeconds = 0.5f;
+
     UIDocument _document;
     VisualElement _root;
     VisualElement _menuPanel;
@@ -27,12 +29,24 @@ public sealed class PauseMenuView : MonoBehaviour
 
     VolumeOptionsPanel _volumes;
     PauseController _controller;
+    float _nextBindAttempt;
+    bool _viewReady;
+    bool _missingElementsReported;
 
     void Awake() => _document = GetComponent<UIDocument>();
 
     void OnEnable()
     {
-        if (_document?.visualTreeAsset == null) return;
+        _nextBindAttempt = 0f;
+        if (!TryPrepareView()) return;
+        TryBindController();
+    }
+
+    bool TryPrepareView()
+    {
+        if (_viewReady) return true;
+        if (_document == null) _document = GetComponent<UIDocument>();
+        if (_document?.visualTreeAsset == null) return false;
 
         var root = _document.rootVisualElement;
         _root = root.Q<VisualElement>("pause-root");
@@ -53,8 +67,12 @@ public sealed class PauseMenuView : MonoBehaviour
             _mainMenuButton == null || _closeOptionsButton == null ||
             _confirmYesButton == null || _confirmNoButton == null)
         {
-            Debug.LogError("[Pause] Required elements are missing from PauseMenu.uxml.");
-            return;
+            if (!_missingElementsReported)
+            {
+                _missingElementsReported = true;
+                Debug.LogError("[Pause] Required elements are missing from PauseMenu.uxml.");
+            }
+            return false;
         }
 
         _volumes = new VolumeOptionsPanel(_optionsPanel);
@@ -68,14 +86,21 @@ public sealed class PauseMenuView : MonoBehaviour
         _confirmNoButton.clicked += ShowMenu;
 
         SetVisible(false);
+        _viewReady = true;
+        return true;
+    }
 
+    bool TryBindController()
+    {
+        if (!_viewReady || _controller != null) return _controller != null;
         _controller = PauseController.HasInstance
             ? PauseController.Instance
             : FindAnyObjectByType<PauseController>(FindObjectsInactive.Include);
-        if (_controller == null) return;
+        if (_controller == null) return false;
 
         _controller.VisibilityChanged += SetVisible;
         if (_controller.IsOpen) SetVisible(true);
+        return true;
     }
 
     void OnDisable()
@@ -96,9 +121,22 @@ public sealed class PauseMenuView : MonoBehaviour
 
         _volumes?.Dispose();
         _volumes = null;
+        _viewReady = false;
     }
 
-    void Update() => _volumes?.Tick();
+    void Update()
+    {
+        if (!_viewReady && !TryPrepareView()) return;
+
+        if (_controller == null && Time.unscaledTime >= _nextBindAttempt)
+        {
+            _controller = null;
+            _nextBindAttempt = Time.unscaledTime + BindRetrySeconds;
+            TryBindController();
+        }
+
+        _volumes?.Tick();
+    }
 
     void SetVisible(bool visible)
     {

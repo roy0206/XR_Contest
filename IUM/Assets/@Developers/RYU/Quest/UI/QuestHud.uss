@@ -1,0 +1,198 @@
+.quest-root {
+    flex-grow: 1;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 30px;
+    color: rgb(246, 249, 252);
+    -unity-font-definition: url("Fonts/Giants-Bold.ttf");
+}
+
+.quest-card {
+    display: none;
+    width: 460px;
+    padding: 16px 18px 16px 12px;
+    flex-direction: row;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    background-color: rgba(14, 20, 28, 0.88);
+}
+
+.quest-card--visible {
+    display: flex;
+}
+
+.quest-accent {
+    width: 4px;
+    min-width: 4px;
+    margin-right: 16px;
+    border-radius: 2px;
+    background-color: rgb(125, 199, 255);
+}
+
+.quest-body {
+    flex-grow: 1;
+}
+
+.quest-card--attention {
+    border-width: 2px;
+    border-color: rgb(255, 205, 96);
+    background-color: rgba(30, 27, 20, 0.94);
+}
+
+.quest-card--attention .quest-accent {
+    background-color: rgb(255, 205, 96);
+}
+
+.quest-card--blocked {
+    border-color: rgba(255, 205, 96, 0.55);
+}
+
+.quest-card--blocked .quest-accent,
+.quest-card--blocked .quest-hint-mark,
+.quest-card--blocked .quest-progress-fill {
+    background-color: rgb(255, 205, 96);
+}
+
+.quest-card--blocked .quest-state {
+    color: rgb(255, 220, 139);
+}
+
+.quest-card--complete {
+    border-color: rgba(105, 224, 164, 0.65);
+    background-color: rgba(14, 30, 25, 0.92);
+}
+
+.quest-card--complete .quest-accent,
+.quest-card--complete .quest-hint-mark,
+.quest-card--complete .quest-progress-fill {
+    background-color: rgb(105, 224, 164);
+}
+
+.quest-card--complete .quest-state {
+    color: rgb(139, 239, 187);
+}
+
+.quest-card--error {
+    border-color: rgba(255, 111, 111, 0.7);
+    background-color: rgba(36, 16, 19, 0.94);
+}
+
+.quest-card--error .quest-accent,
+.quest-card--error .quest-hint-mark,
+.quest-card--error .quest-progress-fill {
+    background-color: rgb(255, 111, 111);
+}
+
+.quest-card--error .quest-state {
+    color: rgb(255, 145, 145);
+}
+
+.quest-header,
+.quest-state-row,
+.quest-hint-row {
+    flex-direction: row;
+    align-items: center;
+}
+
+.quest-header {
+    justify-content: space-between;
+}
+
+.quest-category,
+.quest-section-label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.48);
+    letter-spacing: 1px;
+}
+
+.quest-title {
+    margin-top: 2px;
+    font-size: 21px;
+    color: rgb(255, 255, 255);
+}
+
+.quest-count {
+    min-width: 62px;
+    padding: 6px 10px;
+    border-width: 1px;
+    border-color: rgba(125, 199, 255, 0.55);
+    border-radius: 10px;
+    background-color: rgba(125, 199, 255, 0.12);
+    font-size: 14px;
+    -unity-text-align: middle-center;
+    color: rgb(145, 214, 255);
+}
+
+.quest-divider {
+    height: 1px;
+    margin-top: 13px;
+    margin-bottom: 12px;
+    background-color: rgba(255, 255, 255, 0.14);
+}
+
+.quest-state-row {
+    justify-content: space-between;
+}
+
+.quest-state {
+    padding: 3px 8px;
+    border-radius: 7px;
+    background-color: rgba(255, 255, 255, 0.1);
+    font-size: 11px;
+    color: rgb(145, 214, 255);
+}
+
+.quest-goal {
+    margin-top: 9px;
+    font-size: 21px;
+    white-space: normal;
+    color: rgb(255, 255, 255);
+}
+
+.quest-progress {
+    height: 6px;
+    margin-top: 13px;
+    border-radius: 3px;
+    background-color: rgba(255, 255, 255, 0.14);
+    overflow: hidden;
+}
+
+.quest-progress-fill {
+    width: 0;
+    height: 6px;
+    border-radius: 3px;
+    background-color: rgb(125, 199, 255);
+}
+
+.quest-hint-row {
+    margin-top: 13px;
+    padding: 10px 12px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.07);
+}
+
+.quest-hint-mark {
+    width: 4px;
+    min-width: 4px;
+    height: 22px;
+    margin-right: 10px;
+    border-radius: 2px;
+    background-color: rgb(125, 199, 255);
+}
+
+.quest-hint {
+    flex-grow: 1;
+    font-size: 14px;
+    white-space: normal;
+    color: rgba(255, 255, 255, 0.78);
+}
+
+.quest-skip {
+    align-self: flex-end;
+    margin-top: 10px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.42);
+}

@@ -1,78 +1,218 @@
-/* 일시정지 메뉴. 화면 전체를 덮고 뒤쪽을 어둡게 깔아 진행이 멈췄음을 드러낸다. */
+/* FixedUI.zip의 실제 글래스 메뉴를 현재 PauseController에 연결한 화면 오버레이. */
 .pause-root {
     display: none;
     flex-grow: 1;
     justify-content: center;
     align-items: center;
-    background-color: rgba(6, 10, 18, 0.72);
+    color: rgb(25, 25, 25);
+    -unity-font-definition: url("../../@Developers/RYU/Quest/UI/Fonts/Giants-Bold.ttf");
+}
+
+.pause-screen-shade {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(4, 8, 13, 0.78);
 }
 
 .pause-panel {
-    min-width: 380px;
-    max-width: 560px;
-    padding: 32px 36px;
+    width: 560px;
+    padding: 28px 40px 30px 40px;
     border-width: 1px;
-    border-color: rgba(148, 190, 230, 0.24);
-    border-radius: 16px;
-    background-color: rgba(14, 22, 38, 0.96);
+    border-color: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    background-color: rgba(16, 22, 29, 0.96);
+}
+
+.pause-panel--main {
+    min-height: 340px;
+}
+
+.pause-panel--options {
+    display: none;
+    min-height: 420px;
+}
+
+.pause-panel--confirm {
+    display: none;
+    width: 520px;
+    min-height: 240px;
+    justify-content: center;
+}
+
+.pause-header {
+    flex-shrink: 0;
+}
+
+.pause-eyebrow {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: rgba(125, 199, 255, 0.9);
 }
 
 .pause-title {
-    margin-bottom: 20px;
-    font-size: 26px;
-    -unity-font-style: bold;
-    color: rgb(237, 245, 255);
+    margin-top: 2px;
+    font-size: 30px;
+    color: rgb(255, 255, 255);
+}
+
+.pause-title--confirm {
     -unity-text-align: middle-center;
 }
 
-.pause-button {
-    height: 46px;
-    margin-top: 8px;
-    padding: 0 20px;
-    border-width: 1px;
-    border-color: rgba(148, 190, 230, 0.28);
-    border-radius: 10px;
-    background-color: rgba(32, 48, 76, 0.9);
-    font-size: 17px;
-    color: rgb(226, 236, 250);
+.pause-subtitle {
+    margin-top: 4px;
+    font-size: 15px;
+    white-space: normal;
+    color: rgba(255, 255, 255, 0.56);
 }
 
-.pause-button:hover {
-    background-color: rgba(48, 72, 112, 0.95);
-    border-color: rgba(180, 214, 246, 0.5);
+.pause-divider {
+    height: 1px;
+    margin-top: 17px;
+    margin-bottom: 12px;
+    background-color: rgba(255, 255, 255, 0.16);
+}
+
+.pause-button-group {
+    flex-grow: 1;
+}
+
+.pause-button {
+    height: 40px;
+    margin-top: 10px;
+    padding: 0;
+    flex-direction: row;
+    align-items: center;
+    border-width: 0;
+    border-radius: 7px;
+    background-color: rgba(255, 255, 255, 0.9);
+    color: rgba(25, 25, 25, 0.86);
+    -unity-text-align: middle-left;
+}
+
+.pause-button--first {
+    margin-top: 0;
+}
+
+.pause-button:hover,
+.pause-button:focus {
+    background-color: rgb(255, 255, 255);
+    color: rgb(25, 25, 25);
 }
 
 .pause-button:active {
-    background-color: rgba(24, 36, 58, 0.95);
+    background-color: rgb(125, 199, 255);
+    color: rgb(25, 25, 25);
 }
 
-/* 확인 창의 좌우 배치용. 세로 목록과 달리 위쪽 여백을 행이 담당한다. */
-.pause-button--inline {
+.pause-button:disabled {
+    background-color: rgba(255, 255, 255, 0.24);
+    color: rgba(25, 25, 25, 0.28);
+}
+
+.pause-button-indicator {
+    width: 4px;
+    min-width: 4px;
+    height: 22px;
+    margin-left: 8px;
+    margin-right: 10px;
+    border-radius: 2px;
+    background-color: rgba(125, 199, 255, 0);
+}
+
+.pause-button:hover .pause-button-indicator,
+.pause-button:focus .pause-button-indicator,
+.pause-button:active .pause-button-indicator {
+    background-color: rgb(125, 199, 255);
+}
+
+.pause-button-icon {
+    width: 22px;
+    min-width: 22px;
+    height: 22px;
+    margin-right: 12px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.pause-icon--resume {
+    background-image: url("FixedUI/Icons/play_arrow_48dp_000000_FILL0_wght400_GRAD0_opsz48.png");
+}
+
+.pause-icon--options {
+    background-image: url("FixedUI/Icons/settings_48dp_000000_FILL0_wght400_GRAD0_opsz48.png");
+}
+
+.pause-icon--restart {
+    background-image: url("FixedUI/Icons/replay_48dp_000000_FILL0_wght400_GRAD0_opsz48.png");
+}
+
+.pause-icon--home {
+    background-image: url("FixedUI/Icons/home_48dp_000000_FILL0_wght400_GRAD0_opsz48.png");
+}
+
+.pause-button-label {
     flex-grow: 1;
-    margin-top: 0;
-    margin-left: 6px;
-    margin-right: 6px;
+    font-size: 17px;
+    color: rgba(25, 25, 25, 0.86);
 }
 
-.pause-button--danger {
-    background-color: rgba(96, 40, 44, 0.92);
-    border-color: rgba(214, 128, 128, 0.42);
+.pause-button:hover .pause-button-label,
+.pause-button:focus .pause-button-label,
+.pause-button:active .pause-button-label {
+    color: rgb(25, 25, 25);
 }
 
-.pause-button--danger:hover {
-    background-color: rgba(124, 52, 56, 0.95);
+.pause-button-label--center {
+    -unity-text-align: middle-center;
+}
+
+.pause-button-key {
+    margin-right: 16px;
+    padding: 3px 7px;
+    border-width: 1px;
+    border-color: rgba(25, 25, 25, 0.22);
+    border-radius: 5px;
+    font-size: 10px;
+    color: rgba(25, 25, 25, 0.55);
 }
 
 .pause-slider {
-    margin-top: 14px;
-    font-size: 16px;
-    color: rgb(214, 226, 242);
+    height: 46px;
+    margin-top: 7px;
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.84);
+}
+
+.pause-slider .unity-base-field__label {
+    min-width: 100px;
+    color: rgba(255, 255, 255, 0.76);
+}
+
+.pause-slider .unity-base-slider__tracker {
+    height: 5px;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.pause-slider .unity-base-slider__dragger {
+    width: 16px;
+    height: 16px;
+    border-width: 2px;
+    border-color: rgb(255, 255, 255);
+    background-color: rgb(125, 199, 255);
+}
+
+.pause-button--footer {
+    margin-top: 18px;
 }
 
 .pause-message {
-    margin-bottom: 24px;
-    font-size: 18px;
-    color: rgb(230, 238, 250);
+    margin-top: 18px;
+    margin-bottom: 26px;
+    font-size: 17px;
+    color: rgba(255, 255, 255, 0.74);
     white-space: normal;
     -unity-text-align: middle-center;
 }
@@ -80,4 +220,23 @@
 .pause-confirm-row {
     flex-direction: row;
     justify-content: space-between;
+}
+
+.pause-button--inline {
+    flex-grow: 1;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.pause-button--danger {
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+.pause-button--danger:hover,
+.pause-button--danger:focus {
+    background-color: rgb(255, 255, 255);
+}
+
+.pause-button--danger:active {
+    background-color: rgb(255, 145, 145);
 }

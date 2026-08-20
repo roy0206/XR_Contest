@@ -185,6 +185,26 @@ public sealed class GameFlow : Singleton<GameFlow>
         GoToCurrent();
     }
 
+    /// <summary>
+    /// GameFlow 산하의 퀘스트 실행기가 완료를 보고하는 단일 진입점. 퀘스트는 목표 판정만 하고,
+    /// 저장과 다음 씬·컷씬 결정은 전체 흐름을 소유한 GameFlow가 처리한다.
+    /// </summary>
+    public async Task<bool> CompleteQuestAsync(
+        ProcessId process,
+        ProcessGrade grade = ProcessGrade.None)
+    {
+        if (!await EnsureDataAsync()) return false;
+
+        var progress = DataManager.Instance.Progress;
+        progress.Complete(process, grade);
+
+        // 현재 퀘스트가 끝나 씬을 떠나므로 이전 씬 좌표를 다음 목적지에 적용하지 않는다.
+        progress.PlayerPose = null;
+        await SaveAsync();
+
+        return GoTo(progress.NextProcess);
+    }
+
     /// <summary>Sends the player to whatever <see cref="UserProgressData.NextProcess"/> points at.</summary>
     public void GoToCurrent()
     {
