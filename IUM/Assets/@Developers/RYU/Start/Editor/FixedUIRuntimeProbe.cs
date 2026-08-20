@@ -80,7 +80,7 @@ static class FixedUIRuntimeProbe
     {
         var adapter = Object.FindFirstObjectByType<FixedUIStartMenuAdapter>();
         var startMenu = Object.FindFirstObjectByType<StartMenuController>();
-        var playerBootstrap = Object.FindFirstObjectByType<StartScenePlayerBootstrap>();
+        var playerInteraction = Object.FindFirstObjectByType<StartScenePlayerInteraction>();
         var player = Object.FindFirstObjectByType<Player>();
         var buttons = Object.FindObjectsByType<UguiButton>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         var roots = UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects();
@@ -88,13 +88,18 @@ static class FixedUIRuntimeProbe
 
         Add("Adapter", adapter != null);
         Add("StartMenuController", startMenu != null);
-        Add("PlayerBootstrap", playerBootstrap != null);
+        Add("ScenePlayerInteraction", playerInteraction != null);
         Add("Player", player != null);
-        Add("PlayerCharacterController", player != null && player.GetComponent<CharacterController>() != null);
+        Add("ScenePlacedPlayer", player != null && player.name == "Start Scene Player",
+            player != null ? player.name : "missing");
+        var characterController = player != null ? player.GetComponent<CharacterController>() : null;
+        Add("PlayerCharacterController", characterController != null);
+        Add("PlayerGrounded", characterController != null && characterController.isGrounded,
+            player != null ? player.transform.position.y.ToString("F3") : "missing");
         Add("DesktopInputFallback", new DesktopInputSource().IsAvailable);
         Add("MainCamera", Camera.main != null);
-        Add("PlayerMainCamera", playerBootstrap != null &&
-            playerBootstrap.ActiveCamera != null && playerBootstrap.ActiveCamera == Camera.main);
+        Add("PlayerMainCamera", playerInteraction != null &&
+            playerInteraction.ActiveCamera != null && playerInteraction.ActiveCamera == Camera.main);
         Add("MissingScripts", missingScripts == 0, missingScripts.ToString());
         Add("Button_Continue", buttons.Any(button => button.name == "Button_Continue"));
         Add("Button_Options", buttons.Any(button => button.name == "Button_Options"));
@@ -157,16 +162,16 @@ static class FixedUIRuntimeProbe
         Add("OptionsPersistentListener", options != null && options.onClick.GetPersistentEventCount() == 1,
             options != null ? options.onClick.GetPersistentEventCount().ToString() : "button missing");
 
-        var bootstrap = Object.FindFirstObjectByType<StartScenePlayerBootstrap>();
-        var camera = bootstrap != null ? bootstrap.ActiveCamera : null;
-        if (options == null || bootstrap == null || camera == null)
+        var interaction = Object.FindFirstObjectByType<StartScenePlayerInteraction>();
+        var camera = interaction != null ? interaction.ActiveCamera : null;
+        if (options == null || interaction == null || camera == null)
         {
             Add("PlayerButtonInteraction", false, "required object missing");
             return;
         }
 
         camera.transform.LookAt(options.transform.position);
-        Add("PlayerButtonInteraction", bootstrap.TryActivateFocusedButton());
+        Add("PlayerButtonInteraction", interaction.TryActivateFocusedButton());
     }
 
     static void ValidateOptions()

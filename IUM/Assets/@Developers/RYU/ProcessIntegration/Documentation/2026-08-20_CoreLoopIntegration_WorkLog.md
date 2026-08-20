@@ -196,12 +196,12 @@ Unity 메뉴 `Tools > IUM > Verify Full Core Loop`, Test Runner, batchmode 세 �
 
 ### 적용 내용
 
-- `StartScenePlayerBootstrap`을 추가해 기존 `Assets/Prefabs/Player.prefab`을 StartScene 실행 시 배치한다.
-- 원본 FixedUI 카메라의 위치, 회전, 시야 설정을 플레이어 카메라가 이어받으며 원본 카메라는 비활성화해 MainCamera와 AudioListener 중복을 막는다.
+- 기존 `Assets/Prefabs/Player.prefab`을 StartScene 루트에 프리팹 인스턴스로 직접 배치했다. 런타임 생성 부트스트랩은 사용하지 않는다.
+- 원본 FixedUI 카메라의 위치와 회전은 씬에 배치된 플레이어에 반영하고, 렌더 설정만 `StartScenePlayerInteraction`이 이어받는다. 원본 카메라는 비활성화해 MainCamera와 AudioListener 중복을 막는다.
 - 기존 공용 플레이어 입력을 그대로 사용하므로 데스크톱에서 WASD 이동, 우클릭 시점, Q/E 스냅 회전, F/좌클릭 잡기를 사용할 수 있다.
 - 기존 플레이어의 R 상호작용 명령을 화면 중앙의 World Space uGUI 버튼으로 전달해 시작 메뉴를 키보드로도 선택할 수 있게 했다.
-- FixedUI 자동 프로브에 플레이어 부트스트랩, CharacterController, 데스크톱 입력 대체 경로, 플레이어 MainCamera, R 버튼 실행 검사를 추가했다.
-- 최종 런타임 프로브 결과는 기존 FixedUI 검사를 포함해 19개 항목 모두 PASS였고, 누락 스크립트와 런타임 예외는 0개였다.
+- FixedUI 자동 프로브에 씬 직접 배치 플레이어, CharacterController, 데스크톱 입력 대체 경로, 플레이어 MainCamera, R 버튼 실행 검사를 추가했다.
+- 최종 런타임 프로브 결과는 기존 FixedUI 검사를 포함해 21개 항목 모두 PASS였고, 씬 직접 배치 플레이어의 접지 상태도 확인했다. 누락 스크립트와 런타임 예외는 0개였다.
 
 ### 소유권 보호
 
