@@ -16,7 +16,6 @@
 - `MainPlayProcessBridge`와 `process.json` 사이의 신호 계약
 - 현재 공정이 아닌 도리·공포 부재의 접근 차단 정책
 - 메인 플레이 씬의 러너, 브리지, 대사, 일시정지 컴포넌트 배선
-- 시작 메뉴의 필수 UI 요소, FixedUI 아이콘, 시작 배경 모델과 StartScene 배선
 
 검증하지 않는 범위:
 
@@ -66,4 +65,3 @@ Unity 프로젝트가 이미 다른 Editor에서 열려 있으면 동일 경로�
 - `MainPlaySignals_*`: 공정 신호가 누적·초기화되지 않거나 요구량이 잘못됐다.
 - `MainPlayPolicy_*`: 도리나 공포 부재가 잘못된 공정에서 열릴 수 있다.
 - `MainPlayScene_*`: 메인 씬 배선 또는 재시작 대상 씬 등록이 빠졌다.
-- `StartScene_*`: 시작 메뉴 UI 계약, FixedUI 아이콘 또는 시작 배경 모델 배선이 빠졌다.

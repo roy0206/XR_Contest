@@ -11,7 +11,7 @@ namespace IUM.CoreLoopVerification.Tests
 {
     /// <summary>
     /// 물리 공정 구현을 대신 실행하지 않고, 전체 게임 루프를 잇는 계약을 한 번에 검증한다.
-    /// 검증 대상은 흐름·공정·대사·컷씬 데이터, Build Settings, 시작·메인 씬 배선, 진행 상태 전이,
+    /// 검증 대상은 흐름·공정·대사·컷씬 데이터, Build Settings, 메인 씬 배선, 진행 상태 전이,
     /// MainPlayProcessBridge의 공정별 신호/접근 정책이다.
     ///
     /// 예상 루프는 CoreLoopVerificationProfile.json에 있으므로 다른 루프나 공정 구성을 검증할
@@ -29,10 +29,6 @@ namespace IUM.CoreLoopVerification.Tests
         const string DialoguePath = "Assets/@AddressableAssets/Data/Static/dialogue.json";
         const string CutscenePath = "Assets/@AddressableAssets/Data/Static/cutscene.json";
         const string TutorialScenePath = "Assets/@Developers/RYU/Scenes/Dev/TutorialScene.unity";
-        const string StartScenePath = "Assets/@Scenes/StartScene.unity";
-        const string StartUxmlPath = "Assets/@UI/Start/StartMenu.uxml";
-        const string StartUssPath = "Assets/@UI/Start/StartMenu.uss";
-        const string StartBackdropPath = "Assets/@Developers/RYU/Start/FixedUI/news.fbx";
         const string PauseUxmlPath = "Assets/@UI/Pause/PauseMenu.uxml";
         const string PauseUssPath = "Assets/@UI/Pause/PauseMenu.uss";
         const string FixedUiIconPath = "Assets/@UI/Pause/FixedUI/Icons";
@@ -304,43 +300,6 @@ namespace IUM.CoreLoopVerification.Tests
         }
 
         [Test]
-        public void StartScene_UsesFixedUiPresentationWithoutBreakingMenuContract()
-        {
-            var startTemplate = File.ReadAllText(Absolute(StartUxmlPath));
-            foreach (var elementName in new[]
-                     {
-                         "screen", "start-button", "continue-button", "options-button", "exit-button",
-                         "save-notice", "options-panel", "confirm-panel", "close-options-button",
-                         "confirm-new-game-button", "cancel-new-game-button", "music-volume-slider",
-                         "dialogue-volume-slider", "environment-volume-slider", "video-volume-slider"
-                     })
-                StringAssert.Contains($"name=\"{elementName}\"", startTemplate,
-                    $"시작 메뉴의 필수 요소 '{elementName}'이 없습니다.");
-
-            var startStyle = File.ReadAllText(Absolute(StartUssPath));
-            foreach (var icon in new[]
-                     {
-                         "play_arrow_48dp_000000_FILL0_wght400_GRAD0_opsz48.png",
-                         "settings_48dp_000000_FILL0_wght400_GRAD0_opsz48.png",
-                         "replay_48dp_000000_FILL0_wght400_GRAD0_opsz48.png",
-                         "home_48dp_000000_FILL0_wght400_GRAD0_opsz48.png"
-                     })
-                StringAssert.Contains($"../Pause/FixedUI/Icons/{icon}", startStyle,
-                    $"시작 메뉴가 FixedUI 원본 아이콘 '{icon}'을 참조하지 않습니다.");
-
-            Assert.That(File.Exists(Absolute(StartBackdropPath)), Is.True,
-                "FixedUI 시작 화면 모델이 없습니다.");
-            Assert.That(File.Exists(Absolute(StartBackdropPath + ".meta")), Is.True,
-                "FixedUI 시작 화면 모델 메타가 없습니다.");
-
-            var sceneText = File.ReadAllText(Absolute(StartScenePath));
-            AssertSceneContainsScript(sceneText,
-                "Assets/@Developers/RYU/Start/StartMenuBackdrop.cs");
-            StringAssert.Contains(AssetGuid(StartBackdropPath), sceneText,
-                "StartScene이 FixedUI 시작 화면 모델을 참조하지 않습니다.");
-        }
-
-        [Test]
         public void TutorialOutlineGuide_CoversEveryObjectInteractionStep()
         {
             var sceneText = File.ReadAllText(Absolute(TutorialScenePath));
@@ -505,17 +464,6 @@ namespace IUM.CoreLoopVerification.Tests
             var guid = guidLine.Substring("guid: ".Length).Trim();
             Assert.That(sceneText, Does.Contain($"guid: {guid}"),
                 $"메인 플레이 씬에 '{scriptPath}' 컴포넌트가 없습니다.");
-        }
-
-        static string AssetGuid(string assetPath)
-        {
-            var metaPath = Absolute(assetPath + ".meta");
-            Assert.That(File.Exists(metaPath), Is.True, $"'{assetPath}.meta'가 없습니다.");
-
-            var guidLine = File.ReadLines(metaPath)
-                .FirstOrDefault(line => line.StartsWith("guid: ", StringComparison.Ordinal));
-            Assert.That(guidLine, Is.Not.Null, $"'{assetPath}.meta'에서 GUID를 찾지 못했습니다.");
-            return guidLine.Substring("guid: ".Length).Trim();
         }
 
         static void AssertDialogueExists(

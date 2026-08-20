@@ -784,64 +784,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetSceneName: SampleScene
---- !u!1 &1809000200
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1809000201}
-  - component: {fileID: 1809000202}
-  m_Layer: 0
-  m_Name: FixedUI Start Backdrop
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1809000201
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1809000200}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1809000202
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1809000200}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7cdb5d5ab69144b58ed584345d83bc6f, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
-  backdropPrefab: {fileID: 100100000, guid: ec99f136f7a5d7544b6e87e79aa31bbf, type: 3}
-  authoredMaterials:
-  - {fileID: 2100000, guid: 6ab33e57964c736449ee1f1c5fba1630, type: 2}
-  - {fileID: 2100000, guid: 66c3f6cd4c8394f429e89c45e07086c6, type: 2}
-  - {fileID: 2100000, guid: 5f915a75b77ca11448e40565be8df79d, type: 2}
-  - {fileID: 2100000, guid: 957c5b591be01494cb0ab131061979df, type: 2}
-  - {fileID: 2100000, guid: fb9bf842f0ab27b46a08727fe0ae299e, type: 2}
-  - {fileID: 2100000, guid: aa477dcadcbca2443b56b844430efb6c, type: 2}
-  - {fileID: 2100000, guid: 220cf3ba9b3d22345a3fcb3f430a08da, type: 2}
-  targetHeight: 3.4
-  distance: 4.5
-  horizontalOffset: 1.35
-  verticalOffset: -0.2
-  rotation: {x: 0, y: 180, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -853,4 +795,3 @@ SceneRoots:
   - {fileID: 1249617921}
   - {fileID: 1809000001}
   - {fileID: 1809000101}
-  - {fileID: 1809000201}

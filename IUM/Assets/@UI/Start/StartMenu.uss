@@ -1,184 +1,167 @@
-/* FixedUI.zip의 글래스 메뉴 언어를 기존 StartMenuController 계약에 적용한다. */
-.start-screen {
+.screen {
     flex-grow: 1;
-    color: rgb(255, 255, 255);
-    -unity-font-definition: url("../../@Developers/RYU/Quest/UI/Fonts/Giants-Bold.ttf");
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(7, 12, 24);
+    color: rgb(237, 245, 255);
 }
 
-.start-screen-shade {
+.ambient {
+    position: absolute;
+    width: 720px;
+    height: 720px;
+    border-radius: 360px;
+    background-color: rgba(35, 168, 255, 0.12);
+}
+
+.ambient--top {
+    top: -390px;
+    right: -170px;
+}
+
+.ambient--bottom {
+    bottom: -430px;
+    left: -210px;
+    background-color: rgba(101, 75, 255, 0.13);
+}
+
+.menu-card, .options-card {
+    width: 520px;
+    padding: 54px 58px;
+    border-width: 1px;
+    border-color: rgba(148, 190, 230, 0.28);
+    border-radius: 28px;
+    background-color: rgba(14, 24, 43, 0.94);
+}
+
+.eyebrow {
+    font-size: 18px;
+    letter-spacing: 8px;
+    color: rgb(79, 203, 255);
+    -unity-text-align: middle-center;
+}
+
+.title {
+    margin-top: 12px;
+    font-size: 38px;
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+    -unity-text-align: middle-center;
+}
+
+.subtitle {
+    margin-top: 14px;
+    font-size: 17px;
+    color: rgb(163, 183, 207);
+    -unity-text-align: middle-center;
+}
+
+.divider {
+    height: 1px;
+    margin-top: 34px;
+    margin-bottom: 28px;
+    background-color: rgba(145, 185, 224, 0.2);
+}
+
+.menu-button {
+    height: 58px;
+    margin-top: 12px;
+    border-width: 1px;
+    border-color: rgba(127, 169, 211, 0.34);
+    border-radius: 14px;
+    background-color: rgba(31, 48, 73, 0.8);
+    color: rgb(231, 241, 252);
+    font-size: 20px;
+    -unity-font-style: bold;
+}
+
+.menu-button:hover {
+    background-color: rgb(42, 67, 98);
+    border-color: rgb(83, 196, 255);
+}
+
+.menu-button--primary {
+    background-color: rgb(28, 145, 209);
+    border-color: rgb(77, 206, 255);
+    color: white;
+}
+
+.menu-button--primary:hover {
+    background-color: rgb(38, 169, 232);
+}
+
+.menu-button--quiet {
+    background-color: rgba(22, 33, 51, 0.62);
+    color: rgb(174, 193, 215);
+}
+
+.modal-layer {
     position: absolute;
     left: 0;
     right: 0;
     top: 0;
     bottom: 0;
-    background-color: rgba(4, 8, 13, 0.42);
-}
-
-.start-vignette {
-    position: absolute;
-    width: 760px;
-    height: 760px;
-    border-radius: 380px;
-    background-color: rgba(125, 199, 255, 0.09);
-}
-
-.start-vignette--top {
-    top: -470px;
-    left: -310px;
-}
-
-.start-vignette--bottom {
-    right: -380px;
-    bottom: -520px;
-    background-color: rgba(110, 140, 190, 0.08);
-}
-
-.start-layout {
-    flex-grow: 1;
-    justify-content: center;
-    align-items: flex-start;
-    padding-left: 8%;
-}
-
-.start-panel,
-.start-modal-panel {
-    width: 520px;
-    padding: 34px 42px 30px 42px;
-    border-width: 1px;
-    border-color: rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
-    background-color: rgba(16, 22, 29, 0.94);
-}
-
-.start-header {
-    flex-shrink: 0;
-}
-
-.start-eyebrow {
-    font-size: 11px;
-    letter-spacing: 3px;
-    color: rgba(125, 199, 255, 0.92);
-}
-
-.start-title {
-    margin-top: 3px;
-    font-size: 36px;
-    letter-spacing: 1px;
-    color: rgb(255, 255, 255);
-}
-
-.start-subtitle,
-.start-modal-subtitle {
-    margin-top: 6px;
-    font-size: 15px;
-    white-space: normal;
-    color: rgba(255, 255, 255, 0.58);
-}
-
-.start-divider {
-    height: 1px;
-    margin-top: 20px;
-    margin-bottom: 14px;
-    background-color: rgba(255, 255, 255, 0.16);
-}
-
-.start-button-group {
-    flex-grow: 1;
-}
-
-.start-button {
-    height: 44px;
-    margin-top: 10px;
-    padding: 0;
-    flex-direction: row;
     align-items: center;
-    border-width: 0;
-    border-radius: 7px;
-    background-color: rgba(255, 255, 255, 0.9);
-    color: rgba(25, 25, 25, 0.86);
-    -unity-text-align: middle-left;
+    justify-content: center;
+    background-color: rgba(3, 7, 15, 0.78);
 }
 
-.start-button--first {
-    margin-top: 0;
+.options-card {
+    width: 560px;
 }
 
-.start-button:hover,
-.start-button:focus {
-    background-color: rgb(255, 255, 255);
-    color: rgb(25, 25, 25);
-}
-
-.start-button:active,
-.start-button--accent:active {
-    background-color: rgb(125, 199, 255);
-}
-
-.start-button:disabled {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: rgba(25, 25, 25, 0.26);
-    opacity: 0.58;
-}
-
-.start-button--quiet {
-    background-color: rgba(255, 255, 255, 0.76);
-}
-
-.start-button-indicator {
-    width: 4px;
-    min-width: 4px;
-    height: 24px;
-    margin-left: 8px;
-    margin-right: 10px;
-    border-radius: 2px;
-    background-color: rgba(125, 199, 255, 0);
-}
-
-.start-button:hover .start-button-indicator,
-.start-button:focus .start-button-indicator,
-.start-button:active .start-button-indicator {
-    background-color: rgb(125, 199, 255);
-}
-
-.start-button-icon {
-    width: 23px;
-    min-width: 23px;
-    height: 23px;
-    margin-right: 12px;
-    -unity-background-scale-mode: scale-to-fit;
-}
-
-.start-icon--play {
-    background-image: url("../Pause/FixedUI/Icons/play_arrow_48dp_000000_FILL0_wght400_GRAD0_opsz48.png");
-}
-
-.start-icon--continue {
-    background-image: url("../Pause/FixedUI/Icons/replay_48dp_000000_FILL0_wght400_GRAD0_opsz48.png");
-}
-
-.start-icon--options {
-    background-image: url("../Pause/FixedUI/Icons/settings_48dp_000000_FILL0_wght400_GRAD0_opsz48.png");
-}
-
-.start-icon--exit {
-    background-image: url("../Pause/FixedUI/Icons/home_48dp_000000_FILL0_wght400_GRAD0_opsz48.png");
-}
-
-.start-button-label {
-    flex-grow: 1;
-    font-size: 17px;
-    color: rgba(25, 25, 25, 0.86);
-}
-
-.start-button-label--center {
+.options-title {
+    margin-bottom: 34px;
+    font-size: 32px;
+    -unity-font-style: bold;
     -unity-text-align: middle-center;
 }
 
-.start-save-notice {
+.field-label {
+    margin-bottom: 14px;
+    font-size: 18px;
+    color: rgb(202, 220, 239);
+}
+
+.volume-slider {
+    height: 38px;
+}
+
+.volume-slider .unity-base-slider__tracker {
+    height: 8px;
+    border-radius: 4px;
+    background-color: rgb(35, 54, 78);
+}
+
+.volume-slider .unity-base-slider__dragger {
+    width: 24px;
+    height: 24px;
+    border-radius: 12px;
+    background-color: rgb(75, 207, 255);
+}
+
+.volume-scale {
+    flex-direction: row;
+    justify-content: space-between;
+    color: rgb(128, 151, 178);
+    font-size: 13px;
+}
+
+.close-button {
+    margin-top: 36px;
+}
+
+/* 두 번째 볼륨부터는 위 슬라이더와 간격을 벌린다. */
+.field-label--spaced {
+    margin-top: 22px;
+}
+
+/* 저장 데이터가 없거나 손상된 경우의 안내 (F-001 1.5, 1.8). 평소에는 자리를 차지하지 않는다. */
+.save-notice {
     display: none;
-    margin-top: 14px;
-    font-size: 14px;
-    color: rgb(255, 190, 130);
+    margin-top: 18px;
+    font-size: 15px;
+    color: rgb(232, 168, 120);
     white-space: normal;
     -unity-text-align: middle-center;
 }
@@ -187,94 +170,15 @@
     display: flex;
 }
 
-.start-input-hint {
-    margin-top: 15px;
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.34);
-    -unity-text-align: middle-center;
-}
-
-.start-modal-layer {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    align-items: center;
-    justify-content: center;
-    background-color: rgba(3, 7, 12, 0.82);
-}
-
-.start-modal-panel--options {
-    width: 570px;
-    min-height: 510px;
-}
-
-.start-modal-panel--confirm {
-    width: 520px;
-    min-height: 230px;
-    justify-content: center;
-}
-
-.start-modal-title {
-    margin-top: 2px;
-    font-size: 30px;
-    color: rgb(255, 255, 255);
-}
-
-.start-modal-title--center {
-    -unity-text-align: middle-center;
-}
-
-.start-slider {
-    height: 48px;
-    margin-top: 8px;
-    font-size: 15px;
-    color: rgba(255, 255, 255, 0.84);
-}
-
-.start-slider .unity-base-field__label {
-    min-width: 105px;
-    color: rgba(255, 255, 255, 0.76);
-}
-
-.start-slider .unity-base-slider__tracker {
-    height: 5px;
-    background-color: rgba(255, 255, 255, 0.2);
-}
-
-.start-slider .unity-base-slider__dragger {
-    width: 16px;
-    height: 16px;
-    border-width: 2px;
-    border-color: rgb(255, 255, 255);
-    background-color: rgb(125, 199, 255);
-}
-
-.start-button--footer {
-    margin-top: 20px;
-}
-
-.start-confirm-message {
-    margin-top: 18px;
-    margin-bottom: 28px;
+.confirm-message {
+    margin-bottom: 30px;
     font-size: 17px;
-    color: rgba(255, 255, 255, 0.72);
+    color: rgb(202, 220, 239);
     white-space: normal;
     -unity-text-align: middle-center;
 }
 
-.start-confirm-row {
-    flex-direction: row;
-    justify-content: space-between;
-}
-
-.start-button--inline {
-    flex-grow: 1;
-    margin-left: 5px;
-    margin-right: 5px;
-}
-
-.start-button--accent {
-    background-color: rgb(255, 255, 255);
+/* 비활성 버튼은 눌리지 않는다는 것이 한눈에 보여야 한다 (F-001 1.5). */
+.menu-button:disabled {
+    opacity: 0.45;
 }
