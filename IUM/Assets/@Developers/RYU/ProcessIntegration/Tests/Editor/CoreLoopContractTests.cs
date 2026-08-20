@@ -26,6 +26,7 @@ namespace IUM.CoreLoopVerification.Tests
         const string ProcessPath = "Assets/@AddressableAssets/Data/Static/process.json";
         const string DialoguePath = "Assets/@AddressableAssets/Data/Static/dialogue.json";
         const string CutscenePath = "Assets/@AddressableAssets/Data/Static/cutscene.json";
+        const string TutorialScenePath = "Assets/@Developers/RYU/Scenes/Dev/TutorialScene.unity";
 
         static readonly StringComparer Names = StringComparer.OrdinalIgnoreCase;
 
@@ -264,6 +265,28 @@ namespace IUM.CoreLoopVerification.Tests
                 "연결 계층이 공정 진입을 동기화할 ProcessChanged 이벤트가 없습니다.");
         }
 
+        [Test]
+        public void TutorialOutlineGuide_CoversEveryObjectInteractionStep()
+        {
+            var sceneText = File.ReadAllText(Absolute(TutorialScenePath));
+            AssertSceneContainsScript(sceneText, "Assets/@Scripts/Process/TutorialOutlineGuide.cs");
+            AssertSceneContainsScript(sceneText, "Assets/QuickOutline/Scripts/Outline.cs");
+
+            Assert.That(File.Exists(Absolute("Assets/QuickOutline/Resources/Materials/OutlineMask.mat")), Is.True);
+            Assert.That(File.Exists(Absolute("Assets/QuickOutline/Resources/Materials/OutlineFill.mat")), Is.True);
+
+            var processFile = ReadJson<ProcessFile>(ProcessPath);
+            var tutorial = processFile.processes.Single(process => Names.Equals(process.process, "tutorial"));
+            var point = tutorial.steps.Single(step => Names.Equals(step.condition, "point"));
+            var grab = tutorial.steps.Single(step => Names.Equals(step.condition, "grab"));
+            var place = tutorial.steps.Single(step => Names.Equals(step.condition, "place"));
+
+            Assert.That(point.target, Is.EqualTo("tool_saw"));
+            Assert.That(grab.target, Is.EqualTo("tool_saw"));
+            Assert.That(place.target, Is.EqualTo("socket_bench"));
+            Assert.That(place.unlock, Does.Contain("tool_saw"));
+        }
+
         static string InvokeBridgeSignal(string processName)
         {
             var bridge = RuntimeType("MainPlayProcessBridge");
@@ -381,6 +404,7 @@ namespace IUM.CoreLoopVerification.Tests
             public string id;
             public string condition;
             public string target;
+            public string[] unlock;
             public float amount = 1f;
             public string introDialogue;
             public string retryDialogue;

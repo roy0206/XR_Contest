@@ -529,6 +529,7 @@ public static class DevSceneBuilder
         var runner = new GameObject("ProcessRunner");
         var component = runner.AddComponent<ProcessRunner>();
         runner.AddComponent<PlayerPoseTracker>();
+        var outlineGuide = runner.AddComponent<TutorialOutlineGuide>();
 
         var serialized = new SerializedObject(component);
         serialized.FindProperty("player").objectReferenceValue = Object.FindAnyObjectByType<Player>();
@@ -536,6 +537,10 @@ public static class DevSceneBuilder
         // 씬을 직접 열었을 때 저장된 진행이 다른 공정을 가리켜도 튜토리얼이 돌아가게 한다.
         serialized.FindProperty("sceneProcess").enumValueIndex = (int)ProcessId.Tutorial;
         serialized.ApplyModifiedPropertiesWithoutUndo();
+
+        var outlineSerialized = new SerializedObject(outlineGuide);
+        outlineSerialized.FindProperty("runner").objectReferenceValue = component;
+        outlineSerialized.ApplyModifiedPropertiesWithoutUndo();
 
         CreateSubtitleView();
         CreateCutsceneView();
