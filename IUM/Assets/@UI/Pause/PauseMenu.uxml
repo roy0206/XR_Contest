@@ -1,16 +1,48 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <Style src="PauseMenu.uss" />
     <ui:VisualElement name="pause-root" class="pause-root">
-        <ui:VisualElement name="pause-menu-panel" class="pause-panel">
-            <ui:Label text="일시정지" class="pause-title" />
-            <ui:Button name="resume-button" text="계속하기" class="pause-button" />
-            <ui:Button name="pause-options-button" text="옵션" class="pause-button" />
-            <ui:Button name="restart-process-button" text="공정 다시 시작" class="pause-button" />
-            <ui:Button name="main-menu-button" text="메인 화면으로" class="pause-button" />
+        <ui:VisualElement class="pause-screen-shade" picking-mode="Ignore" />
+
+        <ui:VisualElement name="pause-menu-panel" class="pause-panel pause-panel--main">
+            <ui:VisualElement class="pause-header" picking-mode="Ignore">
+                <ui:Label text="IUM" class="pause-eyebrow" />
+                <ui:Label text="메인 메뉴" class="pause-title" />
+                <ui:Label text="숨을 고르고, 손을 다시 잡을 준비가 되면 이어가시게." class="pause-subtitle" />
+            </ui:VisualElement>
+            <ui:VisualElement class="pause-divider" picking-mode="Ignore" />
+
+            <ui:VisualElement class="pause-button-group">
+                <ui:Button name="resume-button" class="pause-button pause-button--first">
+                    <ui:VisualElement class="pause-button-indicator" picking-mode="Ignore" />
+                    <ui:VisualElement class="pause-button-icon pause-icon--resume" picking-mode="Ignore" />
+                    <ui:Label text="계속하기" class="pause-button-label" picking-mode="Ignore" />
+                    <ui:Label text="ESC" class="pause-button-key" picking-mode="Ignore" />
+                </ui:Button>
+                <ui:Button name="pause-options-button" class="pause-button">
+                    <ui:VisualElement class="pause-button-indicator" picking-mode="Ignore" />
+                    <ui:VisualElement class="pause-button-icon pause-icon--options" picking-mode="Ignore" />
+                    <ui:Label text="옵션" class="pause-button-label" picking-mode="Ignore" />
+                </ui:Button>
+                <ui:Button name="restart-process-button" class="pause-button">
+                    <ui:VisualElement class="pause-button-indicator" picking-mode="Ignore" />
+                    <ui:VisualElement class="pause-button-icon pause-icon--restart" picking-mode="Ignore" />
+                    <ui:Label text="공정 다시 시작" class="pause-button-label" picking-mode="Ignore" />
+                </ui:Button>
+                <ui:Button name="main-menu-button" class="pause-button">
+                    <ui:VisualElement class="pause-button-indicator" picking-mode="Ignore" />
+                    <ui:VisualElement class="pause-button-icon pause-icon--home" picking-mode="Ignore" />
+                    <ui:Label text="메인 화면으로" class="pause-button-label" picking-mode="Ignore" />
+                </ui:Button>
+            </ui:VisualElement>
         </ui:VisualElement>
 
-        <ui:VisualElement name="pause-options-panel" class="pause-panel">
-            <ui:Label text="옵션" class="pause-title" />
+        <ui:VisualElement name="pause-options-panel" class="pause-panel pause-panel--options">
+            <ui:VisualElement class="pause-header" picking-mode="Ignore">
+                <ui:Label text="IUM" class="pause-eyebrow" />
+                <ui:Label text="옵션" class="pause-title" />
+                <ui:Label text="소리의 크기를 조절할 수 있습니다." class="pause-subtitle" />
+            </ui:VisualElement>
+            <ui:VisualElement class="pause-divider" picking-mode="Ignore" />
 
             <ui:Slider name="music-volume-slider" label="음악 볼륨" low-value="0" high-value="100"
                        show-input-field="true" class="pause-slider" />
@@ -21,16 +53,25 @@
             <ui:Slider name="video-volume-slider" label="영상 볼륨" low-value="0" high-value="100"
                        show-input-field="true" class="pause-slider" />
 
-            <ui:Button name="close-options-button" text="뒤로" class="pause-button" />
+            <ui:Button name="close-options-button" class="pause-button pause-button--footer">
+                <ui:VisualElement class="pause-button-indicator" picking-mode="Ignore" />
+                <ui:Label text="뒤로" class="pause-button-label" picking-mode="Ignore" />
+            </ui:Button>
         </ui:VisualElement>
 
-        <ui:VisualElement name="pause-confirm-panel" class="pause-panel">
+        <ui:VisualElement name="pause-confirm-panel" class="pause-panel pause-panel--confirm">
+            <ui:Label text="메인 화면으로" class="pause-title pause-title--confirm" />
             <ui:Label name="confirm-message" class="pause-message"
-                      text="현재 공정의 작업 내용은 저장되지 않습니다. 메인 화면으로 돌아가시겠습니까?" />
+                      text="현재 공정의 작업 내용은 저장되지 않습니다.&#10;메인 화면으로 돌아가시겠습니까?" />
             <ui:VisualElement class="pause-confirm-row">
-                <ui:Button name="confirm-no-button" text="취소" class="pause-button pause-button--inline" />
-                <ui:Button name="confirm-yes-button" text="메인 화면으로"
-                           class="pause-button pause-button--inline pause-button--danger" />
+                <ui:Button name="confirm-no-button" class="pause-button pause-button--inline pause-button--first">
+                    <ui:Label text="취소" class="pause-button-label pause-button-label--center" picking-mode="Ignore" />
+                </ui:Button>
+                <ui:Button name="confirm-yes-button"
+                           class="pause-button pause-button--inline pause-button--danger pause-button--first">
+                    <ui:Label text="메인 화면으로" class="pause-button-label pause-button-label--center"
+                              picking-mode="Ignore" />
+                </ui:Button>
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

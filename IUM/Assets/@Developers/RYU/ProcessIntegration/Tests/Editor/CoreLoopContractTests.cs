@@ -29,6 +29,9 @@ namespace IUM.CoreLoopVerification.Tests
         const string DialoguePath = "Assets/@AddressableAssets/Data/Static/dialogue.json";
         const string CutscenePath = "Assets/@AddressableAssets/Data/Static/cutscene.json";
         const string TutorialScenePath = "Assets/@Developers/RYU/Scenes/Dev/TutorialScene.unity";
+        const string PauseUxmlPath = "Assets/@UI/Pause/PauseMenu.uxml";
+        const string PauseUssPath = "Assets/@UI/Pause/PauseMenu.uss";
+        const string FixedUiIconPath = "Assets/@UI/Pause/FixedUI/Icons";
 
         static readonly StringComparer Names = StringComparer.OrdinalIgnoreCase;
 
@@ -255,6 +258,34 @@ namespace IUM.CoreLoopVerification.Tests
                 "Assets/@Developers/RYU/ProcessIntegration/MainPlayProcessBridge.cs");
             AssertSceneContainsScript(sceneText, "Assets/@Scripts/Dialogue/InGameDialogue.cs");
             AssertSceneContainsScript(sceneText, "Assets/@Scripts/UI/PauseController.cs");
+            AssertSceneContainsScript(sceneText, "Assets/@Scripts/UI/PauseMenuView.cs");
+
+            var pauseTemplate = File.ReadAllText(Absolute(PauseUxmlPath));
+            foreach (var elementName in new[]
+                     {
+                         "pause-root", "pause-menu-panel", "pause-options-panel", "pause-confirm-panel",
+                         "resume-button", "pause-options-button", "restart-process-button", "main-menu-button",
+                         "close-options-button", "confirm-yes-button", "confirm-no-button"
+                     })
+                StringAssert.Contains($"name=\"{elementName}\"", pauseTemplate,
+                    $"FixedUI 일시정지 메뉴의 필수 요소 '{elementName}'이 없습니다.");
+
+            var pauseStyle = File.ReadAllText(Absolute(PauseUssPath));
+            foreach (var icon in new[]
+                     {
+                         "play_arrow_48dp_000000_FILL0_wght400_GRAD0_opsz48.png",
+                         "settings_48dp_000000_FILL0_wght400_GRAD0_opsz48.png",
+                         "replay_48dp_000000_FILL0_wght400_GRAD0_opsz48.png",
+                         "home_48dp_000000_FILL0_wght400_GRAD0_opsz48.png"
+                     })
+            {
+                Assert.That(File.Exists(Absolute($"{FixedUiIconPath}/{icon}")), Is.True,
+                    $"FixedUI 원본 아이콘 '{icon}'이 없습니다.");
+                Assert.That(File.Exists(Absolute($"{FixedUiIconPath}/{icon}.meta")), Is.True,
+                    $"FixedUI 원본 아이콘 메타 '{icon}.meta'가 없습니다.");
+                StringAssert.Contains($"FixedUI/Icons/{icon}", pauseStyle,
+                    $"일시정지 메뉴가 FixedUI 원본 아이콘 '{icon}'을 참조하지 않습니다.");
+            }
 
             var enabledScenes = EditorBuildSettings.scenes
                 .Where(scene => scene.enabled)
