@@ -13,8 +13,15 @@ using UnityEngine.UIElements;
 [RequireComponent(typeof(UIDocument))]
 public sealed class StartMenuController : MonoBehaviour
 {
+    [Tooltip("외부(예: FixedUI 3D 모니터) 메뉴가 기본 버튼을 대신 표시할 때 사용합니다.")]
+    [SerializeField] bool externalPrimaryMenu;
+
     UIDocument _document;
     VisualElement _root;
+    VisualElement _screen;
+    VisualElement _menuCard;
+    VisualElement _ambientTop;
+    VisualElement _ambientBottom;
     VisualElement _optionsPanel;
     VisualElement _confirmPanel;
     Label _saveNotice;
@@ -37,6 +44,9 @@ public sealed class StartMenuController : MonoBehaviour
     /// <summary>Used until the cutscene table is loaded, and matches its authored default.</summary>
     const float DefaultFadeSeconds = 0.5f;
 
+    /// <summary>외부 메뉴가 이어하기 버튼의 활성 상태를 표시할 때 사용한다.</summary>
+    public bool CanContinue => _dataReady && !_busy && GameFlow.Instance.CanContinue;
+
     void Awake() => _document = GetComponent<UIDocument>();
 
     void OnEnable()
@@ -44,6 +54,10 @@ public sealed class StartMenuController : MonoBehaviour
         if (_document?.visualTreeAsset == null) return;
 
         var root = _document.rootVisualElement;
+        _screen = root.Q<VisualElement>("screen");
+        _menuCard = root.Q<VisualElement>(className: "menu-card");
+        _ambientTop = root.Q<VisualElement>(className: "ambient--top");
+        _ambientBottom = root.Q<VisualElement>(className: "ambient--bottom");
         _optionsPanel = root.Q<VisualElement>("options-panel");
         _confirmPanel = root.Q<VisualElement>("confirm-panel");
         _saveNotice = root.Q<Label>("save-notice");
@@ -66,6 +80,7 @@ public sealed class StartMenuController : MonoBehaviour
         }
 
         _root = root;
+        ApplyPrimaryMenuMode();
 
         // Resolved before the first frame: this screen comes back mid-transition after the ending,
         // and starting at full opacity would flash the menu over the blackout.
@@ -104,6 +119,10 @@ public sealed class StartMenuController : MonoBehaviour
         _volumes?.Dispose();
         _volumes = null;
         _root = null;
+        _screen = null;
+        _menuCard = null;
+        _ambientTop = null;
+        _ambientBottom = null;
     }
 
     void Update()
@@ -224,6 +243,34 @@ public sealed class StartMenuController : MonoBehaviour
         _saveNotice.text = text;
         _saveNotice.AddToClassList("save-notice--visible");
     }
+
+    /// <summary>FixedUI처럼 별도 화면이 기본 메뉴를 그릴 때 런타임에서 전환한다.</summary>
+    public void UseExternalPrimaryMenu(bool value)
+    {
+        externalPrimaryMenu = value;
+        ApplyPrimaryMenuMode();
+    }
+
+    void ApplyPrimaryMenuMode()
+    {
+        if (_screen == null) return;
+
+        _screen.style.backgroundColor = externalPrimaryMenu
+            ? new StyleColor(Color.clear)
+            : StyleKeyword.Null;
+
+        var display = externalPrimaryMenu ? DisplayStyle.None : DisplayStyle.Flex;
+        if (_menuCard != null) _menuCard.style.display = display;
+        if (_ambientTop != null) _ambientTop.style.display = display;
+        if (_ambientBottom != null) _ambientBottom.style.display = display;
+    }
+
+    // FixedUI의 원본 uGUI 버튼은 아래의 공개 진입점만 호출한다. 저장/전환/옵션 처리는
+    // 계속 이 컨트롤러 한 곳에 남겨 두어 두 메뉴 구현이 서로 다른 규칙을 갖지 않게 한다.
+    public void RequestStartNewGame() => OnStartClicked();
+    public void RequestContinue() => OnContinueClicked();
+    public void RequestOptions() => ShowOptions();
+    public void RequestExit() => OnExitClicked();
 
     /// <summary>
     /// 게임 시작 (F-001 1.4). 저장 데이터가 있으면 덮어쓰기 전에 확인부터 받는다.

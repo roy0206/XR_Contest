@@ -149,3 +149,43 @@ Unity 메뉴 `Tools > IUM > Verify Full Core Loop`, Test Runner, batchmode 세 �
 - 네트워크 TTS 및 AI 응답
 
 이 항목에서 문제가 발견되더라도 타 개발자의 공정 코드는 이번 브랜치에서 수정하지 않는다.
+
+---
+
+## FixedUI.zip 원본 시작 화면 통합
+
+### 적용 원칙
+
+- `FixedUI.zip`을 별도 Unity 프로젝트로 풀어 원본 `SampleScene`의 계층, 씬 의존성, 재질, 라이트맵, 볼륨, 버튼 영구 이벤트를 조사했다.
+- 기존 시작 화면을 비슷하게 재디자인하지 않고, 원본 씬 내용을 `Assets/@Scenes/StartScene.unity`의 본문으로 사용했다. 기존 StartScene의 `.meta` GUID는 유지했다.
+- 원본의 월드 스페이스 Canvas와 3D 스튜디오, FBX, 재질, 텍스처, 스카이박스, 베이크 라이트맵, 반사 프로브를 `Assets/@Developers/RYU/Start/FixedUI` 아래에 이식했다.
+- 기존 HUD 관련 커밋(`ed4bf0f`, `5825f2e`)은 유지했고, 이번 변경은 시작 화면 통합에 한정했다.
+
+### 호환 연결
+
+- 원본 `PauseMenuController`의 씬 GUID를 `FixedUIStartMenuAdapter`가 이어받아 버튼의 기존 persistent onClick 연결을 보존했다.
+- 원본 버튼 의미를 시작 화면에 맞게 `이어하기`, `옵션`, `게임 시작`, `나가기`로 연결했다.
+- 실제 저장 확인, 새 게임, 이어하기, 옵션, 종료 처리는 기존 `StartMenuController` 공개 진입점으로 위임했다.
+- UI Toolkit의 기존 메뉴 카드만 숨기고 옵션 패널과 확인 패널은 그대로 재사용했다.
+- 월드 스페이스 Canvas의 이벤트 카메라를 Main Camera로 런타임 연결했다.
+- 원본 PC URP 에셋을 StartScene 동안만 적용하고 씬 파괴 시 이전 파이프라인으로 복구한다.
+- 원본 SDF에 없는 한글 글리프 문제는 기존 프로젝트의 `Giants-Bold.ttf`로 런타임 TMP 폰트를 만들어 해결했다.
+
+### 원본 대조 기록
+
+- 원본과 이식본의 씬 렌더 상태 311줄을 비교했다. 경로와 품질 레벨 이름을 제외한 렌더러, 재질, 셰이더, 색상, 텍스처, 라이트, 라이트맵 인덱스가 일치했다.
+- 최초 원본 캡처에서 보였던 보라색은 ZIP의 직렬화된 에셋 값이 아니라 이전 임포트 캐시에 남은 결과였다. 원본 프로젝트를 전체 재임포트한 뒤에는 원본도 검정·회색으로 렌더링됐다.
+- 원본에 없는 추가 글로벌 볼륨과 진단용 URP 전역 설정은 최종본에서 제거했다. ProjectSettings는 수정하지 않았다.
+
+### 재사용 검증
+
+- Unity 메뉴: `Tools > IUM > Validation > Run FixedUI Start Screen Probe`
+- 결과: `Temp/FixedUIValidation/RuntimeReport.txt`
+- 캡처: `Temp/FixedUIValidation/RuntimeGame.png`
+- 검사 항목: 어댑터/기존 시작 컨트롤러/카메라, 누락 스크립트, 버튼 4개, 이벤트 카메라, 원본 URP, 베이크 라이트맵, 옵션 persistent listener, 옵션 패널 열림.
+- 최종 실행 결과: 13개 항목 모두 PASS.
+
+### 보호한 변경
+
+- 타 개발자의 목공 공정 코드와 공포 씬은 수정하지 않았다.
+- 기존 미커밋 파일 `Assets/warehouseFin/Scenes/SampleScene.unity.meta`는 스테이징 및 커밋에서 제외한다.
