@@ -1,59 +1,87 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <Style src="StartMenu.uss" />
-    <ui:VisualElement name="screen" class="screen">
-        <ui:VisualElement class="ambient ambient--top" />
-        <ui:VisualElement class="ambient ambient--bottom" />
-        <ui:VisualElement class="menu-card">
-            <ui:Label text="IUM" class="eyebrow" />
-            <ui:Label text="PROJECT 이음" class="title" />
-            <ui:Label text="숭례문 복원 현장으로 들어갈 준비가 되셨나요?" class="subtitle" />
-            <ui:VisualElement class="divider" />
-            <ui:Button name="start-button" text="게임 시작" class="menu-button menu-button--primary" />
-            <ui:Button name="continue-button" text="이어하기" class="menu-button" />
-            <ui:Button name="options-button" text="옵션" class="menu-button" />
-            <ui:Button name="exit-button" text="나가기" class="menu-button menu-button--quiet" />
-            <ui:Label name="save-notice" class="save-notice" />
-        </ui:VisualElement>
+    <ui:VisualElement name="screen" class="start-screen">
+        <ui:VisualElement class="start-screen-shade" picking-mode="Ignore" />
+        <ui:VisualElement class="start-vignette start-vignette--top" picking-mode="Ignore" />
+        <ui:VisualElement class="start-vignette start-vignette--bottom" picking-mode="Ignore" />
 
-        <ui:VisualElement name="options-panel" class="modal-layer">
-            <ui:VisualElement class="options-card">
-                <ui:Label name="options-title" text="옵션" class="options-title" />
+        <ui:VisualElement class="start-layout">
+            <ui:VisualElement class="start-panel">
+                <ui:VisualElement class="start-header" picking-mode="Ignore">
+                    <ui:Label text="IUM" class="start-eyebrow" />
+                    <ui:Label text="PROJECT 이음" class="start-title" />
+                    <ui:Label text="숭례문 복원 현장으로 들어갈 준비가 되셨나요?" class="start-subtitle" />
+                </ui:VisualElement>
+                <ui:VisualElement class="start-divider" picking-mode="Ignore" />
 
-                <ui:Label text="음악 볼륨" class="field-label" />
-                <ui:Slider name="music-volume-slider" low-value="0" high-value="100"
-                           show-input-field="false" class="volume-slider" />
-
-                <ui:Label text="대사 볼륨" class="field-label field-label--spaced" />
-                <ui:Slider name="dialogue-volume-slider" low-value="0" high-value="100"
-                           show-input-field="false" class="volume-slider" />
-
-                <ui:Label text="환경 볼륨" class="field-label field-label--spaced" />
-                <ui:Slider name="environment-volume-slider" low-value="0" high-value="100"
-                           show-input-field="false" class="volume-slider" />
-
-                <ui:Label text="영상 볼륨" class="field-label field-label--spaced" />
-                <ui:Slider name="video-volume-slider" low-value="0" high-value="100"
-                           show-input-field="false" class="volume-slider" />
-
-                <ui:VisualElement class="volume-scale">
-                    <ui:Label text="음소거" />
-                    <ui:Label text="최대" />
+                <ui:VisualElement class="start-button-group">
+                    <ui:Button name="start-button" class="start-button start-button--first">
+                        <ui:VisualElement class="start-button-indicator" picking-mode="Ignore" />
+                        <ui:VisualElement class="start-button-icon start-icon--play" picking-mode="Ignore" />
+                        <ui:Label text="게임 시작" class="start-button-label" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="continue-button" class="start-button">
+                        <ui:VisualElement class="start-button-indicator" picking-mode="Ignore" />
+                        <ui:VisualElement class="start-button-icon start-icon--continue" picking-mode="Ignore" />
+                        <ui:Label text="이어하기" class="start-button-label" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="options-button" class="start-button">
+                        <ui:VisualElement class="start-button-indicator" picking-mode="Ignore" />
+                        <ui:VisualElement class="start-button-icon start-icon--options" picking-mode="Ignore" />
+                        <ui:Label text="옵션" class="start-button-label" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="exit-button" class="start-button start-button--quiet">
+                        <ui:VisualElement class="start-button-indicator" picking-mode="Ignore" />
+                        <ui:VisualElement class="start-button-icon start-icon--exit" picking-mode="Ignore" />
+                        <ui:Label text="나가기" class="start-button-label" picking-mode="Ignore" />
+                    </ui:Button>
                 </ui:VisualElement>
 
-                <ui:Button name="close-options-button" text="완료"
-                           class="menu-button menu-button--primary close-button" />
+                <ui:Label name="save-notice" class="start-save-notice" />
+                <ui:Label text="마우스 또는 키보드로 메뉴를 선택할 수 있습니다." class="start-input-hint" />
             </ui:VisualElement>
         </ui:VisualElement>
 
-        <ui:VisualElement name="confirm-panel" class="modal-layer">
-            <ui:VisualElement class="options-card">
-                <ui:Label text="기존 진행 기록이 있습니다." class="options-title" />
-                <ui:Label name="confirm-message" class="confirm-message"
+        <ui:VisualElement name="options-panel" class="start-modal-layer">
+            <ui:VisualElement class="start-modal-panel start-modal-panel--options">
+                <ui:Label text="IUM" class="start-eyebrow" />
+                <ui:Label name="options-title" text="옵션" class="start-modal-title" />
+                <ui:Label text="소리의 크기를 조절할 수 있습니다." class="start-modal-subtitle" />
+                <ui:VisualElement class="start-divider" />
+
+                <ui:Slider name="music-volume-slider" label="음악 볼륨" low-value="0" high-value="100"
+                           show-input-field="true" class="start-slider" />
+                <ui:Slider name="dialogue-volume-slider" label="대사 볼륨" low-value="0" high-value="100"
+                           show-input-field="true" class="start-slider" />
+                <ui:Slider name="environment-volume-slider" label="환경 볼륨" low-value="0" high-value="100"
+                           show-input-field="true" class="start-slider" />
+                <ui:Slider name="video-volume-slider" label="영상 볼륨" low-value="0" high-value="100"
+                           show-input-field="true" class="start-slider" />
+
+                <ui:Button name="close-options-button" class="start-button start-button--footer start-button--first">
+                    <ui:VisualElement class="start-button-indicator" picking-mode="Ignore" />
+                    <ui:Label text="완료" class="start-button-label start-button-label--center" picking-mode="Ignore" />
+                </ui:Button>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="confirm-panel" class="start-modal-layer">
+            <ui:VisualElement class="start-modal-panel start-modal-panel--confirm">
+                <ui:Label text="새 게임 시작" class="start-modal-title start-modal-title--center" />
+                <ui:Label name="confirm-message" class="start-confirm-message"
                           text="새 게임을 시작하면 이전 진행 기록이 초기화됩니다." />
-                <ui:Button name="confirm-new-game-button" text="새로 시작"
-                           class="menu-button menu-button--primary" />
-                <ui:Button name="cancel-new-game-button" text="취소"
-                           class="menu-button menu-button--quiet" />
+                <ui:VisualElement class="start-confirm-row">
+                    <ui:Button name="cancel-new-game-button"
+                               class="start-button start-button--inline start-button--first">
+                        <ui:Label text="취소" class="start-button-label start-button-label--center"
+                                  picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="confirm-new-game-button"
+                               class="start-button start-button--inline start-button--accent start-button--first">
+                        <ui:Label text="새로 시작" class="start-button-label start-button-label--center"
+                                  picking-mode="Ignore" />
+                    </ui:Button>
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
