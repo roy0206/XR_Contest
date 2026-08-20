@@ -13,8 +13,8 @@ public sealed class MainPlayProcessBridge : MonoBehaviour
     public const string SawingSignal = "main.sawing.complete";
     public const string PurlinInstallSignal = "main.purlin.install";
     public const string GongpoPuzzleSignal = "main.gongpo.assembled";
-    const string PurlinPartId = "1floor";
-    const int GongpoRequiredPartCount = 37;
+    public const string PurlinPartId = "1floor";
+    public const int GongpoRequiredPartCount = 37;
 
     [SerializeField] ProcessRunner runner;
     [SerializeField] List<InkLineZone> inkLineZones = new();
@@ -30,12 +30,19 @@ public sealed class MainPlayProcessBridge : MonoBehaviour
     readonly Dictionary<InkLineZone, UnityAction> _inkListeners = new();
     readonly Dictionary<AssemblyTarget, Action<Grabbable>> _assemblyListeners = new();
     readonly HashSet<AssemblyTarget> _completedAssemblyTargets = new();
+    readonly Dictionary<Grabbable, bool> _originalGrabAccess = new();
+    readonly Dictionary<Grabbable, string> _assemblyPartIds = new();
+    readonly List<Grabbable> _inkTools = new();
+    readonly List<Grabbable> _planeTools = new();
     UnityAction _sawingListener;
+    PauseController _pauseController;
+    ProcessId? _activeProcess;
     int _completedInkLineCount;
     int _completedPurlinCount;
     int _completedGongpoCount;
     bool _sawingCompleted;
     bool _started;
+    bool _restartRequested;
 
     void Awake()
     {
@@ -44,15 +51,19 @@ public sealed class MainPlayProcessBridge : MonoBehaviour
         assemblyTargets ??= new List<AssemblyTarget>();
         if (assemblyTargets.Count == 0)
             assemblyTargets.AddRange(FindObjectsByType<AssemblyTarget>(FindObjectsSortMode.None));
+
+        CacheGatedObjects();
     }
 
     void OnEnable()
     {
-        ProcessSignalBus.Reset(MakmeokSignal);
-        ProcessSignalBus.Reset(SawingSignal);
-        ProcessSignalBus.Reset(PlaceholderSignal(ProcessId.Chiseling));
-        ProcessSignalBus.Reset(PurlinInstallSignal);
-        ProcessSignalBus.Reset(GongpoPuzzleSignal);
+        ResetAllSignals();
+
+        if (runner != null)
+        {
+            runner.ProcessChanged += OnProcessChanged;
+            runner.Completed += OnProcessCompleted;
+        }
 
         for (var i = 0; i < inkLineZones.Count; i++)
         {
@@ -70,13 +81,22 @@ public sealed class MainPlayProcessBridge : MonoBehaviour
             sawingZone.OnWorkCompleted.AddListener(_sawingListener);
         }
 
-        if (_started) BindAssemblyTargets();
+        BindPauseController();
+        ApplyAccess(null);
+
+        if (_started)
+        {
+            BindAssemblyTargets();
+            SynchronizeRunningProcess();
+        }
     }
 
     void Start()
     {
         _started = true;
         BindAssemblyTargets();
+        BindPauseController();
+        SynchronizeRunningProcess();
     }
 
     void OnDisable()
@@ -87,6 +107,15 @@ public sealed class MainPlayProcessBridge : MonoBehaviour
         if (sawingZone != null && _sawingListener != null)
             sawingZone.OnWorkCompleted.RemoveListener(_sawingListener);
 
+        if (runner != null)
+        {
+            runner.ProcessChanged -= OnProcessChanged;
+            runner.Completed -= OnProcessCompleted;
+        }
+
+        if (_pauseController != null)
+            _pauseController.ProcessRestartRequested -= OnProcessRestartRequested;
+
         foreach (var pair in _assemblyListeners)
             if (pair.Key != null && pair.Key.Snap != null)
                 pair.Key.Snap.Assembled -= pair.Value;
@@ -95,10 +124,184 @@ public sealed class MainPlayProcessBridge : MonoBehaviour
         _assemblyListeners.Clear();
         _completedAssemblyTargets.Clear();
         _sawingListener = null;
+        _pauseController = null;
+        _activeProcess = null;
         _completedInkLineCount = 0;
         _completedPurlinCount = 0;
         _completedGongpoCount = 0;
         _sawingCompleted = false;
+        _restartRequested = false;
+    }
+
+    void CacheGatedObjects()
+    {
+        foreach (var tool in FindObjectsByType<InkLineTool>(
+                     FindObjectsInactive.Include, FindObjectsSortMode.None))
+            RememberTool(tool != null ? tool.GetComponentInParent<Grabbable>(true) : null, _inkTools);
+
+        foreach (var tool in FindObjectsByType<HandPlaneTool>(
+                     FindObjectsInactive.Include, FindObjectsSortMode.None))
+            RememberTool(tool != null ? tool.GetComponentInParent<Grabbable>(true) : null, _planeTools);
+
+        foreach (var male in FindObjectsByType<MaleSnapPoint>(
+                     FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            if (male == null) continue;
+
+            var part = male.GetComponentInParent<Grabbable>(true);
+            if (part == null) continue;
+
+            RememberAccess(part);
+            _assemblyPartIds.TryAdd(part, male.mySnapID);
+        }
+    }
+
+    void RememberTool(Grabbable tool, List<Grabbable> collection)
+    {
+        if (tool == null || collection.Contains(tool)) return;
+        collection.Add(tool);
+        RememberAccess(tool);
+    }
+
+    void RememberAccess(Grabbable target)
+    {
+        if (target != null) _originalGrabAccess.TryAdd(target, target.GrabEnabled);
+    }
+
+    void BindPauseController()
+    {
+        if (_pauseController != null) return;
+        if (!PauseController.TryGetInstance(out var pause)) return;
+
+        _pauseController = pause;
+        _pauseController.ProcessRestartRequested += OnProcessRestartRequested;
+    }
+
+    void SynchronizeRunningProcess()
+    {
+        if (runner != null && runner.IsRunning) OnProcessChanged(runner.Process);
+    }
+
+    void OnProcessChanged(ProcessId process)
+    {
+        if (_activeProcess == process) return;
+
+        _activeProcess = process;
+        ResetProcessState(process);
+        ApplyAccess(process);
+        BindAssemblyTargets();
+        SynchronizeAssemblyState(process);
+
+        Debug.Log($"[MainPlay] 공정 연결 상태를 '{process}'에 맞췄습니다.", this);
+    }
+
+    void OnProcessCompleted(ProcessId process)
+    {
+        if (_activeProcess != process) return;
+        ApplyAccess(null);
+    }
+
+    void ResetProcessState(ProcessId process)
+    {
+        var signal = SignalForProcess(process);
+        if (!string.IsNullOrEmpty(signal)) ProcessSignalBus.Reset(signal);
+
+        switch (process)
+        {
+            case ProcessId.Makmeok:
+                _completedInkLineCount = 0;
+                break;
+            case ProcessId.Sawing:
+                _sawingCompleted = false;
+                break;
+            case ProcessId.PurlinInstall:
+                _completedAssemblyTargets.Clear();
+                _completedPurlinCount = 0;
+                break;
+            case ProcessId.GongpoPuzzle:
+                _completedAssemblyTargets.Clear();
+                _completedGongpoCount = 0;
+                break;
+        }
+    }
+
+    void ResetAllSignals()
+    {
+        ProcessSignalBus.Reset(MakmeokSignal);
+        ProcessSignalBus.Reset(SawingSignal);
+        ProcessSignalBus.Reset(PlaceholderSignal(ProcessId.Chiseling));
+        ProcessSignalBus.Reset(PurlinInstallSignal);
+        ProcessSignalBus.Reset(GongpoPuzzleSignal);
+    }
+
+    void ApplyAccess(ProcessId? process)
+    {
+        SetToolAccess(_inkTools, process == ProcessId.Makmeok);
+        SetToolAccess(_planeTools, process == ProcessId.Sawing);
+
+        foreach (var pair in _assemblyPartIds)
+        {
+            var part = pair.Key;
+            if (part == null) continue;
+
+            var assemblyPart = part.GetComponent<AssemblyPart>() ?? part.GetComponentInChildren<AssemblyPart>();
+            var assembled = assemblyPart != null && assemblyPart.isAssembled;
+            var available = process.HasValue &&
+                            IsAssemblyPartAvailable(process.Value, pair.Value, assembled) &&
+                            _originalGrabAccess.GetValueOrDefault(part);
+
+            SetGrabAccess(part, available);
+        }
+    }
+
+    void SetToolAccess(List<Grabbable> tools, bool available)
+    {
+        for (var i = 0; i < tools.Count; i++)
+        {
+            var tool = tools[i];
+            if (tool == null) continue;
+            SetGrabAccess(tool, available && _originalGrabAccess.GetValueOrDefault(tool));
+        }
+    }
+
+    static void SetGrabAccess(Grabbable target, bool available)
+    {
+        if (target != null && target.GrabEnabled != available) target.GrabEnabled = available;
+    }
+
+    public static bool IsAssemblyPartAvailable(ProcessId process, string partId, bool assembled)
+    {
+        if (assembled || string.IsNullOrWhiteSpace(partId)) return false;
+
+        var isPurlin = string.Equals(partId, PurlinPartId, StringComparison.Ordinal);
+        return process == ProcessId.PurlinInstall ? isPurlin :
+               process == ProcessId.GongpoPuzzle && !isPurlin;
+    }
+
+    void OnProcessRestartRequested()
+    {
+        if (_restartRequested) return;
+
+        var sceneName = gameObject.scene.name;
+        if (string.IsNullOrWhiteSpace(sceneName) || !Application.CanStreamedLevelBeLoaded(sceneName))
+        {
+            Debug.LogError($"[MainPlay] 공정 재시작 씬 '{sceneName}'을 Build Settings에서 찾을 수 없습니다.", this);
+            return;
+        }
+
+        if (!SceneController.TryGetInstance(out var scenes))
+        {
+            Debug.LogError("[MainPlay] SceneController가 없어 공정을 다시 시작할 수 없습니다.", this);
+            return;
+        }
+
+        _restartRequested = true;
+        InGameDialogue.TryGetInstance(out var dialogue);
+        dialogue?.Stop();
+        ResetAllSignals();
+
+        Debug.Log($"[MainPlay] 현재 공정 '{runner?.Process}'을 처음부터 다시 시작합니다.", this);
+        scenes.LoadScene(sceneName);
     }
 
     void OnInkLineCompleted(InkLineZone zone)
@@ -132,18 +335,33 @@ public sealed class MainPlayProcessBridge : MonoBehaviour
             Action<Grabbable> listener = part => OnAssemblyCompleted(target, part);
             _assemblyListeners.Add(target, listener);
             target.Snap.Assembled += listener;
+        }
+    }
 
-            if (target.Snap.IsOccupied)
-                OnAssemblyCompleted(target, target.Snap.Occupant);
+    void SynchronizeAssemblyState(ProcessId process)
+    {
+        if (process is not ProcessId.PurlinInstall and not ProcessId.GongpoPuzzle) return;
+
+        for (var i = 0; i < assemblyTargets.Count; i++)
+        {
+            var target = assemblyTargets[i];
+            if (target == null || target.Snap == null || !target.Snap.IsOccupied) continue;
+            OnAssemblyCompleted(target, target.Snap.Occupant);
         }
     }
 
     void OnAssemblyCompleted(AssemblyTarget target, Grabbable part)
     {
-        if (target == null || part == null || !_completedAssemblyTargets.Add(target)) return;
+        if (target == null || part == null || runner == null) return;
 
         var male = part.GetComponentInChildren<MaleSnapPoint>();
-        if (male != null && string.Equals(male.mySnapID, PurlinPartId, StringComparison.Ordinal))
+        if (male == null) return;
+
+        var isPurlin = string.Equals(male.mySnapID, PurlinPartId, StringComparison.Ordinal);
+        var expectedProcess = isPurlin ? ProcessId.PurlinInstall : ProcessId.GongpoPuzzle;
+        if (runner.Process != expectedProcess || !_completedAssemblyTargets.Add(target)) return;
+
+        if (isPurlin)
         {
             _completedPurlinCount++;
             ProcessSignalBus.Add(PurlinInstallSignal);
@@ -174,6 +392,16 @@ public sealed class MainPlayProcessBridge : MonoBehaviour
     public static string PlaceholderSignal(ProcessId process) => process switch
     {
         ProcessId.Chiseling => "main.placeholder.chiseling",
+        _ => null
+    };
+
+    public static string SignalForProcess(ProcessId process) => process switch
+    {
+        ProcessId.Makmeok => MakmeokSignal,
+        ProcessId.Sawing => SawingSignal,
+        ProcessId.Chiseling => PlaceholderSignal(ProcessId.Chiseling),
+        ProcessId.PurlinInstall => PurlinInstallSignal,
+        ProcessId.GongpoPuzzle => GongpoPuzzleSignal,
         _ => null
     };
 

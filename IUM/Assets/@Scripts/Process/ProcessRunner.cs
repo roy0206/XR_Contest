@@ -89,6 +89,12 @@ public sealed class ProcessRunner : MonoBehaviour
     /// <summary>공정을 마치고 다음 목적지로 넘어가기 직전.</summary>
     public event Action<ProcessId> Completed;
 
+    /// <summary>
+    /// 새 공정의 상태가 초기화되고 진입 대사를 요청한 직후. 같은 씬에서 여러 제작 공정을
+    /// 이어 갈 때 외부 연결 계층이 공정별 신호와 접근 권한을 맞추는 데 사용한다.
+    /// </summary>
+    public event Action<ProcessId> ProcessChanged;
+
     void Awake()
     {
         if (player == null) player = FindAnyObjectByType<Player>();
@@ -102,6 +108,23 @@ public sealed class ProcessRunner : MonoBehaviour
     {
         _table = await LoadTableAsync();
         _table.Prepare();
+
+        // InGameDialogue도 DataManager를 기다리므로 둘의 async continuation 순서는 보장되지 않는다.
+        // 러너가 먼저 돌아오면 첫 진입 대사가 소실되므로, 씬에 대사 시스템이 있을 때는 준비를
+        // 명시적으로 기다린 뒤 첫 공정을 시작한다.
+        if (InGameDialogue.TryGetInstance(out var dialogue))
+        {
+            try
+            {
+                await dialogue.InitializeAsync();
+            }
+            catch (Exception exception)
+            {
+                // 대사는 자막 없이도 공정 진행을 막지 않아야 한다. PlayDialogue가 남기는 경고와
+                // 구분되도록 초기화 실패 원인만 기록하고 공정은 계속 시작한다.
+                Debug.LogWarning($"[Process] 대사 시스템 준비에 실패해 대사 없이 진행합니다: {exception.Message}");
+            }
+        }
 
         if (this == null) return;
 
@@ -135,6 +158,7 @@ public sealed class ProcessRunner : MonoBehaviour
             _steps.Add(new ProcessStep(_definition.Steps[i], player));
 
         BeginIntro();
+        ProcessChanged?.Invoke(process);
         return true;
     }
 
