@@ -44,6 +44,50 @@
     background-color: rgb(255, 205, 96);
 }
 
+.quest-card--blocked {
+    border-color: rgba(255, 205, 96, 0.55);
+}
+
+.quest-card--blocked .quest-accent,
+.quest-card--blocked .quest-hint-mark,
+.quest-card--blocked .quest-progress-fill {
+    background-color: rgb(255, 205, 96);
+}
+
+.quest-card--blocked .quest-state {
+    color: rgb(255, 220, 139);
+}
+
+.quest-card--complete {
+    border-color: rgba(105, 224, 164, 0.65);
+    background-color: rgba(14, 30, 25, 0.92);
+}
+
+.quest-card--complete .quest-accent,
+.quest-card--complete .quest-hint-mark,
+.quest-card--complete .quest-progress-fill {
+    background-color: rgb(105, 224, 164);
+}
+
+.quest-card--complete .quest-state {
+    color: rgb(139, 239, 187);
+}
+
+.quest-card--error {
+    border-color: rgba(255, 111, 111, 0.7);
+    background-color: rgba(36, 16, 19, 0.94);
+}
+
+.quest-card--error .quest-accent,
+.quest-card--error .quest-hint-mark,
+.quest-card--error .quest-progress-fill {
+    background-color: rgb(255, 111, 111);
+}
+
+.quest-card--error .quest-state {
+    color: rgb(255, 145, 145);
+}
+
 .quest-header,
 .quest-state-row,
 .quest-hint-row {

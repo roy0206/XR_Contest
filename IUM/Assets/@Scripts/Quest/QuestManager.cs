@@ -2,6 +2,28 @@ using System;
 using System.Threading.Tasks;
 using UnityEngine;
 
+public enum QuestRuntimeState
+{
+    Loading,
+    Intro,
+    Objective,
+    ObjectiveSuccess,
+    Complete,
+    Leaving,
+    Missing
+}
+
+public enum QuestObjectiveBlockReason
+{
+    None,
+    Inactive,
+    Paused,
+    Cutscene,
+    Dialogue,
+    ProcessGate,
+    StepGap
+}
+
 /// <summary>
 /// GameFlow가 진입시킨 한 퀘스트 그래프를 실행한다. 씬·컷씬 이동과 진행 저장은 직접 결정하지
 /// 않고 완료 결과를 GameFlow에 보고한다. 현재 튜토리얼의 단계 판정을 일반화한 런타임이다.
@@ -11,17 +33,6 @@ using UnityEngine;
 public sealed class QuestManager : MonoBehaviour
 {
     public const string DataKey = "quest";
-
-    enum Phase
-    {
-        Loading,
-        Intro,
-        Objective,
-        ObjectiveSuccess,
-        Complete,
-        Leaving,
-        Missing
-    }
 
     [Header("참조")]
     [Tooltip("비우면 씬에서 찾습니다.")]
@@ -43,7 +54,8 @@ public sealed class QuestManager : MonoBehaviour
     QuestDefinition _definition;
     QuestNodeData _node;
     ProcessStep _objective;
-    Phase _phase = Phase.Loading;
+    QuestRuntimeState _state = QuestRuntimeState.Loading;
+    string _failureReason;
     int _objectiveIndex = -1;
     int _objectiveCount;
     float _idleSeconds;
@@ -53,29 +65,37 @@ public sealed class QuestManager : MonoBehaviour
     public string QuestId => _definition?.Id;
     public string QuestTitle => string.IsNullOrWhiteSpace(_definition?.Title) ? QuestId : _definition.Title;
     public ProcessId Process { get; private set; }
-    public bool IsRunning => _phase is Phase.Intro or Phase.Objective or Phase.ObjectiveSuccess or Phase.Complete;
-    public bool IsObjectiveActive => _phase == Phase.Objective;
-    public bool CanEvaluateObjective
+    public QuestRuntimeState State => _state;
+    public string FailureReason => _failureReason;
+    public bool IsRunning => _state is QuestRuntimeState.Intro or QuestRuntimeState.Objective or
+        QuestRuntimeState.ObjectiveSuccess or QuestRuntimeState.Complete;
+    public bool IsObjectiveActive => _state == QuestRuntimeState.Objective;
+    public QuestObjectiveBlockReason ObjectiveBlockReason
     {
         get
         {
-            if (!IsObjectiveActive || PauseService.IsPaused || !ProcessGate.IsOpen || IsSpeaking ||
-                PauseService.Now < _resumeAt)
-                return false;
-
-            return !CutsceneDirector.TryGetInstance(out var director) || !director.IsPlaying;
+            if (!IsObjectiveActive) return QuestObjectiveBlockReason.Inactive;
+            if (PauseService.IsPaused) return QuestObjectiveBlockReason.Paused;
+            if (CutsceneDirector.TryGetInstance(out var director) && director.IsPlaying)
+                return QuestObjectiveBlockReason.Cutscene;
+            if (IsSpeaking) return QuestObjectiveBlockReason.Dialogue;
+            if (!ProcessGate.IsOpen) return QuestObjectiveBlockReason.ProcessGate;
+            if (PauseService.Now < _resumeAt) return QuestObjectiveBlockReason.StepGap;
+            return QuestObjectiveBlockReason.None;
         }
     }
+    public bool CanEvaluateObjective => ObjectiveBlockReason == QuestObjectiveBlockReason.None;
     public int ObjectiveNumber => _objectiveIndex >= 0 ? _objectiveIndex + 1 : 0;
     public int ObjectiveCount => _objectiveCount;
     public float ObjectiveProgress => _objective?.Progress ?? 0f;
-    public bool AllowForceObjective => allowForceObjective;
+    public bool AllowForceObjective => allowForceObjective && DevelopmentFeaturesEnabled;
     public KeyCode ForceObjectiveKey => forceObjectiveKey;
     public QuestNodeData CurrentNode => _node;
     public ProcessStepData CurrentObjective => _objective?.Data;
 
     public event Action<QuestDefinition> QuestChanged;
     public event Action<QuestNodeData, int> ObjectiveChanged;
+    public event Action<QuestRuntimeState> StateChanged;
     public event Action<ProcessId> Completed;
 
     void Awake()
@@ -114,8 +134,9 @@ public sealed class QuestManager : MonoBehaviour
 
         if (!ResolveQuest(out var quest) || !BeginQuest(quest))
         {
-            Debug.LogWarning($"[Quest] 이 씬에서 실행할 퀘스트 '{sceneQuestId}'를 찾지 못했습니다.", this);
-            _phase = Phase.Missing;
+            var message = $"이 씬에서 실행할 퀘스트 '{sceneQuestId}'를 찾지 못했습니다.";
+            Debug.LogWarning($"[Quest] {message}", this);
+            SetState(QuestRuntimeState.Missing, message);
         }
     }
 
@@ -162,7 +183,7 @@ public sealed class QuestManager : MonoBehaviour
         _resumeAt = 0f;
         _introPlayed = false;
         Process = definition.Process;
-        _phase = Phase.Intro;
+        SetState(QuestRuntimeState.Intro);
 
         PlayDialogue(definition.IntroDialogue);
         QuestChanged?.Invoke(definition);
@@ -205,21 +226,21 @@ public sealed class QuestManager : MonoBehaviour
         if (CutsceneDirector.TryGetInstance(out var director) && director.IsPlaying) return;
         if (PauseService.Now < _resumeAt) return;
 
-        switch (_phase)
+        switch (_state)
         {
-            case Phase.Intro:
+            case QuestRuntimeState.Intro:
                 if (!IsSpeaking) AdvanceFromCurrent();
                 break;
 
-            case Phase.Objective:
+            case QuestRuntimeState.Objective:
                 TickObjective();
                 break;
 
-            case Phase.ObjectiveSuccess:
+            case QuestRuntimeState.ObjectiveSuccess:
                 if (!IsSpeaking) AdvanceFromCurrent();
                 break;
 
-            case Phase.Complete:
+            case QuestRuntimeState.Complete:
                 if (!IsSpeaking) BeginLeave();
                 break;
         }
@@ -274,7 +295,7 @@ public sealed class QuestManager : MonoBehaviour
 
     void SucceedObjective()
     {
-        _phase = Phase.ObjectiveSuccess;
+        SetState(QuestRuntimeState.ObjectiveSuccess);
         _idleSeconds = 0f;
         PlayDialogue(_objective.Data.SuccessDialogue);
     }
@@ -304,7 +325,7 @@ public sealed class QuestManager : MonoBehaviour
 
                 _objectiveIndex++;
                 _objective = new ProcessStep(node.Objective, player);
-                _phase = Phase.Objective;
+                SetState(QuestRuntimeState.Objective);
                 _idleSeconds = 0f;
                 _introPlayed = false;
                 _resumeAt = PauseService.Now + _table.Settings.StepGapSeconds;
@@ -326,15 +347,15 @@ public sealed class QuestManager : MonoBehaviour
 
     void BeginComplete()
     {
-        _phase = Phase.Complete;
         _objective = null;
         ProcessTarget.SetAllAvailable(false);
+        SetState(QuestRuntimeState.Complete);
         PlayDialogue(_definition.CompleteDialogue);
     }
 
     void BeginLeave()
     {
-        _phase = Phase.Leaving;
+        SetState(QuestRuntimeState.Leaving);
         _ = LeaveAsync();
     }
 
@@ -354,10 +375,18 @@ public sealed class QuestManager : MonoBehaviour
 
     void FailGraph(string message)
     {
-        _phase = Phase.Missing;
         _objective = null;
         ProcessTarget.SetAllAvailable(false);
+        SetState(QuestRuntimeState.Missing, message);
         Debug.LogError($"[Quest] {message}", this);
+    }
+
+    void SetState(QuestRuntimeState state, string failureReason = null)
+    {
+        var changed = _state != state || !string.Equals(_failureReason, failureReason, StringComparison.Ordinal);
+        _state = state;
+        _failureReason = state == QuestRuntimeState.Missing ? failureReason : null;
+        if (changed) StateChanged?.Invoke(state);
     }
 
     static void ApplyLocks(ProcessStepData step)
@@ -394,10 +423,12 @@ public sealed class QuestManager : MonoBehaviour
 
     bool ForcePressed()
     {
-        if (!allowForceObjective) return false;
+        if (!AllowForceObjective) return false;
         var input = UserInput.Instance;
         return input != null && input.GetKeyDown(forceObjectiveKey);
     }
+
+    static bool DevelopmentFeaturesEnabled => Application.isEditor || Debug.isDebugBuild;
 
     void OnGUI()
     {
@@ -406,12 +437,12 @@ public sealed class QuestManager : MonoBehaviour
         var step = _objective?.Data;
         var lines = new[]
         {
-            $"퀘스트: {QuestId ?? "-"}   목표: {(_definition != null ? $"{_objectiveIndex + 1}/{_objectiveCount}" : "-")}   상태: {_phase}",
+            $"퀘스트: {QuestId ?? "-"}   목표: {(_definition != null ? $"{_objectiveIndex + 1}/{_objectiveCount}" : "-")}   상태: {_state}",
             $"노드: {_node?.Id ?? "-"}",
-            $"목표: {(step != null ? step.Goal : _phase == Phase.Missing ? "그래프 오류" : "-")}",
+            $"목표: {(step != null ? step.Goal : _state == QuestRuntimeState.Missing ? "그래프 오류" : "-")}",
             $"조건: {(step != null ? $"{step.Condition} {_objective.Progress * 100f:F0}%" : "-")}",
             $"공정 판정: {ProcessGate.Describe()}",
-            allowForceObjective
+            AllowForceObjective
                 ? $"{forceObjectiveKey} 현재 목표 강제 통과 · Esc 일시정지"
                 : "Esc 일시정지"
         };

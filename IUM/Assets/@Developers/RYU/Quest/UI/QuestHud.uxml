@@ -7,7 +7,7 @@
                 <ui:VisualElement class="quest-header">
                     <ui:VisualElement>
                         <ui:Label name="quest-category" text="현재 퀘스트" class="quest-category" />
-                        <ui:Label name="quest-title" text="기초 조작 훈련" class="quest-title" />
+                        <ui:Label name="quest-title" text="퀘스트 준비 중" class="quest-title" />
                     </ui:VisualElement>
                     <ui:Label name="quest-count" text="0 / 0" class="quest-count" />
                 </ui:VisualElement>
@@ -16,13 +16,13 @@
                     <ui:Label name="quest-state" text="준비 중" class="quest-state" />
                     <ui:Label text="OBJECTIVE" class="quest-section-label" />
                 </ui:VisualElement>
-                <ui:Label name="quest-goal" text="훈련 안내를 확인하세요." class="quest-goal" />
+                <ui:Label name="quest-goal" text="퀘스트를 준비하고 있습니다." class="quest-goal" />
                 <ui:VisualElement name="quest-progress" class="quest-progress">
                     <ui:VisualElement name="quest-progress-fill" class="quest-progress-fill" />
                 </ui:VisualElement>
                 <ui:VisualElement class="quest-hint-row">
                     <ui:VisualElement class="quest-hint-mark" />
-                    <ui:Label name="quest-hint" text="안내가 끝나면 첫 목표가 시작됩니다." class="quest-hint" />
+                    <ui:Label name="quest-hint" text="잠시만 기다려 주세요." class="quest-hint" />
                 </ui:VisualElement>
                 <ui:Label name="quest-skip" text="Enter  ·  현재 목표 건너뛰기 (개발용)" class="quest-skip" />
             </ui:VisualElement>

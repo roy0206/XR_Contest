@@ -284,8 +284,31 @@ namespace IUM.CoreLoopVerification.Tests
             const string questHudFontPath = "Assets/@Developers/RYU/Quest/UI/Fonts/Giants-Bold.ttf";
             Assert.That(File.Exists(Absolute(questHudStylePath)), Is.True);
             Assert.That(File.Exists(Absolute(questHudFontPath)), Is.True);
-            StringAssert.Contains("Fonts/Giants-Bold.ttf", File.ReadAllText(Absolute(questHudStylePath)),
+            var hudStyle = File.ReadAllText(Absolute(questHudStylePath));
+            StringAssert.Contains("Fonts/Giants-Bold.ttf", hudStyle,
                 "Quest HUD가 선별 임포트한 Giants 폰트를 참조하지 않습니다.");
+            StringAssert.Contains("quest-card--blocked", hudStyle, "HUD에 진행 대기 상태 스타일이 없습니다.");
+            StringAssert.Contains("quest-card--complete", hudStyle, "HUD에 완료 상태 스타일이 없습니다.");
+            StringAssert.Contains("quest-card--error", hudStyle, "HUD에 오류 상태 스타일이 없습니다.");
+
+            var hudTemplate = File.ReadAllText(Absolute("Assets/@Developers/RYU/Quest/UI/QuestHud.uxml"));
+            foreach (var elementName in new[]
+                     {
+                         "quest-card", "quest-progress-fill", "quest-category", "quest-title", "quest-count",
+                         "quest-goal", "quest-hint", "quest-state", "quest-skip"
+                     })
+                StringAssert.Contains($"name=\"{elementName}\"", hudTemplate,
+                    $"Quest HUD 필수 요소 '{elementName}'이 없습니다.");
+
+            var questManager = RuntimeType("QuestManager");
+            Assert.That(questManager.GetProperty("State"), Is.Not.Null,
+                "HUD가 읽을 퀘스트 런타임 상태가 공개되지 않았습니다.");
+            Assert.That(questManager.GetProperty("ObjectiveBlockReason"), Is.Not.Null,
+                "HUD가 일시정지·대화·컷씬 등의 진행 대기 사유를 읽을 수 없습니다.");
+            Assert.That(questManager.GetProperty("FailureReason"), Is.Not.Null,
+                "HUD가 퀘스트 로딩/그래프 오류 상태를 설명할 수 없습니다.");
+            Assert.That(questManager.GetEvent("StateChanged"), Is.Not.Null,
+                "HUD 갱신에 필요한 StateChanged 이벤트가 없습니다.");
 
             var processFile = ReadJson<ProcessFile>(ProcessPath);
             Assert.That(processFile.processes.Any(process => Names.Equals(process.process, "tutorial")), Is.False,
