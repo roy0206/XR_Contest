@@ -1,0 +1,58 @@
+{
+  "name": "PROJECT 이음 전체 코어 루프",
+  "mainPlayScene": "MainPlayScene",
+  "mainPlaySceneAsset": "Assets/@Developers/RYU/Scenes/Main/MainPlayScene.unity",
+  "route": [
+    {
+      "process": "prologue",
+      "destinationKind": "cutscene",
+      "destination": "prologue"
+    },
+    {
+      "process": "tutorial",
+      "destinationKind": "scene",
+      "destination": "TutorialScene",
+      "requiresProcessDefinition": true
+    },
+    {
+      "process": "makmeok",
+      "destinationKind": "scene",
+      "destination": "MainPlayScene",
+      "requiresProcessDefinition": true,
+      "signal": "main.makmeok.lines"
+    },
+    {
+      "process": "sawing",
+      "destinationKind": "scene",
+      "destination": "MainPlayScene",
+      "requiresProcessDefinition": true,
+      "signal": "main.sawing.complete"
+    },
+    {
+      "process": "chiseling",
+      "destinationKind": "scene",
+      "destination": "MainPlayScene",
+      "requiresProcessDefinition": true,
+      "signal": "main.placeholder.chiseling"
+    },
+    {
+      "process": "purlinInstall",
+      "destinationKind": "scene",
+      "destination": "MainPlayScene",
+      "requiresProcessDefinition": true,
+      "signal": "main.purlin.install"
+    },
+    {
+      "process": "gongpoPuzzle",
+      "destinationKind": "scene",
+      "destination": "MainPlayScene",
+      "requiresProcessDefinition": true,
+      "signal": "main.gongpo.assembled"
+    },
+    {
+      "process": "ending",
+      "destinationKind": "cutscene",
+      "destination": "ending"
+    }
+  ]
+}
